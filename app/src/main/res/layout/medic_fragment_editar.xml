@@ -1,0 +1,154 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    android:background="#F8F9FA">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Consultorio"
+        android:textStyle="bold"
+        android:textColor="#212121"
+        android:layout_marginBottom="8dp"/>
+
+    <Spinner
+        android:id="@+id/spinnerConsultorios"
+        android:layout_width="match_parent"
+        android:layout_height="50dp"
+        android:background="@android:drawable/btn_dropdown"
+        android:layout_marginBottom="24dp"/>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="2dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="12dp">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Días de Atención"
+                    android:textStyle="bold"
+                    android:layout_alignParentStart="true"/>
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Selección múltiple"
+                    android:textColor="#00838F"
+                    android:layout_alignParentEnd="true"/>
+            </RelativeLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:weightSum="7"
+                android:layout_marginBottom="24dp">
+
+                <TextView android:id="@+id/btnEditDiaL" style="@style/DiaButtonStyle"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginEnd="4dp"
+                    android:gravity="center" android:paddingVertical="10dp"
+                    android:textSize="14sp" android:text="Lun" />
+
+                <TextView android:id="@+id/btnEditDiaM" style="@style/DiaButtonStyle"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginEnd="4dp"
+                    android:gravity="center" android:paddingVertical="10dp"
+                    android:textSize="14sp" android:text="Mar" />
+
+                <TextView android:id="@+id/btnEditDiaMi" style="@style/DiaButtonStyle"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginEnd="4dp"
+                    android:gravity="center" android:paddingVertical="10dp"
+                    android:textSize="14sp" android:text="Mie" />
+
+                <TextView android:id="@+id/btnEditDiaJ" style="@style/DiaButtonStyle"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginEnd="4dp"
+                    android:gravity="center" android:paddingVertical="10dp"
+                    android:textSize="14sp" android:text="Jue" />
+
+                <TextView android:id="@+id/btnEditDiaV" style="@style/DiaButtonStyle"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginEnd="4dp"
+                    android:gravity="center" android:paddingVertical="10dp"
+                    android:textSize="14sp" android:text="Vie" />
+
+                <TextView android:id="@+id/btnEditDiaS" style="@style/DiaButtonStyle"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:layout_marginEnd="4dp"
+                    android:gravity="center" android:paddingVertical="10dp"
+                    android:textSize="14sp" android:text="Sab" />
+
+                <TextView android:id="@+id/btnEditDiaD" style="@style/DiaButtonStyle"
+                    android:layout_width="0dp" android:layout_height="wrap_content"
+                    android:layout_weight="1" android:gravity="center"
+                    android:paddingVertical="10dp" android:textSize="14sp" android:text="Dom" />
+
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Apertura"
+                android:textColor="#5F6368"
+                android:layout_marginBottom="4dp"/>
+
+            <EditText
+                android:id="@+id/editApertura"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="08:00 AM"
+                android:focusable="false"
+                android:layout_marginBottom="16dp"/>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cierre"
+                android:textColor="#5F6368"
+                android:layout_marginBottom="4dp"/>
+
+            <EditText
+                android:id="@+id/editCierre"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:hint="06:30 PM"
+                android:focusable="false"/>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Los cambios realizados en los horarios de apertura y cierre se aplicarán automáticamente a todos los días seleccionados arriba para este consultorio específico."
+        android:textSize="12sp"
+        android:textColor="#757575"
+        android:layout_marginVertical="24dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnEditarHorarios"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="Editar horarios"
+        app:cornerRadius="12dp"
+        android:backgroundTint="#00695C"/>
+
+</LinearLayout>
