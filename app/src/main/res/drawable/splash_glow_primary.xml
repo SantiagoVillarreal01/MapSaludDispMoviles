@@ -1,0 +1,5 @@
+<!-- res/drawable/glow_primary.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#224D8EFF"/>
+    <corners android:radius="999dp"/>
+</shape>

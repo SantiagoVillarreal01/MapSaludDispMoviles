@@ -1,0 +1,5 @@
+<!-- res/drawable/support_chip.xml -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <solid android:color="#CC4D8EFF"/>
+    <corners android:radius="14dp"/>
+</shape>
