@@ -1,4 +1,4 @@
-package com.example.mapsalud.userPages
+package ec.edu.mapsalud.userPages
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,7 +8,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-import com.example.mapsalud.dto.CitaMedica
+import ec.edu.mapsalud.dto.CitaMedica
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import ec.edu.mapsalud.databinding.UserCancelarCitaBinding
 import ec.edu.mapsalud.databinding.UserCuadroCitaBinding

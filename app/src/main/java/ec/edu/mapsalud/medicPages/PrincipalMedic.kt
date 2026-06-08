@@ -1,11 +1,11 @@
-package com.example.mapsalud.medicPages
+package ec.edu.mapsalud.medicPages
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import com.example.mapsalud.ConfiguracionApp
-import com.example.mapsalud.EditarPerfil
+import ec.edu.mapsalud.ConfiguracionApp
+import ec.edu.mapsalud.EditarPerfil
 import ec.edu.mapsalud.databinding.MedicPrincipalBinding
 
 class PrincipalMedic : AppCompatActivity() {

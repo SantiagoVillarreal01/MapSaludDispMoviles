@@ -1,4 +1,4 @@
-package com.example.mapsalud
+package ec.edu.mapsalud
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,12 +7,12 @@ import android.text.InputType
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mapsalud.datos.FirebaseManager
-import com.example.mapsalud.enum.Type
-import com.example.mapsalud.medicPages.PrincipalMedic
-import com.example.mapsalud.userPages.PrincipalUser
-import com.example.mapsalud.utils.EmailJSRequest
-import com.example.mapsalud.utils.RetrofitClient
+import ec.edu.mapsalud.datos.FirebaseManager
+import ec.edu.mapsalud.enum.Type
+import ec.edu.mapsalud.medicPages.PrincipalMedic
+import ec.edu.mapsalud.userPages.PrincipalUser
+import ec.edu.mapsalud.utils.EmailJSRequest
+import ec.edu.mapsalud.utils.RetrofitClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
@@ -21,9 +21,12 @@ import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
+import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
-import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.ActivityLoginPageBinding
+import retrofit2.Call
+import retrofit2.Callback
+import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -225,7 +228,7 @@ class LoginScreen : AppCompatActivity() {
             }
     }
 
-    private fun pedirCedulaUsuarioNuevo(firebaseUser: com.google.firebase.auth.FirebaseUser) {
+    private fun pedirCedulaUsuarioNuevo(firebaseUser: FirebaseUser) {
         val inputEditText = TextInputEditText(this).apply {
             inputType = InputType.TYPE_CLASS_NUMBER
             hint = "Ej: 1712345678"
@@ -318,10 +321,10 @@ class LoginScreen : AppCompatActivity() {
     private fun sendSecurityAlert(email: String) {
 
         val request = EmailJSRequest(
-            service_id = "service_l7uoiyl",
-            template_id = "template_2qxrwor",
-            user_id = "cC9mD7QTe_bQAMAZQ",
-            accessToken = "64bpTMQJNY6--yhc3HQtK",
+            service_id = "-----",
+            template_id = "-",
+            user_id = "----",
+            accessToken = "-----",
             template_params = mapOf(
                 "user_name" to "Usuario",
                 "email" to email,
@@ -340,11 +343,11 @@ class LoginScreen : AppCompatActivity() {
         RetrofitClient.emailService
             .sendEmail(request)
             .enqueue(
-                object : retrofit2.Callback<Void> {
+                object : Callback<Void> {
 
                     override fun onResponse(
-                        call: retrofit2.Call<Void>,
-                        response: retrofit2.Response<Void>
+                        call: Call<Void>,
+                        response: Response<Void>
                     ) {
                         if (response.isSuccessful) {
                             counter = 0
@@ -353,7 +356,7 @@ class LoginScreen : AppCompatActivity() {
                     }
 
                     override fun onFailure(
-                        call: retrofit2.Call<Void>,
+                        call: Call<Void>,
                         t: Throwable
                     ) {
                         showMessage("Novali")

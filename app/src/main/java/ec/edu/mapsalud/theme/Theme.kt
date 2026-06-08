@@ -1,4 +1,4 @@
-package com.example.mapsalud.ui.theme
+package ec.edu.mapsalud.theme
 
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme

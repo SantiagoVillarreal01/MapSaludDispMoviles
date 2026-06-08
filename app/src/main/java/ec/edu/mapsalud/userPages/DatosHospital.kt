@@ -1,4 +1,4 @@
-package com.example.mapsalud.userPages
+package ec.edu.mapsalud.userPages
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

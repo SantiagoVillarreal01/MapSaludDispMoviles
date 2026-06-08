@@ -1,4 +1,4 @@
-package com.example.mapsalud.medicPages
+package ec.edu.mapsalud.medicPages
 
 import android.graphics.Color
 import android.os.Bundle
@@ -8,6 +8,7 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.MedicFragmentEditarBinding
+import kotlin.collections.iterator
 
 class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
 

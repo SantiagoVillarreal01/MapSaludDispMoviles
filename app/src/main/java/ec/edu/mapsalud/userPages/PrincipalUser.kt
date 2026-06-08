@@ -1,12 +1,12 @@
-package com.example.mapsalud.userPages
+package ec.edu.mapsalud.userPages
 
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mapsalud.ConfiguracionApp
-import com.example.mapsalud.EditarPerfil
-import com.example.mapsalud.R
+import ec.edu.mapsalud.ConfiguracionApp
+import ec.edu.mapsalud.EditarPerfil
+import ec.edu.mapsalud.R
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.GoogleMap
 import com.google.android.gms.maps.OnMapReadyCallback

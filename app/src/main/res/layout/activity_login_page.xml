@@ -261,6 +261,7 @@
                     android:text="@string/continue_with_google"
                     android:textColor="@color/small_text_color"
                     app:icon="@drawable/ic_google"
+                    app:iconSize="24dp"
                     app:iconGravity="textStart"
                     app:iconTint="@null" />
 

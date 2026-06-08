@@ -1,4 +1,4 @@
-package com.example.mapsalud.ui.theme
+package ec.edu.mapsalud.theme
 
 import androidx.compose.material3.Typography
 import androidx.compose.ui.text.TextStyle

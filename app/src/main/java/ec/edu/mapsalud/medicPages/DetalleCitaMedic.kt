@@ -1,4 +1,4 @@
-package com.example.mapsalud.medicPages
+package ec.edu.mapsalud.medicPages
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

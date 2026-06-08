@@ -1,11 +1,11 @@
-package com.example.mapsalud
+package ec.edu.mapsalud
 
 import android.content.Intent
 import android.os.Bundle
+import android.util.Patterns
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mapsalud.datos.FirebaseManager
+import ec.edu.mapsalud.datos.FirebaseManager
 import com.google.android.material.snackbar.Snackbar
-import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.ActivitySignUpPageBinding
 
 
@@ -205,7 +205,7 @@ class SignUpScreen : AppCompatActivity() {
             return false
         }
 
-        if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             showMessage("Correo inválido")
             return false
         }

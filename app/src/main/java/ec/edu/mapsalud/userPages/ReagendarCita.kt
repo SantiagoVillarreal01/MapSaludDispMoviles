@@ -1,9 +1,9 @@
-package com.example.mapsalud.userPages
+package ec.edu.mapsalud.userPages
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mapsalud.databinding.UserReagendarCitaBinding
+import ec.edu.mapsalud.databinding.UserReagendarCitaBinding
 
 class ReagendarCita : AppCompatActivity() {
     private lateinit var binding: UserReagendarCitaBinding

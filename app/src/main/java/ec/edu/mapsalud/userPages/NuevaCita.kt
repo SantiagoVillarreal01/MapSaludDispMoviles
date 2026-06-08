@@ -1,5 +1,6 @@
-package com.example.mapsalud.userPages
+package ec.edu.mapsalud.userPages
 
+import android.R
 import android.content.Intent
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -8,7 +9,7 @@ import android.widget.ArrayAdapter
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mapsalud.dto.CentroMedico
+import ec.edu.mapsalud.dto.CentroMedico
 import ec.edu.mapsalud.databinding.CuadroCentroMedicoBinding
 import ec.edu.mapsalud.databinding.UserNuevaCitaBinding
 
@@ -32,11 +33,11 @@ class NuevaCita : AppCompatActivity() {
     private fun configurarFiltros() {
 
         val tiposCentro = arrayOf("Public centers", "Private centers", "All centers")
-        val adapterTipos = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, tiposCentro)
+        val adapterTipos = ArrayAdapter(this, R.layout.simple_dropdown_item_1line, tiposCentro)
         binding.autoCompleteTipoCentro.setAdapter(adapterTipos)
 
         val especialidades = arrayOf("Cardiology", "Neurology", "Pediatrics", "Traumatology")
-        val adapterEspecialidades = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, especialidades)
+        val adapterEspecialidades = ArrayAdapter(this, R.layout.simple_dropdown_item_1line, especialidades)
         binding.autoCompleteEspecialidad.setAdapter(adapterEspecialidades)
     }
 

@@ -1,4 +1,4 @@
-package com.example.mapsalud.dto
+package ec.edu.mapsalud.dto
 
 data class Medico(
     val nombres: String,

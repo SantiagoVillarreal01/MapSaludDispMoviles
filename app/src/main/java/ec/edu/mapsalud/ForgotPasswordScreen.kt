@@ -1,11 +1,11 @@
-package com.example.mapsalud
+package ec.edu.mapsalud
 
 import android.os.Bundle
+import android.util.Patterns
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mapsalud.datos.FirebaseManager
+import ec.edu.mapsalud.datos.FirebaseManager
 import com.google.android.material.snackbar.Snackbar
-import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.ActivityForgotPasswordBinding
 
 class ForgotPasswordScreen : AppCompatActivity() {
@@ -33,7 +33,7 @@ class ForgotPasswordScreen : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+            if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
                 showMessage("Por favor, ingresa un correo electrónico válido")
                 return@setOnClickListener
             }

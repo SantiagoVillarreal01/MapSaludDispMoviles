@@ -1,4 +1,4 @@
-package com.example.mapsalud.medicPages
+package ec.edu.mapsalud.medicPages
 
 import android.content.Intent
 import android.graphics.Color
@@ -10,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-import com.example.mapsalud.dto.CitaMedic
+import ec.edu.mapsalud.dto.CitaMedic
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.MedicCuadroCitaBinding
 import ec.edu.mapsalud.databinding.MedicFragmentCitasBinding
@@ -25,15 +25,69 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
         binding = MedicFragmentCitasBinding.bind(view)
 
         val citasHoy = listOf(
-            CitaMedic("09:00", "AM", "Ana María González", "Control Post-operatorio", "En espera", "#00695C", "#B2EBF2", "#006064"),
-            CitaMedic("10:30", "AM", "Carlos Javier Ruiz", "Chequeo General Anual", "Pendiente", "#9E9E9E", "#E0E0E0", "#616161"),
-            CitaMedic("11:15", "AM", "Elena Rodriguez", "Urgencia - Dolor Abdominal", "Urgente", "#D32F2F", "#FFCDD2", "#C62828"),
-            CitaMedic("12:00", "PM", "Roberto Valdez", "Consulta Virtual", "Confirmado", "#E0E0E0", "#EEEEEE", "#9E9E9E")
+            CitaMedic(
+                "09:00",
+                "AM",
+                "Ana María González",
+                "Control Post-operatorio",
+                "En espera",
+                "#00695C",
+                "#B2EBF2",
+                "#006064"
+            ),
+            CitaMedic(
+                "10:30",
+                "AM",
+                "Carlos Javier Ruiz",
+                "Chequeo General Anual",
+                "Pendiente",
+                "#9E9E9E",
+                "#E0E0E0",
+                "#616161"
+            ),
+            CitaMedic(
+                "11:15",
+                "AM",
+                "Elena Rodriguez",
+                "Urgencia - Dolor Abdominal",
+                "Urgente",
+                "#D32F2F",
+                "#FFCDD2",
+                "#C62828"
+            ),
+            CitaMedic(
+                "12:00",
+                "PM",
+                "Roberto Valdez",
+                "Consulta Virtual",
+                "Confirmado",
+                "#E0E0E0",
+                "#EEEEEE",
+                "#9E9E9E"
+            )
         )
 
         val citasManana = listOf(
-            CitaMedic("08:00", "AM", "Lucía Mendoza", "Control de Presión", "Pendiente", "#9E9E9E", "#E0E0E0", "#616161"),
-            CitaMedic("09:30", "AM", "Fernando Silva", "Lectura de Exámenes", "Pendiente", "#9E9E9E", "#E0E0E0", "#616161")
+            CitaMedic(
+                "08:00",
+                "AM",
+                "Lucía Mendoza",
+                "Control de Presión",
+                "Pendiente",
+                "#9E9E9E",
+                "#E0E0E0",
+                "#616161"
+            ),
+            CitaMedic(
+                "09:30",
+                "AM",
+                "Fernando Silva",
+                "Lectura de Exámenes",
+                "Pendiente",
+                "#9E9E9E",
+                "#E0E0E0",
+                "#616161"
+            )
         )
 
         binding.recyclerCitasHoy.layoutManager = LinearLayoutManager(requireContext())

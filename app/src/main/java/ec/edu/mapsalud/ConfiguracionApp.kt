@@ -1,6 +1,5 @@
-package com.example.mapsalud
+package ec.edu.mapsalud
 
-import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Toast
@@ -25,7 +24,7 @@ class ConfiguracionApp : AppCompatActivity() {
     }
 
     private fun configurarEncabezadoUsuario() {
-        val sharedPref = getSharedPreferences("MapSaludPrefs", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("MapSaludPrefs", MODE_PRIVATE)
         val tipoUsuario = sharedPref.getString("TIPO_USUARIO", "PACIENTE")
 
         if (tipoUsuario == "DOCTOR") {
@@ -48,7 +47,7 @@ class ConfiguracionApp : AppCompatActivity() {
         }
 
         binding.btnCerrarSesion.setOnClickListener {
-            val sharedPref = getSharedPreferences("MapSaludPrefs", Context.MODE_PRIVATE)
+            val sharedPref = getSharedPreferences("MapSaludPrefs", MODE_PRIVATE)
             sharedPref.edit().clear().apply()
 
             Toast.makeText(this, "Sesión cerrada correctamente", Toast.LENGTH_SHORT).show()

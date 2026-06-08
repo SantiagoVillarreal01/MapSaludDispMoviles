@@ -1,6 +1,7 @@
-package com.example.mapsalud.medicPages
+package ec.edu.mapsalud.medicPages
 
 import android.content.Intent
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -9,7 +10,7 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-import com.example.mapsalud.dto.CitaParaDiagnostico
+import ec.edu.mapsalud.dto.CitaParaDiagnostico
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.CuadroCitaCompletaBinding
 import ec.edu.mapsalud.databinding.MedicFragmentDiagnosticosBinding
@@ -59,7 +60,7 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
             holder.binding.txtFechaCita.text = cita.fecha
             holder.binding.txtNombrePaciente.text = cita.paciente
             holder.binding.txtMotivo.text = cita.motivo
-            holder.binding.colorBordeLateral.setBackgroundColor(android.graphics.Color.parseColor(cita.colorBorde))
+            holder.binding.colorBordeLateral.setBackgroundColor(Color.parseColor(cita.colorBorde))
 
             holder.binding.root.setOnClickListener { onCitaClick(cita) }
         }

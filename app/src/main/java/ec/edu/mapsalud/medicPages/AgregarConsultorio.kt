@@ -1,4 +1,4 @@
-package com.example.mapsalud.medicPages
+package ec.edu.mapsalud.medicPages
 
 import android.graphics.Color
 import android.os.Bundle
@@ -15,6 +15,7 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import ec.edu.mapsalud.databinding.MedicAgregarConsultorioBinding
+import kotlin.collections.iterator
 
 class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
 

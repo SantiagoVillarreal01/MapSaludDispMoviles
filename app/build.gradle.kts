@@ -1,15 +1,15 @@
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.google.gms.google.services)
 }
 
 android {
-    namespace = "com.example.mapsalud20"
+    namespace = "ec.edu.mapsalud"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.mapsalud20"
+        applicationId = "ec.edu.mapsalud"
         minSdk = 28
         targetSdk = 35
         versionCode = 1
@@ -31,9 +31,7 @@ android {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
     }
-    kotlinOptions {
-        jvmTarget = "11"
-    }
+
     buildFeatures {
         viewBinding = true
     }
@@ -63,5 +61,16 @@ dependencies {
     implementation(libs.androidx.activity)
     implementation(libs.androidx.constraintlayout)
     implementation(libs.picasso)
+    implementation(libs.firebase.auth)
+    implementation(libs.firebase.firestore)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.gson)
+    implementation(libs.androidx.credentials)
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.googleid)
+    implementation(libs.play.services.auth)
+    testImplementation(libs.junit)
+
     implementation("com.google.android.gms:play-services-maps:19.0.0")
 }

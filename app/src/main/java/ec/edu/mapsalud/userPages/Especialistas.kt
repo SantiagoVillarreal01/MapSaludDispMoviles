@@ -1,4 +1,4 @@
-package com.example.mapsalud.userPages
+package ec.edu.mapsalud.userPages
 
 import android.content.Intent
 import android.os.Bundle
@@ -7,7 +7,7 @@ import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
-import com.example.mapsalud.dto.Medico
+import ec.edu.mapsalud.dto.Medico
 import ec.edu.mapsalud.databinding.CuadroDoctorBinding
 import ec.edu.mapsalud.databinding.UserEspecialistasBinding
 

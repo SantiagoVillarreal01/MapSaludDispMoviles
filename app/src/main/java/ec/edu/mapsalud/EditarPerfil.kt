@@ -1,6 +1,5 @@
-package com.example.mapsalud
+package ec.edu.mapsalud
 
-import android.content.Context
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -24,7 +23,7 @@ class EditarPerfil : AppCompatActivity() {
     }
 
     private fun cargarDatosActuales() {
-        val sharedPref = getSharedPreferences("MapSaludPrefs", Context.MODE_PRIVATE)
+        val sharedPref = getSharedPreferences("MapSaludPrefs", MODE_PRIVATE)
         val tipoUsuario = sharedPref.getString("TIPO_USUARIO", "PACIENTE")
 
         if (tipoUsuario == "DOCTOR") {

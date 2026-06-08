@@ -1,9 +1,9 @@
-package com.example.mapsalud.userPages
+package ec.edu.mapsalud.userPages
 
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
-import com.example.mapsalud.databinding.UserReservarCitaBinding
+import ec.edu.mapsalud.databinding.UserReservarCitaBinding
 
 class ReservarCita : AppCompatActivity() {
     private lateinit var binding: UserReservarCitaBinding

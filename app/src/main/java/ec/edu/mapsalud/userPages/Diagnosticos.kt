@@ -1,5 +1,6 @@
-package com.example.mapsalud.userPages
+package ec.edu.mapsalud.userPages
 
+import android.graphics.Color
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -8,8 +9,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 
-import com.example.mapsalud.dto.Diagnostico
-import com.example.mapsalud.dto.Medicamento
+import ec.edu.mapsalud.dto.Diagnostico
+import ec.edu.mapsalud.dto.Medicamento
 import ec.edu.mapsalud.databinding.CuadroDiagnosticoBinding
 import ec.edu.mapsalud.databinding.UserDiagnosticosBinding
 
@@ -59,7 +60,7 @@ class Diagnosticos : AppCompatActivity() {
                 diag.medicamentos.forEach { med ->
                     val textMed = TextView(itemView.context).apply {
                         text = "• ${med.nombre} - ${med.dosis}"
-                        setTextColor(android.graphics.Color.parseColor("#424242"))
+                        setTextColor(Color.parseColor("#424242"))
                         textSize = 14f
                     }
                     itemBinding.layoutMedicamentos.addView(textMed)
