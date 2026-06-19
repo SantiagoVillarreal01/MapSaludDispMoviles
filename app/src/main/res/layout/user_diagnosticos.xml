@@ -17,6 +17,19 @@
         android:textColor="#00695C"
         app:layout_constraintTop_toTopOf="parent"/>
 
+    <TextView
+        android:id="@+id/txtEmptyState"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Aún no tienes diagnósticos registrados."
+        android:textSize="16sp"
+        android:textColor="#757575"
+        android:visibility="gone"
+        app:layout_constraintTop_toBottomOf="@id/titulo"
+        app:layout_constraintBottom_toTopOf="@id/btnRegresar"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerDiagnosticos"
         android:layout_width="match_parent"
@@ -25,7 +38,6 @@
         android:paddingBottom="16dp"
         app:layout_constraintTop_toBottomOf="@id/titulo"
         app:layout_constraintBottom_toTopOf="@id/btnRegresar"/>
-
 
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnRegresar"

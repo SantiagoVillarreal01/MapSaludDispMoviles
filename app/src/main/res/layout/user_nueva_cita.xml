@@ -41,7 +41,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="16dp"
-        android:hint="Centers within 100m"
+        android:hint="Tipo de centro médico"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
@@ -53,7 +53,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="none"
-            android:text="Publicos"
             android:textSize="14sp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -64,7 +63,7 @@
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="16dp"
         android:layout_marginTop="12dp"
-        android:hint="Medical Specialty"
+        android:hint="Especialidad requerida"
         app:boxCornerRadiusTopStart="12dp"
         app:boxCornerRadiusTopEnd="12dp"
         app:boxCornerRadiusBottomStart="12dp"
@@ -76,7 +75,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:inputType="none"
-            android:text="Cardiologia"
             android:textSize="14sp"/>
     </com.google.android.material.textfield.TextInputLayout>
 
@@ -97,7 +95,7 @@
         android:id="@+id/txtCountCentros"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="3 Found"
+        android:text="..."
         android:textSize="12sp"
         android:textColor="#757575"
         android:layout_marginEnd="16dp"

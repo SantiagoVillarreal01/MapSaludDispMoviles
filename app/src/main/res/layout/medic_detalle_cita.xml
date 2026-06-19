@@ -2,6 +2,7 @@
 <androidx.constraintlayout.widget.ConstraintLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="#F8F9FA">
@@ -14,14 +15,17 @@
         android:padding="16dp"
         android:gravity="center_vertical"
         android:background="@android:color/white"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toEndOf="parent">
 
         <ImageView
             android:id="@+id/btnRegresar"
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:src="@android:drawable/ic_menu_revert"
-            app:tint="#00695C" />
+            app:tint="#00695C"
+            android:contentDescription="Regresar" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -45,11 +49,21 @@
             android:orientation="vertical"
             android:padding="16dp">
 
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Información del Paciente"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#757575"
+                android:layout_marginBottom="8dp"/>
+
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="2dp"
+                app:cardElevation="1dp"
                 app:strokeWidth="0dp">
 
                 <LinearLayout
@@ -63,22 +77,127 @@
                         android:id="@+id/txtNombreDetalle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Nombre del Paciente"
-                        android:textSize="20sp"
+                        tools:text="Nombre del Paciente"
+                        android:textSize="18sp"
                         android:textStyle="bold"
                         android:textColor="#212121"/>
 
                     <TextView
+                        android:id="@+id/txtCedulaDetalle"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="Toca actualizar el estado de esta cita una vez finalizada la consulta."
+                        tools:text="C.I: 17xxxxxx"
+                        android:textSize="14sp"
+                        android:textColor="#5F6368"
+                        android:layout_marginTop="4dp"/>
+
+                    <TextView
+                        android:id="@+id/txtTelefonoDetalle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Teléfono: 09xxxxxx"
+                        android:textSize="14sp"
+                        android:textColor="#5F6368"
+                        android:layout_marginTop="2dp"/>
+
+                    <TextView
+                        android:id="@+id/txtGeneroDetalle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Género: No especificado"
+                        android:textSize="14sp"
+                        android:textColor="#5F6368"
+                        android:layout_marginTop="2dp"/>
+
+                    <TextView
+                        android:id="@+id/txtSangreDetalle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Tipo de Sangre: O+"
+                        android:textSize="14sp"
+                        android:textColor="#D32F2F"
+                        android:textStyle="bold"
+                        android:layout_marginTop="4dp"/>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Motivo de Consulta"
+                android:textSize="14sp"
+                android:textStyle="bold"
+                android:textColor="#757575"
+                android:layout_marginBottom="8dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="24dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="1dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical"
+                    android:padding="16dp"
+                    android:background="@android:color/white">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="horizontal"
+                        android:weightSum="2">
+                        <TextView
+                            android:id="@+id/txtFechaHoraDetalle"
+                            android:layout_width="0dp"
+                            android:layout_height="wrap_content"
+                            android:layout_weight="1"
+                            tools:text="📅 12/08/2026 • 14:30"
+                            android:textSize="14sp"
+                            android:textStyle="bold"
+                            android:textColor="#00695C"/>
+                        <TextView
+                            android:id="@+id/txtEstadoDetalle"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            tools:text="Pendiente"
+                            android:background="#B2EBF2"
+                            android:textColor="#006064"
+                            android:paddingHorizontal="8dp"
+                            android:paddingVertical="2dp"
+                            android:textSize="12sp"
+                            android:textStyle="bold"/>
+                    </LinearLayout>
+
+                    <View
+                        android:layout_width="match_parent"
+                        android:layout_height="1dp"
+                        android:background="#EEEEEE"
+                        android:layout_marginVertical="12dp"/>
+
+                    <TextView
+                        android:id="@+id/txtReasonDetalle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Dolor Estomacal"
+                        android:textSize="16sp"
+                        android:textStyle="bold"
+                        android:textColor="#212121"/>
+
+                    <TextView
+                        android:id="@+id/txtDescriptionDetalle"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        tools:text="Llevo tres días con dolor..."
                         android:textSize="14sp"
                         android:textColor="#5F6368"
                         android:layout_marginTop="8dp"/>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
 
-            <!-- Título de Sección -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -86,8 +205,7 @@
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:textColor="#212121"
-                android:layout_marginTop="32dp"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="12dp"/>
 
             <RadioGroup
                 android:id="@+id/radioGroupEstado"
@@ -99,7 +217,7 @@
                     android:id="@+id/radioAtendida"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Atendida / Completada"
+                    android:text="Completada / Atendida"
                     android:textSize="16sp"
                     android:textColor="#212121"
                     app:buttonTint="#00695C"
@@ -113,7 +231,7 @@
                     android:textSize="16sp"
                     android:textColor="#212121"
                     app:buttonTint="#F57C00"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:paddingStart="8dp"/>
 
                 <RadioButton
@@ -124,7 +242,7 @@
                     android:textSize="16sp"
                     android:textColor="#212121"
                     app:buttonTint="#D32F2F"
-                    android:layout_marginTop="12dp"
+                    android:layout_marginTop="8dp"
                     android:paddingStart="8dp"/>
             </RadioGroup>
 

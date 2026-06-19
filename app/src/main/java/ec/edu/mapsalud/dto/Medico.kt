@@ -1,13 +1,8 @@
 package ec.edu.mapsalud.dto
 
+import ec.edu.mapsalud.enum.Specialty
 data class Medico(
-    val nombres: String,
-    val apellidos: String,
-    val correo: String,
-    val correoMapsalud: String,
-    val contrasenaMapsalud: String,
-    val telefono: String,
-    val cedula: String,
-    val idEspecialidadPrincipal: Int,
-    val anosExperiencia: Int
+    val info: UsuarioInfo = UsuarioInfo(),
+    val specialty: Specialty = Specialty.GENERAL,
+    val anosExperiencia: Int = 0
 )

@@ -8,10 +8,10 @@
             <InsightsFilterSettings>
               <option name="connection">
                 <ConnectionSetting>
-                  <option name="appId" value="PLACEHOLDER" />
-                  <option name="mobileSdkAppId" value="" />
-                  <option name="projectId" value="" />
-                  <option name="projectNumber" value="" />
+                  <option name="appId" value="ec.edu.mapsalud" />
+                  <option name="mobileSdkAppId" value="1:714728034415:android:012bf7b2af42fc02fc3d9a" />
+                  <option name="projectId" value="map-salud-2" />
+                  <option name="projectNumber" value="714728034415" />
                 </ConnectionSetting>
               </option>
               <option name="signal" value="SIGNAL_UNSPECIFIED" />

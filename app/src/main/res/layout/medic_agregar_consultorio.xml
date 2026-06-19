@@ -28,8 +28,8 @@
 
             <ImageView
                 android:id="@+id/btnRegresar"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
                 android:src="@android:drawable/ic_menu_revert"
                 app:tint="#00695C" />
             <TextView
@@ -49,6 +49,7 @@
             android:layout_margin="16dp"
             app:cardCornerRadius="8dp"
             app:cardElevation="4dp"
+            app:strokeWidth="0dp"
             app:layout_constraintTop_toBottomOf="@id/topBar">
 
             <EditText
@@ -70,7 +71,7 @@
         android:layout_height="wrap_content"
         android:elevation="16dp"
         app:behavior_hideable="false"
-        app:behavior_peekHeight="80dp"
+        app:behavior_peekHeight="120dp"
         app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
 
         <LinearLayout
@@ -87,7 +88,8 @@
                 android:layout_marginBottom="4dp"
                 android:visibility="gone"
                 app:cardCornerRadius="12dp"
-                app:cardElevation="10dp">
+                app:cardElevation="8dp"
+                app:strokeWidth="0dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -111,7 +113,7 @@
                         <TextView
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="UBICACIÓN SELECCIONADA"
+                            android:text="CENTRO MÉDICO SELECCIONADO"
                             android:textSize="10sp"
                             android:textStyle="bold"
                             android:textColor="#757575"/>
@@ -153,7 +155,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Especialidad"
+                    android:text="Especialidad de este Consultorio"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:textColor="#212121"
@@ -163,13 +165,17 @@
                     style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_marginBottom="16dp">
+                    android:layout_marginBottom="16dp"
+                    app:startIconDrawable="@android:drawable/ic_menu_agenda"
+                    app:startIconTint="#00695C">
 
                     <com.google.android.material.textfield.TextInputEditText
                         android:id="@+id/inputEspecialidad"
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:hint="Ej. Cardiología, Pediatría General"/>
+                        android:focusable="false"
+                        android:clickable="true"
+                        android:hint="Toque para seleccionar especialidad"/>
                 </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
@@ -188,13 +194,13 @@
                     android:weightSum="7"
                     android:layout_marginBottom="16dp">
 
-                    <TextView android:id="@+id/btnDiaL" style="@style/DiaButtonStyle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="14sp" android:text="Lun" />
-                    <TextView android:id="@+id/btnDiaM" style="@style/DiaButtonStyle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="14sp" android:text="Mar" />
-                    <TextView android:id="@+id/btnDiaMi" style="@style/DiaButtonStyle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="14sp" android:text="Mie" />
-                    <TextView android:id="@+id/btnDiaJ" style="@style/DiaButtonStyle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="14sp" android:text="Jue" />
-                    <TextView android:id="@+id/btnDiaV" style="@style/DiaButtonStyle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="14sp" android:text="Vie" />
-                    <TextView android:id="@+id/btnDiaS" style="@style/DiaButtonStyle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="14sp" android:text="Sab" />
-                    <TextView android:id="@+id/btnDiaD" style="@style/DiaButtonStyle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:paddingVertical="10dp" android:textSize="14sp" android:text="Dom" />
+                    <TextView android:id="@+id/btnDiaL" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Lun" android:background="#E0E0E0"/>
+                    <TextView android:id="@+id/btnDiaM" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Mar" android:background="#E0E0E0"/>
+                    <TextView android:id="@+id/btnDiaMi" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Mié" android:background="#E0E0E0"/>
+                    <TextView android:id="@+id/btnDiaJ" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Jue" android:background="#E0E0E0"/>
+                    <TextView android:id="@+id/btnDiaV" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Vie" android:background="#E0E0E0"/>
+                    <TextView android:id="@+id/btnDiaS" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Sáb" android:background="#E0E0E0"/>
+                    <TextView android:id="@+id/btnDiaD" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Dom" android:background="#E0E0E0"/>
                 </LinearLayout>
 
                 <TextView
@@ -225,7 +231,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:focusable="false"
-                            android:text="09:00 AM"/>
+                            android:clickable="true"
+                            android:text="08:00 AM"/>
                     </com.google.android.material.textfield.TextInputLayout>
 
                     <com.google.android.material.textfield.TextInputLayout
@@ -240,7 +247,8 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:focusable="false"
-                            android:text="05:00 PM"/>
+                            android:clickable="true"
+                            android:text="04:00 PM"/>
                     </com.google.android.material.textfield.TextInputLayout>
                 </LinearLayout>
 
@@ -249,7 +257,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="56dp"
                     android:layout_marginTop="24dp"
-                    android:text="Agregar consultorio"
+                    android:text="Vincular Consultorio"
                     android:textAllCaps="false"
                     android:textSize="16sp"
                     app:cornerRadius="12dp"

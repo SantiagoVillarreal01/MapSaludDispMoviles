@@ -58,13 +58,14 @@
                 app:cardElevation="0dp"
                 app:strokeWidth="1dp"
                 app:strokeColor="#EAEAEA"
-                android:layout_marginBottom="24dp">
+                android:layout_marginBottom="16dp">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:padding="16dp"
-                    android:orientation="horizontal">
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
 
                     <ImageView
                         android:layout_width="60dp"
@@ -82,22 +83,16 @@
                             android:id="@+id/txtNombreDoctor"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Dr. Andrés Gómez"
+                            android:text="Cargando..."
                             android:textStyle="bold"
                             android:textSize="18sp"
                             android:textColor="#212121"/>
                         <TextView
+                            android:id="@+id/txtEspecialidadDoctor"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:text="Cardiología"
+                            android:text="..."
                             android:textColor="#00695C"/>
-                        <TextView
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:text="★ 4.9 (120 reseñas)"
-                            android:textColor="#FFA000"
-                            android:textSize="12sp"
-                            android:layout_marginTop="4dp"/>
                     </LinearLayout>
                 </LinearLayout>
             </com.google.android.material.card.MaterialCardView>
@@ -105,10 +100,48 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Selecciona una fecha"
+                android:text="Motivo de la consulta"
                 android:textStyle="bold"
                 android:textColor="#212121"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="8dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginBottom="16dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtMotivo"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ej. Dolor de cabeza, Chequeo general..."
+                    android:inputType="textMultiLine"
+                    android:minLines="1"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Descripción detallada (Opcional)"
+                android:textStyle="bold"
+                android:textColor="#212121"
+                android:layout_marginBottom="8dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_marginBottom="24dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/edtDescripcion"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Síntomas previos, medicamentos que tomas..."
+                    android:inputType="textMultiLine"
+                    android:gravity="top|start"
+                    android:lines="3"
+                    android:minLines="3"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
             <TextView
                 android:layout_width="wrap_content"
@@ -116,7 +149,7 @@
                 android:text="Selecciona una fecha"
                 android:textStyle="bold"
                 android:textColor="#212121"
-                android:layout_marginBottom="16dp"/>
+                android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
@@ -127,15 +160,10 @@
                 android:layout_marginBottom="24dp">
 
                 <CalendarView
-                    android:id="@+id/decorCalendar"
+                    android:id="@+id/calendarCita"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:theme="@style/Theme.MaterialComponents.Light"
-                    android:dateTextAppearance="@style/calendarDateAppearance"
-                    android:weekDayTextAppearance="@style/calendarWeekAppearance"
-                    android:focusable="false"
-                    android:clickable="false" />
+                    android:layout_margin="8dp" />
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
@@ -151,56 +179,14 @@
                 android:layout_height="wrap_content"
                 android:scrollbars="none"
                 android:layout_marginBottom="24dp">
+
                 <LinearLayout
+                    android:id="@+id/layoutTimeSlots"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:text="09:00"
-                        android:layout_marginEnd="8dp"/>
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="#00695C"
-                        android:textColor="@android:color/white"
-                        android:text="09:30"
-                        android:layout_marginEnd="8dp"/>
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:text="10:30"/>
-                </LinearLayout>
+                    android:orientation="horizontal"/>
+
             </HorizontalScrollView>
-
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Forma de pago (privada)"
-                android:textStyle="bold"
-                android:textColor="#212121"
-                android:layout_marginBottom="12dp"/>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:cardCornerRadius="8dp"
-                app:strokeWidth="2dp"
-                app:strokeColor="#00695C"
-                android:layout_marginBottom="16dp">
-                <TextView
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp"
-                    android:text="💳 Visa ending in 4242"
-                    android:textStyle="bold"
-                    android:textColor="#212121"
-                    app:drawableEndCompat="@android:drawable/presence_online"/>
-            </com.google.android.material.card.MaterialCardView>
-
         </LinearLayout>
     </ScrollView>
 
@@ -212,25 +198,6 @@
         android:padding="16dp"
         android:background="@android:color/white"
         app:layout_constraintBottom_toBottomOf="parent">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
-            android:layout_marginBottom="12dp">
-            <TextView
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Total Consulta"/>
-            <TextView
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="€65.00"
-                android:textStyle="bold"
-                android:textSize="18sp"
-                android:textColor="#212121"/>
-        </LinearLayout>
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnConfirmarCita"

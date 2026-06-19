@@ -61,48 +61,14 @@
                 android:scrollbars="none"
                 android:layout_marginBottom="24dp">
 
+                <!-- IMPORTANTE: Se agregó el ID y se quitaron las tarjetas de prueba -->
                 <LinearLayout
+                    android:id="@+id/containerCitas"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:orientation="horizontal"
-                    android:paddingEnd="16dp">
+                    android:paddingEnd="16dp"/>
 
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="280dp"
-                        android:layout_height="wrap_content"
-                        app:cardCornerRadius="12dp"
-                        app:strokeWidth="2dp"
-                        app:strokeColor="#00695C"
-                        android:layout_marginEnd="12dp">
-
-                        <LinearLayout
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:orientation="vertical"
-                            android:padding="16dp">
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="Dr. Andrés Gómez"
-                                android:textStyle="bold"
-                                android:textSize="16sp"
-                                android:textColor="#212121"/>
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="Cardiología"
-                                android:textColor="#00695C"
-                                android:layout_marginBottom="8dp"/>
-                            <TextView
-                                android:layout_width="match_parent"
-                                android:layout_height="wrap_content"
-                                android:text="📅 15 Oct, 2026 • 🕒 09:30 AM"
-                                android:textSize="12sp"
-                                android:textColor="#757575"/>
-                        </LinearLayout>
-                    </com.google.android.material.card.MaterialCardView>
-
-                </LinearLayout>
             </HorizontalScrollView>
 
             <TextView
@@ -126,11 +92,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
-                    android:theme="@style/Theme.MaterialComponents.Light"
-                    android:dateTextAppearance="@style/calendarDateAppearance"
-                    android:weekDayTextAppearance="@style/calendarWeekAppearance"
-                    android:focusable="false"
-                    android:clickable="false" />
+                    android:theme="@style/Theme.MaterialComponents.Light" />
             </com.google.android.material.card.MaterialCardView>
 
             <TextView
@@ -146,33 +108,19 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:scrollbars="none">
+
+                <!-- IMPORTANTE: Se agregó el ID y se quitaron los botones de prueba -->
                 <LinearLayout
+                    android:id="@+id/containerHorarios"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:orientation="horizontal">
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:text="09:00"
-                        android:layout_marginEnd="8dp"/>
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:backgroundTint="#00695C"
-                        android:textColor="@android:color/white"
-                        android:text="09:30"
-                        android:layout_marginEnd="8dp"/>
-                    <Button
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        style="?attr/materialButtonOutlinedStyle"
-                        android:text="10:30"/>
-                </LinearLayout>
+                    android:orientation="horizontal"/>
+
             </HorizontalScrollView>
         </LinearLayout>
     </ScrollView>
 
+    <!-- Tu botón de guardar queda igual -->
     <com.google.android.material.button.MaterialButton
         android:id="@+id/btnReagendarCita"
         android:layout_width="match_parent"

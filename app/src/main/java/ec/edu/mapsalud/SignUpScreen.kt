@@ -7,7 +7,16 @@ import androidx.appcompat.app.AppCompatActivity
 import ec.edu.mapsalud.datos.FirebaseManager
 import com.google.android.material.snackbar.Snackbar
 import ec.edu.mapsalud.databinding.ActivitySignUpPageBinding
-
+import android.view.View
+import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import ec.edu.mapsalud.dto.Medico
+import ec.edu.mapsalud.dto.Paciente
+import ec.edu.mapsalud.dto.UsuarioInfo
+import ec.edu.mapsalud.enum.BloodType
+import ec.edu.mapsalud.enum.Specialty
+import ec.edu.mapsalud.enum.Type
+import ec.edu.mapsalud.enum.Genero
 
 class SignUpScreen : AppCompatActivity() {
 
@@ -17,24 +26,50 @@ class SignUpScreen : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         binding = ActivitySignUpPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        initVariables()
+
+        configurarSpinners()
         initListeners()
     }
 
-    var counter: Int = 0
+    private fun configurarSpinners() {
+        val tiposUsuario = arrayOf("Soy Paciente", "Soy Médico")
+        val adapterTipo = ArrayAdapter(this, android.R.layout.simple_spinner_item, tiposUsuario)
+        adapterTipo.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerTipoUsuario.adapter = adapterTipo
 
+        binding.spinnerTipoUsuario.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                if (position == 0) { // Paciente
+                    binding.containerPaciente.visibility = View.VISIBLE
+                    binding.containerMedico.visibility = View.GONE
+                } else { // Médico
+                    binding.containerPaciente.visibility = View.GONE
+                    binding.containerMedico.visibility = View.VISIBLE
+                }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
 
-    private fun initVariables() {
-        counter = 1
+        val generosVisibles = Genero.values().map { it.valor }.toTypedArray()
+        val adapterGenero = ArrayAdapter(this, android.R.layout.simple_spinner_item, generosVisibles)
+        adapterGenero.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerGenero.adapter = adapterGenero
+        binding.spinnerGenero.setSelection(Genero.NO_ESPECIFICADO.ordinal)
+
+        val sangresVisibles = BloodType.values().map { it.nombreMostrar }.toTypedArray()
+        val adapterSangre = ArrayAdapter(this, android.R.layout.simple_spinner_item, sangresVisibles)
+        adapterSangre.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerTipoSangre.adapter = adapterSangre
+
+        val especialidadesVisibles = Specialty.values().map { it.nombreMostrar }.toTypedArray()
+        val adapterEspecialidad = ArrayAdapter(this, android.R.layout.simple_spinner_item, especialidadesVisibles)
+        adapterEspecialidad.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+        binding.spinnerEspecialidad.adapter = adapterEspecialidad
     }
 
     private fun initListeners() {
         binding.btnSignUp.setOnClickListener {
-
-            if (!validateFields()) {
-                return@setOnClickListener
-            }
-
+            if (!validateFields()) return@setOnClickListener
             registerUser()
         }
 
@@ -45,178 +80,116 @@ class SignUpScreen : AppCompatActivity() {
         }
     }
 
-
     private fun registerUser() {
-
-        val name = binding.name.text.toString().trim()
-        val idNumber = binding.idNumber.text.toString().trim()
         val email = binding.email.text.toString().trim()
         val password = binding.password.text.toString()
 
         binding.btnSignUp.isEnabled = false
+        binding.btnSignUp.text = "Registrando..."
 
-        FirebaseManager.auth.createUserWithEmailAndPassword(
-            email,
-            password
-        )
+        FirebaseManager.auth.createUserWithEmailAndPassword(email, password)
             .addOnSuccessListener { result ->
-
                 val firebaseUser = result.user
-                binding.btnSignUp.isEnabled = true
 
                 if (firebaseUser == null) {
-
-                    showMessage(
-                        "Error al obtener el usuario creado"
-                    )
-
+                    binding.btnSignUp.isEnabled = true
+                    showMessage("Error al obtener el usuario creado")
                     return@addOnSuccessListener
                 }
 
+                // Determinar el rol
+                val isDoctor = binding.spinnerTipoUsuario.selectedItemPosition == 1
 
-                val userData = hashMapOf(
-                    "uid" to firebaseUser.uid,
-                    "name" to name,
-                    "idNumber" to idNumber,
-                    "email" to email
+                // Extraemos el valor del enum según la posición seleccionada
+                val generoSeleccionado = Genero.values()[binding.spinnerGenero.selectedItemPosition].valor
+
+                val infoComun = UsuarioInfo(
+                    id = firebaseUser.uid,
+                    nombres = binding.nombres.text.toString().trim(),
+                    apellidos = binding.apellidos.text.toString().trim(),
+                    correo = email,
+                    telefono = binding.telefono.text.toString().trim(),
+                    cedula = binding.idNumber.text.toString().trim(),
+                    genero = generoSeleccionado, // Mapeado correctamente
+                    tipoUsuario = if (isDoctor) Type.DOCTOR else Type.PATIENT
                 )
 
-                FirebaseManager.db
-                    .collection("users")
-                    .document(firebaseUser.uid)
-                    .set(userData)
+                val entidadAGuardar: Any = if (isDoctor) {
+                    Medico(
+                        info = infoComun,
+                        specialty = Specialty.values()[binding.spinnerEspecialidad.selectedItemPosition],
+                        anosExperiencia = binding.anosExperiencia.text.toString().toIntOrNull() ?: 0
+                    )
+                } else {
+                    Paciente(
+                        info = infoComun,
+                        tipoSangre = BloodType.values()[binding.spinnerTipoSangre.selectedItemPosition],
+                        contactoEmergencia = binding.contactoEmergencia.text.toString().trim()
+                    )
+                }
+
+                FirebaseManager.db.collection("usuarios").document(firebaseUser.uid)
+                    .set(entidadAGuardar)
                     .addOnSuccessListener {
                         binding.btnSignUp.isEnabled = true
+                        binding.btnSignUp.text = "Registrarse"
 
-                        firebaseUser.sendEmailVerification()
-                            .addOnSuccessListener {
-
-                                showMessage("Correo de verificación enviado")
-                            }
-                            .addOnFailureListener {
-
-                                showMessage("Error al registrar usuario")
-                            }
+                        firebaseUser.sendEmailVerification().addOnSuccessListener {
+                            showMessage("Registro exitoso. Revisa tu correo para verificar tu cuenta.")
+                        }
                     }
                     .addOnFailureListener {
                         binding.btnSignUp.isEnabled = true
-
-                        showMessage("Error Firestore: ${it.message}")
+                        binding.btnSignUp.text = "Registrarse"
+                        showMessage("Error guardando datos: ${it.message}")
                     }
-
             }
             .addOnFailureListener { exception ->
-
                 binding.btnSignUp.isEnabled = true
+                binding.btnSignUp.text = "Registrarse"
 
-                when {
-
-                    exception.message?.contains(
-                        "email address is already in use",
-                        true
-                    ) == true -> {
-
-                        showMessage(
-                            "Este correo ya está registrado"
-                        )
-                    }
-
-                    else -> {
-
-                        showMessage(
-                            exception.message
-                                ?: "Error al registrar usuario"
-                        )
-                    }
+                if (exception.message?.contains("email address is already in use", true) == true) {
+                    showMessage("Este correo ya está registrado")
+                } else {
+                    showMessage(exception.message ?: "Error al registrar usuario")
                 }
             }
     }
 
-//    private fun showVerificationDialog() {
-//
-//        val view = layoutInflater.inflate(
-//            R.layout.activity_verification_code_dialog,
-//            null
-//        )
-//
-//        val dialog = MaterialAlertDialogBuilder(this)
-//            .setView(view)
-//            .create()
-//
-//        dialog.window?.setBackgroundDrawableResource(android.R.color.transparent)
-//
-//        val pinView = view.findViewById<PinView>(R.id.pinView)
-//
-//        val btnCancel = view.findViewById<MaterialButton>(R.id.btnCancel)
-//
-//        val btnVerify = view.findViewById<MaterialButton>(R.id.btnVerify)
-//
-//        btnCancel.setOnClickListener {
-//            dialog.dismiss()
-//        }
-//
-//        btnVerify.setOnClickListener {
-//
-//            if (pinView.text.toString().length == 6) {
-//
-//                dialog.dismiss()
-//
-//                val code = pinView.text.toString()
-//
-//                Toast.makeText(this, code, Toast.LENGTH_SHORT).show()
-//            }
-//        }
-//
-//        dialog.show()
-//        pinView.requestFocus()
-//
-//        val imm = getSystemService(
-//            INPUT_METHOD_SERVICE
-//        ) as InputMethodManager
-//
-//        imm.showSoftInput(
-//            pinView,
-//            InputMethodManager.SHOW_IMPLICIT
-//        )
-//        pinView.requestFocus()
-//    }
-//
-
-
     private fun validateFields(): Boolean {
-
-        val name = binding.name.text.toString().trim()
-        val idNumber = binding.idNumber.text.toString().trim()
+        val nombres = binding.nombres.text.toString().trim()
+        val cedula = binding.idNumber.text.toString().trim()
         val email = binding.email.text.toString().trim()
         val password = binding.password.text.toString()
 
-        if (name.isEmpty()) {
-            showMessage("Ingrese su nombre")
+        if (nombres.isEmpty()) {
+            showMessage("Ingrese sus nombres")
             return false
         }
-
-        if (idNumber.isEmpty()) {
-            showMessage("Ingrese su cédula")
+        if (cedula.isEmpty() || !cedula.matches(Regex("\\d{10}"))) {
+            showMessage("Ingrese una cédula válida de 10 dígitos")
             return false
         }
-
-        if (email.isEmpty()) {
-            showMessage("Ingrese un correo")
-            return false
-        }
-
-        if (!Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
+        if (email.isEmpty() || !Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
             showMessage("Correo inválido")
-            return false
-        }
-
-        if (!idNumber.matches(Regex("\\d{10}"))) {
-            showMessage("Ingrese una cédula válida")
             return false
         }
         if (password.length < 6) {
             showMessage("La contraseña debe tener al menos 6 caracteres")
             return false
+        }
+
+        val isDoctor = binding.spinnerTipoUsuario.selectedItemPosition == 1
+        if (isDoctor) {
+            if (binding.anosExperiencia.text.toString().isEmpty()) {
+                showMessage("Ingrese los años de experiencia")
+                return false
+            }
+        } else {
+            if (binding.contactoEmergencia.text.toString().isEmpty()) {
+                showMessage("Ingrese un número de emergencia")
+                return false
+            }
         }
 
         if (!binding.terms.isChecked) {
@@ -228,21 +201,7 @@ class SignUpScreen : AppCompatActivity() {
     }
 
     private fun showMessage(message: String) {
-
-        val snackbar = Snackbar.make(
-            binding.root,
-            message,
-            Snackbar.LENGTH_LONG
-        )
-
-        snackbar.setBackgroundTint(
-            getColor(R.color.black_soft)
-        )
-
-        snackbar.setTextColor(
-            getColor(R.color.white)
-        )
-
+        val snackbar = Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
         snackbar.show()
     }
 }

@@ -26,7 +26,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         app:cardCornerRadius="12dp"
-        app:cardElevation="2dp">
+        app:cardElevation="2dp"
+        app:strokeWidth="0dp">
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -61,46 +62,13 @@
                 android:weightSum="7"
                 android:layout_marginBottom="24dp">
 
-                <TextView android:id="@+id/btnEditDiaL" style="@style/DiaButtonStyle"
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:layout_marginEnd="4dp"
-                    android:gravity="center" android:paddingVertical="10dp"
-                    android:textSize="14sp" android:text="Lun" />
-
-                <TextView android:id="@+id/btnEditDiaM" style="@style/DiaButtonStyle"
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:layout_marginEnd="4dp"
-                    android:gravity="center" android:paddingVertical="10dp"
-                    android:textSize="14sp" android:text="Mar" />
-
-                <TextView android:id="@+id/btnEditDiaMi" style="@style/DiaButtonStyle"
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:layout_marginEnd="4dp"
-                    android:gravity="center" android:paddingVertical="10dp"
-                    android:textSize="14sp" android:text="Mie" />
-
-                <TextView android:id="@+id/btnEditDiaJ" style="@style/DiaButtonStyle"
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:layout_marginEnd="4dp"
-                    android:gravity="center" android:paddingVertical="10dp"
-                    android:textSize="14sp" android:text="Jue" />
-
-                <TextView android:id="@+id/btnEditDiaV" style="@style/DiaButtonStyle"
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:layout_marginEnd="4dp"
-                    android:gravity="center" android:paddingVertical="10dp"
-                    android:textSize="14sp" android:text="Vie" />
-
-                <TextView android:id="@+id/btnEditDiaS" style="@style/DiaButtonStyle"
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:layout_marginEnd="4dp"
-                    android:gravity="center" android:paddingVertical="10dp"
-                    android:textSize="14sp" android:text="Sab" />
-
-                <TextView android:id="@+id/btnEditDiaD" style="@style/DiaButtonStyle"
-                    android:layout_width="0dp" android:layout_height="wrap_content"
-                    android:layout_weight="1" android:gravity="center"
-                    android:paddingVertical="10dp" android:textSize="14sp" android:text="Dom" />
+                <TextView android:id="@+id/btnEditDiaL" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Lun" android:background="#E0E0E0" />
+                <TextView android:id="@+id/btnEditDiaM" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Mar" android:background="#E0E0E0" />
+                <TextView android:id="@+id/btnEditDiaMi" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Mié" android:background="#E0E0E0" />
+                <TextView android:id="@+id/btnEditDiaJ" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Jue" android:background="#E0E0E0" />
+                <TextView android:id="@+id/btnEditDiaV" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Vie" android:background="#E0E0E0" />
+                <TextView android:id="@+id/btnEditDiaS" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Sáb" android:background="#E0E0E0" />
+                <TextView android:id="@+id/btnEditDiaD" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Dom" android:background="#E0E0E0" />
 
             </LinearLayout>
 
@@ -117,6 +85,7 @@
                 android:layout_height="wrap_content"
                 android:hint="08:00 AM"
                 android:focusable="false"
+                android:clickable="true"
                 android:layout_marginBottom="16dp"/>
 
             <TextView
@@ -131,7 +100,8 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="06:30 PM"
-                android:focusable="false"/>
+                android:focusable="false"
+                android:clickable="true"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
 
@@ -147,7 +117,7 @@
         android:id="@+id/btnEditarHorarios"
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:text="Editar horarios"
+        android:text="Guardar cambios"
         app:cornerRadius="12dp"
         android:backgroundTint="#00695C"/>
 

@@ -62,6 +62,7 @@
                 android:textColor="#5F6368"
                 android:layout_marginBottom="24dp"/>
 
+            <!-- 1. Diagnóstico Clínico -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -73,37 +74,63 @@
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp">
+                android:layout_marginBottom="16dp">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputDiagnostico"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Escribe el diagnóstico detallado aquí..."
+                    android:hint="Ej. Faringitis aguda..."
                     android:inputType="textMultiLine"
-                    android:minLines="5"
+                    android:minLines="3"
                     android:gravity="top|start"/>
             </com.google.android.material.textfield.TextInputLayout>
 
+            <!-- 2. Tratamiento -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Medicamentos y Sugerencias"
+                android:text="Tratamiento"
                 android:textStyle="bold"
                 android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
                 style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content">
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
 
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/inputReceta"
+                    android:id="@+id/inputTratamiento"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Ej. Paracetamol 500mg cada 8 horas..."
+                    android:hint="Ej. Amoxicilina 500mg cada 8h..."
                     android:inputType="textMultiLine"
-                    android:minLines="5"
+                    android:minLines="3"
+                    android:gravity="top|start"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
+            <!-- 3. Sugerencias -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Sugerencias y Cuidados"
+                android:textStyle="bold"
+                android:layout_marginBottom="8dp"/>
+
+            <com.google.android.material.textfield.TextInputLayout
+                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginBottom="16dp">
+
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/inputSugerencias"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Ej. Reposo absoluto, hidratación constante..."
+                    android:inputType="textMultiLine"
+                    android:minLines="3"
                     android:gravity="top|start"/>
             </com.google.android.material.textfield.TextInputLayout>
 
@@ -115,7 +142,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:layout_margin="16dp"
-        android:text="Enviar diagnóstico"
+        android:text="Guardar y Completar Cita"
         app:cornerRadius="12dp"
         android:backgroundTint="#00695C"
         app:layout_constraintBottom_toBottomOf="parent"/>

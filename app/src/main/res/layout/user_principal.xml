@@ -7,8 +7,9 @@
     android:background="#F8F9FA"
     tools:context=".userPages.PrincipalUser">
 
-    <FrameLayout
+    <androidx.fragment.app.FragmentContainerView
         android:id="@+id/mapContainer"
+        android:name="com.google.android.gms.maps.SupportMapFragment"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         app:layout_constraintTop_toTopOf="parent"
@@ -109,48 +110,23 @@
                 android:textSize="18sp"/>
 
             <TextView
+                android:id="@+id/txtDireccionHospitalCuadro"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Dirección del centro"
+                android:textColor="#424242"
+                android:textSize="14sp"
+                android:layout_marginTop="2dp"/>
+
+            <TextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Toca aquí para ver reseñas, especialidades y agendar una cita."
                 android:textColor="#757575"
-                android:textSize="14sp"
+                android:textSize="12sp"
                 android:layout_marginTop="4dp"/>
         </LinearLayout>
     </com.google.android.material.card.MaterialCardView>
-
-    <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:layout_marginEnd="16dp"
-        android:layout_marginBottom="32dp"
-        app:layout_constraintBottom_toTopOf="@+id/cardInfoHospital"
-        app:layout_constraintEnd_toEndOf="parent">
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnZoomIn"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginBottom="8dp"
-            android:src="@drawable/plus"
-            app:fabSize="mini" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnZoomOut"
-            android:layout_width="40dp"
-            android:layout_height="40dp"
-            android:layout_marginBottom="16dp"
-            app:fabSize="mini"
-            android:src="@drawable/minus" />
-
-        <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/btnMiUbicacion"
-            android:layout_width="50dp"
-            android:layout_height="50dp"
-            app:backgroundTint="#00695C"
-            app:tint="@android:color/white"
-            android:src="@drawable/target" />
-    </LinearLayout>
 
     <LinearLayout
         android:id="@+id/bottomMenuContainer"
@@ -166,11 +142,13 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
-            android:background="#00695C"
+            android:background="@drawable/selector_boton_menu"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/addschedule" app:tint="@color/white" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nueva\ncita" android:textColor="@color/white" android:textSize="12sp" android:textAlignment="center" android:textStyle="bold"/>
+            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/addschedule" app:tint="#00695C" />
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nueva\ncita" android:textColor="#00695C" android:textSize="12sp" android:textAlignment="center" android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout
@@ -178,10 +156,13 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="@drawable/selector_boton_menu"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
             <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/schedule" app:tint="#5F6368" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Reagendar" android:textColor="#5F6368" android:textSize="12sp"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Reagendar" android:textColor="#5F6368" android:textSize="12sp" android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout
@@ -189,10 +170,13 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="@drawable/selector_boton_menu"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
             <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/diagnostic" app:tint="#1976D2" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Diagnósticos" android:textColor="#1976D2" android:textSize="12sp"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Diagnósticos" android:textColor="#1976D2" android:textSize="12sp" android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout
@@ -200,10 +184,13 @@
             android:layout_width="0dp"
             android:layout_height="match_parent"
             android:layout_weight="1"
+            android:background="@drawable/selector_boton_menu"
+            android:clickable="true"
+            android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
             <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/cancel" app:tint="#D32F2F" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cancelar" android:textColor="#D32F2F" android:textSize="12sp"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cancelar" android:textColor="#D32F2F" android:textSize="12sp" android:textStyle="bold"/>
         </LinearLayout>
 
     </LinearLayout>

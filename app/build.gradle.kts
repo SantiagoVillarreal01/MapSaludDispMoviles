@@ -2,6 +2,9 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.gms.google.services)
+
+    //id("com.android.application")
+    //id("com.google.gms.google-services")
 }
 
 android {
@@ -28,10 +31,9 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
-
     buildFeatures {
         viewBinding = true
     }
@@ -73,4 +75,9 @@ dependencies {
     testImplementation(libs.junit)
 
     implementation("com.google.android.gms:play-services-maps:19.0.0")
+    implementation("com.google.android.gms:play-services-location:21.3.0")
+
+
+    //implementation(platform("com.google.firebase:firebase-bom:34.14.1"))
+    //implementation("com.google.firebase:firebase-analytics")
 }

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:tools="http://schemas.android.com/tools"
     android:background="#F8F9FA">
 
     <LinearLayout
@@ -28,7 +28,7 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
-            android:text="MediLocate"
+            android:text="Datos del Centro Medico"
             android:textSize="20sp"
             android:textStyle="bold"
             android:textColor="#00695C"
@@ -102,10 +102,12 @@
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp"/>
+
                 <TextView
+                    android:id="@+id/txtDescripcionHospital"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:text="Institución de salud dedicada a brindar servicios médicos integrales. Equipado con la última tecnología diagnóstica y personal multidisciplinario."
+                    tools:text="Descripción del centro médico..."
                     android:textColor="#424242"
                     android:lineSpacingExtra="4dp"
                     android:layout_marginBottom="16dp"/>
@@ -120,43 +122,11 @@
                     android:layout_marginBottom="12dp"/>
 
                 <GridLayout
+                    android:id="@+id/gridEspecialidades"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:columnCount="2"
-                    android:rowCount="2"
                     android:layout_marginBottom="24dp">
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:layout_margin="4dp"
-                        app:cardCornerRadius="8dp"
-                        app:strokeWidth="1dp"
-                        app:strokeColor="#EAEAEA">
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="❤️ Cardiología"
-                            android:padding="16dp"
-                            android:gravity="center"
-                            android:textStyle="bold"/>
-                    </com.google.android.material.card.MaterialCardView>
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="0dp"
-                        android:layout_height="wrap_content"
-                        android:layout_columnWeight="1"
-                        android:layout_margin="4dp"
-                        app:cardCornerRadius="8dp"
-                        app:strokeWidth="1dp"
-                        app:strokeColor="#EAEAEA">
-                        <TextView
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:text="👶 Pediatría"
-                            android:padding="16dp"
-                            android:gravity="center"
-                            android:textStyle="bold"/>
-                    </com.google.android.material.card.MaterialCardView>
                 </GridLayout>
 
                 <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_marginBottom="16dp"/>
@@ -187,14 +157,15 @@
                             android:text="Califica tu experiencia"
                             android:textStyle="bold"
                             android:layout_marginBottom="8dp"/>
+
                         <RatingBar
                             android:id="@+id/ratingBar"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:numStars="5"
                             android:stepSize="1.0"
-                            android:theme="@style/Widget.AppCompat.RatingBar.Indicator"
                             android:layout_marginBottom="8dp"/>
+
                         <EditText
                             android:id="@+id/editComentario"
                             android:layout_width="match_parent"

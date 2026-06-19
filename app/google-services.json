@@ -1,44 +1,26 @@
 {
   "project_info": {
-    "project_number": "861655205039",
-    "project_id": "mapsalud-2026",
-    "storage_bucket": "mapsalud-2026.firebasestorage.app"
+    "project_number": "714728034415",
+    "project_id": "map-salud-2",
+    "storage_bucket": "map-salud-2.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:861655205039:android:f12a23e199c3c0ceb3005a",
+        "mobilesdk_app_id": "1:714728034415:android:012bf7b2af42fc02fc3d9a",
         "android_client_info": {
           "package_name": "ec.edu.mapsalud"
         }
       },
-      "oauth_client": [
-        {
-          "client_id": "861655205039-64rbhq16jj94nu2lqcdhrhgvbsqpkqdk.apps.googleusercontent.com",
-          "client_type": 1,
-          "android_info": {
-            "package_name": "ec.edu.mapsalud",
-            "certificate_hash": "278f016dbb6675264c479212d2e0c5f551a46f78"
-          }
-        },
-        {
-          "client_id": "861655205039-e0sjvj2qsmnefevofqlr49uf8tv1tc76.apps.googleusercontent.com",
-          "client_type": 3
-        }
-      ],
+      "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyB1T7mAD1cONqzeRDl4xGtsDa5f9wGkZYY"
+          "current_key": "AIzaSyDS_tCODBoHHnETlgRs8KcXAUPRVK90yeU"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": [
-            {
-              "client_id": "861655205039-e0sjvj2qsmnefevofqlr49uf8tv1tc76.apps.googleusercontent.com",
-              "client_type": 3
-            }
-          ]
+          "other_platform_oauth_client": []
         }
       }
     }

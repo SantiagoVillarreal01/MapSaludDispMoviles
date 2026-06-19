@@ -2,6 +2,7 @@
 <com.google.android.material.card.MaterialCardView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_marginHorizontal="16dp"
@@ -17,10 +18,10 @@
         android:padding="16dp">
 
         <TextView
-            android:id="@+id/txtTituloDiagnostico"
+            android:id="@+id/txtMotivoCita"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Infección Respiratoria Aguda"
+            tools:text="Dolor abdominal severo"
             android:textStyle="bold"
             android:textColor="#212121"
             android:textSize="18sp"/>
@@ -29,41 +30,57 @@
             android:id="@+id/txtDoctorYFecha"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Dr. Andrés Gómez • 10 Oct, 2026"
+            tools:text="Dr. Andrés Gómez • 10 Oct, 2026"
             android:textColor="#00695C"
             android:textSize="14sp"
-            android:layout_marginBottom="8dp"/>
+            android:layout_marginBottom="12dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Recomendaciones:"
+            android:text="Diagnóstico Clínico:"
             android:textStyle="bold"
             android:textColor="#757575"
             android:textSize="12sp"/>
 
         <TextView
-            android:id="@+id/txtRecomendaciones"
+            android:id="@+id/txtDiagnosticoClinico"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Guardar reposo por 3 días. Mantenerse hidratado y evitar cambios bruscos de temperatura."
+            tools:text="Gastritis aguda por estrés."
             android:textColor="#424242"
             android:layout_marginBottom="12dp"/>
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Medicamentos:"
+            android:text="Tratamiento:"
             android:textStyle="bold"
             android:textColor="#757575"
             android:textSize="12sp"/>
 
-        <LinearLayout
-            android:id="@+id/layoutMedicamentos"
+        <TextView
+            android:id="@+id/txtTratamiento"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_marginTop="4dp"/>
+            tools:text="Omeprazol 20mg en ayunas por 14 días."
+            android:textColor="#424242"
+            android:layout_marginBottom="12dp"/>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sugerencias:"
+            android:textStyle="bold"
+            android:textColor="#757575"
+            android:textSize="12sp"/>
+
+        <TextView
+            android:id="@+id/txtSugerencias"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:text="Evitar comidas picantes, café y alcohol. Masticar despacio."
+            android:textColor="#424242"/>
 
     </LinearLayout>
 </com.google.android.material.card.MaterialCardView>

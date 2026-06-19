@@ -47,26 +47,32 @@ class ForgotPasswordScreen : AppCompatActivity() {
 
                     binding.root.postDelayed({
                         finish()
-                    }, 2000)
+                    }, 2200)
                 }
                 .addOnFailureListener { exception ->
                     setLoadingState(false)
-                    showMessage("Error: ${exception.localizedMessage}")
+
+                    val errorMsg = when {
+                        exception.message?.contains("user-not-found", true) == true -> {
+                            "No existe ninguna cuenta registrada con este correo."
+                        }
+                        else -> exception.localizedMessage ?: "Error al enviar el correo."
+                    }
+                    showMessage(errorMsg)
                 }
         }
     }
-
 
     private fun setLoadingState(isLoading: Boolean) {
         if (isLoading) {
             binding.btnResetPassword.isEnabled = false
             binding.btnResetPassword.text = ""
-            binding.btnResetPassword.setIconResource(0)
+            binding.btnResetPassword.icon = null
             binding.progressBarReset.visibility = View.VISIBLE
         } else {
             binding.btnResetPassword.isEnabled = true
             binding.btnResetPassword.text = "Enviar Instrucciones"
-            binding.btnResetPassword.setIconResource(android.R.drawable.ic_menu_send)
+            binding.btnResetPassword.setIconResource(R.drawable.ic_mail)
             binding.progressBarReset.visibility = View.GONE
         }
     }

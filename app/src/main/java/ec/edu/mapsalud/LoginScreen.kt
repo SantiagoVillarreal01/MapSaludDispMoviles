@@ -24,12 +24,18 @@ import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
 import ec.edu.mapsalud.databinding.ActivityLoginPageBinding
+import ec.edu.mapsalud.dto.Medico
+import ec.edu.mapsalud.dto.Paciente
+import ec.edu.mapsalud.dto.UsuarioInfo
+import ec.edu.mapsalud.enum.BloodType
+import ec.edu.mapsalud.enum.Specialty
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+
 
 class LoginScreen : AppCompatActivity() {
 
@@ -53,7 +59,7 @@ class LoginScreen : AppCompatActivity() {
             }
         } else {
             binding.btnGoogle.isEnabled = true
-            showMessage("Inicio de sesión cancelado. Código de resultado: ${result.resultCode}")
+            showMessage("Inicio de sesión cancelado.")
         }
     }
 
@@ -88,6 +94,7 @@ class LoginScreen : AppCompatActivity() {
         binding.btnGoogle.setOnClickListener {
             signInWithGoogle()
         }
+
         binding.btnDoctor.setOnClickListener {
             type = Type.DOCTOR
             updateSelection()
@@ -111,7 +118,6 @@ class LoginScreen : AppCompatActivity() {
     }
 
     private fun loginUser() {
-
         val email = binding.txtEmail.text.toString().trim()
         val password = binding.txtPassword.text.toString()
 
@@ -127,74 +133,72 @@ class LoginScreen : AppCompatActivity() {
 
         binding.btnSignin.isEnabled = false
 
-        FirebaseManager.auth.signInWithEmailAndPassword(
-            email,
-            password
-        )
-            .addOnSuccessListener {
-
+        FirebaseManager.auth.signInWithEmailAndPassword(email, password)
+            .addOnSuccessListener { authResult ->
                 val user = FirebaseManager.auth.currentUser
-
                 user?.reload()?.addOnSuccessListener {
-
                     if (user.isEmailVerified) {
-
-                      navegarAlHome(Type.PATIENT == type)
-
+                        // SOLUCIÓN: Validamos el rol real directo desde Firestore
+                        obtenerPerfilYRedirigir(user.uid)
                     } else {
-
                         FirebaseManager.auth.signOut()
-
-                        showMessage(
-                            "Debe verificar su correo electrónico"
-                        )
+                        showMessage("Debe verificar su correo electrónico")
+                        binding.btnSignin.isEnabled = true
                     }
-
-                    binding.btnSignin.isEnabled = true
                 }
             }
             .addOnFailureListener {
-
                 binding.btnSignin.isEnabled = true
                 counter++
                 if (counter >= 3) {
                     sendSecurityAlert(email)
                 }
-                showMessage(
-                    "Correo o contraseña incorrectos"
-                )
+                showMessage("Correo o contraseña incorrectos")
+            }
+    }
+
+    private fun obtenerPerfilYRedirigir(uid: String) {
+        FirebaseManager.db.collection("usuarios").document(uid).get()
+            .addOnSuccessListener { document ->
+                binding.btnSignin.isEnabled = true
+                if (document != null && document.exists()) {
+                    val infoMap = document.get("info") as? Map<*, *>
+                    val tipoUsuarioStr = infoMap?.get("tipoUsuario")?.toString() ?: ""
+
+                    val tipoUsuarioReal = try {
+                        Type.valueOf(tipoUsuarioStr)
+                    } catch (e: IllegalArgumentException) {
+                        null
+                    }
+
+                    when (tipoUsuarioReal) {
+                        Type.DOCTOR -> navegarAlHome(isPatient = false)
+                        Type.PATIENT -> navegarAlHome(isPatient = true)
+                        null -> showMessage("Error: Tipo de usuario no identificado en el servidor.")
+                    }
+                } else {
+                    showMessage("No se encontraron datos de perfil.")
+                }
+            }
+            .addOnFailureListener {
+                binding.btnSignin.isEnabled = true
+                showMessage("Error al obtener perfil: ${it.localizedMessage}")
             }
     }
 
     private fun updateSelection() {
-
         if (type == Type.PATIENT) {
-
-            binding.btnPatient.setBackgroundTintList(
-                getColorStateList(R.color.primary)
-            )
-
-            binding.btnDoctor.setBackgroundTintList(
-                getColorStateList(R.color.surface_container_high)
-            )
-
+            binding.btnPatient.setBackgroundTintList(getColorStateList(R.color.primary))
+            binding.btnDoctor.setBackgroundTintList(getColorStateList(R.color.surface_container_high))
             binding.btnPatient.setTextColor(getColor(R.color.yellow_cremy))
             binding.btnDoctor.setTextColor(getColor(R.color.information_text_color))
-
         } else {
-
-            binding.btnDoctor.setBackgroundTintList(
-                getColorStateList(R.color.primary)
-            )
-
-            binding.btnPatient.setBackgroundTintList(
-                getColorStateList(R.color.surface_container_high)
-            )
+            binding.btnDoctor.setBackgroundTintList(getColorStateList(R.color.primary))
+            binding.btnPatient.setBackgroundTintList(getColorStateList(R.color.surface_container_high))
             binding.btnDoctor.setTextColor(getColor(R.color.yellow_cremy))
             binding.btnPatient.setTextColor(getColor(R.color.information_text_color))
         }
     }
-
 
     private fun signInWithGoogle() {
         binding.btnGoogle.isEnabled = false
@@ -218,12 +222,14 @@ class LoginScreen : AppCompatActivity() {
                     if (isNewUser) {
                         pedirCedulaUsuarioNuevo(firebaseUser)
                     } else {
-                        navegarAlHome(true)
+                        // Si ya existe, leemos su rol real de la DB en vez de asumir que es paciente
+                        obtenerPerfilYRedirigir(firebaseUser.uid)
                     }
                 }
             }
             .addOnFailureListener { exception ->
                 binding.btnSignin.isEnabled = true
+                binding.btnGoogle.isEnabled = true
                 showMessage("Autenticación fallida: ${exception.localizedMessage}")
             }
     }
@@ -240,9 +246,7 @@ class LoginScreen : AppCompatActivity() {
             setPadding(45, 20, 45, 0)
             boxBackgroundMode = TextInputLayout.BOX_BACKGROUND_FILLED
             boxBackgroundColor = getColor(R.color.surface_container_high)
-
             setBoxCornerRadii(12f, 12f, 12f, 12f)
-
             addView(inputEditText)
         }
 
@@ -255,6 +259,7 @@ class LoginScreen : AppCompatActivity() {
             .setNegativeButton("Cancelar") { d, _ ->
                 FirebaseManager.auth.signOut()
                 binding.btnSignin.isEnabled = true
+                binding.btnGoogle.isEnabled = true
                 d.dismiss()
             }
             .create()
@@ -272,33 +277,54 @@ class LoginScreen : AppCompatActivity() {
             textInputLayout.error = null
             dialog.dismiss()
 
-            showMessage("Guardando perfil médico...")
+            val isDoctor = type == Type.DOCTOR
+            showMessage(if (isDoctor) "Guardando perfil médico..." else "Guardando perfil de paciente...")
 
-            val userData = hashMapOf(
-                "uid" to firebaseUser.uid,
-                "name" to (firebaseUser.displayName ?: "Usuario Google"),
-                "idNumber" to cedula,
-                "email" to (firebaseUser.email ?: "")
+            val infoComun = UsuarioInfo(
+                id = firebaseUser.uid,
+                nombres = firebaseUser.displayName ?: "Usuario Google",
+                apellidos = "",
+                correo = firebaseUser.email ?: "",
+                telefono = "",
+                cedula = cedula,
+                tipoUsuario = if (isDoctor) Type.DOCTOR else Type.PATIENT
             )
 
-            FirebaseManager.db.collection("users")
+            val entidadAGuardar: Any = if (isDoctor) {
+                Medico(
+                    info = infoComun,
+                    specialty = Specialty.GENERAL,
+                    anosExperiencia = 0
+                )
+            } else {
+                Paciente(
+                    info = infoComun,
+                    tipoSangre = BloodType.DESCONOCIDO,
+                    contactoEmergencia = ""
+                )
+            }
+
+            FirebaseManager.db.collection("usuarios")
                 .document(firebaseUser.uid)
-                .set(userData)
+                .set(entidadAGuardar)
                 .addOnSuccessListener {
-                    navegarAlHome(true)
+                    binding.btnGoogle.isEnabled = true
+                    navegarAlHome(isPatient = !isDoctor)
                 }
                 .addOnFailureListener {
                     binding.btnSignin.isEnabled = true
+                    binding.btnGoogle.isEnabled = true
                     FirebaseManager.auth.signOut()
                     showMessage("Error al crear perfil: ${it.localizedMessage}")
                 }
         }
     }
 
-    private fun navegarAlHome(user: Boolean) {
+    private fun navegarAlHome(isPatient: Boolean) {
         showMessage("Bienvenido")
+        binding.btnGoogle.isEnabled = true
 
-        val intent = if (user) {
+        val intent = if (isPatient) {
             Intent(this, PrincipalUser::class.java)
         } else {
             Intent(this, PrincipalMedic::class.java)
@@ -309,7 +335,6 @@ class LoginScreen : AppCompatActivity() {
         finish()
     }
 
-
     private fun showMessage(message: String) {
         val snackbar = Snackbar.make(binding.root, message, Snackbar.LENGTH_LONG)
         snackbar.setBackgroundTint(getColor(R.color.black_soft))
@@ -317,9 +342,7 @@ class LoginScreen : AppCompatActivity() {
         snackbar.show()
     }
 
-
     private fun sendSecurityAlert(email: String) {
-
         val request = EmailJSRequest(
             service_id = "-----",
             template_id = "-",
@@ -328,40 +351,21 @@ class LoginScreen : AppCompatActivity() {
             template_params = mapOf(
                 "user_name" to "Usuario",
                 "email" to email,
-                "date" to SimpleDateFormat(
-                    "dd/MM/yyyy",
-                    Locale.getDefault()
-                ).format(Date()),
-                "time" to SimpleDateFormat(
-                    "HH:mm",
-                    Locale.getDefault()
-                ).format(Date())
-
+                "date" to SimpleDateFormat("dd/MM/yyyy", Locale.getDefault()).format(Date()),
+                "time" to SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date())
             )
         )
 
-        RetrofitClient.emailService
-            .sendEmail(request)
-            .enqueue(
-                object : Callback<Void> {
-
-                    override fun onResponse(
-                        call: Call<Void>,
-                        response: Response<Void>
-                    ) {
-                        if (response.isSuccessful) {
-                            counter = 0
-                            showMessage("Email enviado correctamente")
-                        }
-                    }
-
-                    override fun onFailure(
-                        call: Call<Void>,
-                        t: Throwable
-                    ) {
-                        showMessage("Novali")
-                    }
+        RetrofitClient.emailService.sendEmail(request).enqueue(object : Callback<Void> {
+            override fun onResponse(call: Call<Void>, response: Response<Void>) {
+                if (response.isSuccessful) {
+                    counter = 0
+                    showMessage("Email de alerta enviado.")
                 }
-            )
+            }
+            override fun onFailure(call: Call<Void>, t: Throwable) {
+                showMessage("Fallo en reporte de seguridad.")
+            }
+        })
     }
 }

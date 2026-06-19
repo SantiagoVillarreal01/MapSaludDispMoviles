@@ -12,7 +12,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <!-- HERO IMAGE -->
         <FrameLayout
             android:layout_width="match_parent"
             android:layout_height="300dp">
@@ -23,13 +22,11 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/login" />
 
-            <!-- Overlay -->
             <View
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 android:background="#B3000000" />
 
-            <!-- Logo -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -54,7 +51,6 @@
 
         </FrameLayout>
 
-        <!-- FORM CONTAINER -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -76,7 +72,26 @@
                 android:text="Join our network of premium healthcare."
                 android:textColor="@color/information_text_color" />
 
-            <!-- FULL NAME -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:text="¿Qué tipo de cuenta deseas crear?"
+                android:textColor="@color/information_text_color" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/surface_container"
+                android:padding="4dp">
+                <Spinner
+                    android:id="@+id/spinnerTipoUsuario"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent" />
+            </LinearLayout>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -84,18 +99,35 @@
                 app:boxBackgroundMode="filled"
                 app:boxBackgroundColor="@color/surface_container"
                 android:layout_marginTop="12dp">
-
                 <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/name"
+                    android:id="@+id/nombres"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:hint="Full Name"
+                    android:hint="Nombres"
                     android:drawableStart="@drawable/ic_person"
                     android:drawablePadding="12dp"
                     android:textColor="@color/small_text_color"
                     android:paddingStart="12dp"/>
             </com.google.android.material.textfield.TextInputLayout>
-            <!-- ID NUMBER -->
+
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textColorHint="@color/teal_700"
+                app:boxBackgroundMode="filled"
+                app:boxBackgroundColor="@color/surface_container"
+                android:layout_marginTop="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/apellidos"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Apellidos"
+                    android:drawableStart="@drawable/ic_person"
+                    android:drawablePadding="12dp"
+                    android:textColor="@color/small_text_color"
+                    android:paddingStart="12dp"/>
+            </com.google.android.material.textfield.TextInputLayout>
+
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -103,7 +135,6 @@
                 android:textColorHint="@color/teal_700"
                 app:boxBackgroundColor="@color/surface_container"
                 android:layout_marginTop="12dp">
-
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/idNumber"
                     android:layout_width="match_parent"
@@ -111,11 +142,10 @@
                     android:hint="Número de Cédula"
                     android:drawableStart="@drawable/ic_badge"
                     android:drawablePadding="12dp"
+                    android:inputType="number"
                     android:textColor="@color/small_text_color" />
             </com.google.android.material.textfield.TextInputLayout>
 
-
-            <!-- EMAIL -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -123,7 +153,25 @@
                 android:textColorHint="@color/teal_700"
                 app:boxBackgroundColor="@color/surface_container"
                 android:layout_marginTop="12dp">
+                <com.google.android.material.textfield.TextInputEditText
+                    android:id="@+id/telefono"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:hint="Teléfono"
+                    android:drawableStart="@drawable/ic_phone"
+                    android:drawablePadding="12dp"
+                    android:inputType="phone"
+                    android:textColor="@color/small_text_color"
+                    android:paddingStart="12dp"/>
+            </com.google.android.material.textfield.TextInputLayout>
 
+            <com.google.android.material.textfield.TextInputLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:boxBackgroundMode="filled"
+                android:textColorHint="@color/teal_700"
+                app:boxBackgroundColor="@color/surface_container"
+                android:layout_marginTop="12dp">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/email"
                     android:layout_width="match_parent"
@@ -136,8 +184,6 @@
                     android:textColorHint="@color/information_text_color" />
             </com.google.android.material.textfield.TextInputLayout>
 
-
-            <!-- PASSWORD -->
             <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -145,7 +191,6 @@
                 android:textColorHint="@color/teal_700"
                 app:boxBackgroundColor="@color/surface_container"
                 android:layout_marginTop="12dp">
-
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/password"
                     android:layout_width="match_parent"
@@ -157,7 +202,119 @@
                     android:textColor="@color/small_text_color"
                     android:textColorHint="@color/information_text_color" />
             </com.google.android.material.textfield.TextInputLayout>
-            <!-- TERMS -->
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="Género"
+                android:textColor="@color/information_text_color" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="8dp"
+                android:background="@color/surface_container"
+                android:padding="4dp">
+                <Spinner
+                    android:id="@+id/spinnerGenero"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="@android:color/transparent" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/containerPaciente"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="visible">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Tipo de Sangre"
+                    android:textColor="@color/information_text_color" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/surface_container"
+                    android:padding="4dp">
+                    <Spinner
+                        android:id="@+id/spinnerTipoSangre"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent" />
+                </LinearLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:boxBackgroundMode="filled"
+                    android:textColorHint="@color/teal_700"
+                    app:boxBackgroundColor="@color/surface_container"
+                    android:layout_marginTop="12dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/contactoEmergencia"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Contacto Emergencia (Teléfono)"
+                        android:drawablePadding="12dp"
+                        android:inputType="phone"
+                        android:textColor="@color/small_text_color"
+                        android:paddingStart="12dp"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
+            <LinearLayout
+                android:id="@+id/containerMedico"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:visibility="gone">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="16dp"
+                    android:text="Especialidad Médica"
+                    android:textColor="@color/information_text_color" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="50dp"
+                    android:layout_marginTop="8dp"
+                    android:background="@color/surface_container"
+                    android:padding="4dp">
+                    <Spinner
+                        android:id="@+id/spinnerEspecialidad"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:background="@android:color/transparent" />
+                </LinearLayout>
+
+                <com.google.android.material.textfield.TextInputLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    app:boxBackgroundMode="filled"
+                    android:textColorHint="@color/teal_700"
+                    app:boxBackgroundColor="@color/surface_container"
+                    android:layout_marginTop="12dp">
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/anosExperiencia"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:hint="Años de Experiencia"
+                        android:drawablePadding="12dp"
+                        android:inputType="number"
+                        android:textColor="@color/small_text_color"
+                        android:paddingStart="12dp"/>
+                </com.google.android.material.textfield.TextInputLayout>
+            </LinearLayout>
+
             <CheckBox
                 android:id="@+id/terms"
                 android:layout_width="wrap_content"
@@ -166,7 +323,6 @@
                 android:text="I agree to Terms &amp; Conditions"
                 android:textColor="@color/information_text_color" />
 
-            <!-- SIGN UP -->
             <Button
                 android:id="@+id/btnSignUp"
                 android:layout_width="match_parent"
@@ -176,7 +332,6 @@
                 android:text="Sign Up"
                 android:textColor="@color/white" />
 
-            <!-- DIVIDER -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -185,7 +340,6 @@
                 android:text="Or sign up with"
                 android:textColor="@color/information_text_color" />
 
-            <!-- GOOGLE BUTTON -->
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnGoogle"
                 android:layout_width="match_parent"
@@ -198,13 +352,13 @@
                 app:iconTint="@null"
                 app:iconGravity="textStart" />
 
-            <!-- LOGIN -->
             <TextView
                 android:id="@+id/txtAlradyHaveAccount"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:layout_marginTop="16dp"
+                android:layout_marginBottom="24dp"
                 android:text="Already have an account? Sign In"
                 android:textColor="@color/information_text_color" />
         </LinearLayout>

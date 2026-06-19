@@ -16,19 +16,50 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import ec.edu.mapsalud.databinding.MedicAgregarConsultorioBinding
 import kotlin.collections.iterator
+import androidx.lifecycle.lifecycleScope
+import com.google.android.gms.maps.model.BitmapDescriptorFactory
+import com.google.android.gms.maps.model.Marker
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.withContext
+import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
+import ec.edu.mapsalud.dto.OfficeDtoRemote
+import ec.edu.mapsalud.enum.Specialty
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.core.app.ActivityCompat
+import com.google.android.gms.location.FusedLocationProviderClient
+import com.google.android.gms.location.LocationServices
+import ec.edu.mapsalud.enum.CenterType
 
 class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: MedicAgregarConsultorioBinding
     private lateinit var mapa: GoogleMap
-    private val diasSeleccionados = mutableSetOf<String>()
-
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+
+    private lateinit var fusedLocationClient: FusedLocationProviderClient
+
+    private val db = FirebaseFirestore.getInstance()
+    private val auth = FirebaseAuth.getInstance()
+
+    private val diasSeleccionados = mutableSetOf<String>()
+    private var centroSeleccionado: MedicalCenterDtoRemote? = null
+    private var especialidadSeleccionada: Specialty? = null
+
+    private val marcadoresCentrosMedicos = HashMap<Marker, MedicalCenterDtoRemote>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = MedicAgregarConsultorioBinding.inflate(layoutInflater)
         setContentView(binding.root)
+
+        fusedLocationClient = LocationServices.getFusedLocationProviderClient(this)
 
         val mapFragment = supportFragmentManager.findFragmentById(binding.mapConsultorio.id) as SupportMapFragment
         mapFragment.getMapAsync(this)
@@ -40,35 +71,77 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
 
     override fun onMapReady(googleMap: GoogleMap) {
         mapa = googleMap
-
         mapa.uiSettings.isZoomGesturesEnabled = true
         mapa.uiSettings.isZoomControlsEnabled = true
 
-        val centroSalud = LatLng(-0.180653, -78.467834)
-        mapa.addMarker(MarkerOptions().position(centroSalud).title("Centro de Salud Iñaquito"))
-        mapa.moveCamera(CameraUpdateFactory.newLatLngZoom(centroSalud, 15f))
+        configurarUbicacionEnTiempoReal()
 
-        val bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheetForm)
+        obtenerCentrosMedicosDesdeFirestore()
 
         mapa.setOnMarkerClickListener { marker ->
-            binding.cardUbicacion.visibility = View.VISIBLE
-            binding.txtNombreCentro.text = marker.title
-            binding.txtDireccionCentro.text = "Av. Naciones Unidas y Núñez de Vela"
-            bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+            val centro = marcadoresCentrosMedicos[marker]
+            if (centro != null) {
+                centroSeleccionado = centro
+                binding.cardUbicacion.visibility = View.VISIBLE
 
+                val tipoCentro = try {
+                    CenterType.valueOf(centro.type).nombreMostrar
+                } catch (e: Exception) {
+                    "Centro Médico"
+                }
+
+                binding.txtNombreCentro.text = centro.name
+                binding.txtDireccionCentro.text = "${centro.address} • $tipoCentro"
+
+                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+
+                mapa.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
+            }
             true
         }
 
         mapa.setOnMapClickListener {
+            centroSeleccionado = null
             binding.cardUbicacion.visibility = View.GONE
-
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+        }
+    }
+
+    private fun obtenerCentrosMedicosDesdeFirestore() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val snapshot = db.collection("centros_medicos").get().await()
+                val listaCentros = snapshot.toObjects(MedicalCenterDtoRemote::class.java)
+
+                withContext(Dispatchers.Main) {
+                    mapa.clear()
+                    marcadoresCentrosMedicos.clear()
+
+                    for (centro in listaCentros) {
+                        val coordenadas = LatLng(centro.latitude, centro.longitude)
+                        val markerOptions = MarkerOptions()
+                            .position(coordenadas)
+                            .title(centro.name)
+                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+
+                        val m = mapa.addMarker(markerOptions)
+                        if (m != null) {
+                            // Guardamos la relación en el mapa de memoria
+                            marcadoresCentrosMedicos[m] = centro
+                        }
+                    }
+                }
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@AgregarConsultorio, "Error al cargar centros médicos", Toast.LENGTH_SHORT).show()
+                }
+            }
         }
     }
 
     private fun configurarPanelDeslizable() {
         bottomSheetBehavior = BottomSheetBehavior.from(binding.bottomSheetForm)
-        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
 
         binding.btnToggleSheet.setOnClickListener {
             if (bottomSheetBehavior.state == BottomSheetBehavior.STATE_EXPANDED) {
@@ -81,12 +154,40 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         bottomSheetBehavior.addBottomSheetCallback(object : BottomSheetBehavior.BottomSheetCallback() {
             override fun onStateChanged(bottomSheet: View, newState: Int) {
                 when (newState) {
-                    BottomSheetBehavior.STATE_COLLAPSED -> binding.btnToggleSheet.rotation = 180f // Flecha hacia arriba
-                    BottomSheetBehavior.STATE_EXPANDED -> binding.btnToggleSheet.rotation = 0f    // Flecha hacia abajo
+                    BottomSheetBehavior.STATE_COLLAPSED -> binding.btnToggleSheet.rotation = 180f
+                    BottomSheetBehavior.STATE_EXPANDED -> binding.btnToggleSheet.rotation = 0f
                 }
             }
             override fun onSlide(bottomSheet: View, slideOffset: Float) {}
         })
+    }
+
+    private fun configurarUbicacionEnTiempoReal() {
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
+            ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+
+            ActivityCompat.requestPermissions(
+                this,
+                arrayOf(Manifest.permission.ACCESS_FINE_LOCATION, Manifest.permission.ACCESS_COARSE_LOCATION),
+                1001
+            )
+            return
+        }
+        mapa.isMyLocationEnabled = true
+
+        fusedLocationClient.lastLocation.addOnSuccessListener { location ->
+            if (location != null) {
+                val userLocation = LatLng(location.latitude, location.longitude)
+                mapa.animateCamera(CameraUpdateFactory.newLatLngZoom(userLocation, 14f))
+            }
+        }
+    }
+
+    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<out String>, grantResults: IntArray) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        if (requestCode == 1001 && grantResults.isNotEmpty() && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+            configurarUbicacionEnTiempoReal()
+        }
     }
 
     private fun initListeners() {
@@ -94,21 +195,9 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
             finish()
         }
 
-        binding.btnGuardarConsultorio.setOnClickListener {
-
-            if (binding.cardUbicacion.visibility == View.GONE) {
-                Toast.makeText(this, "Por favor, selecciona un consultorio en el mapa primero", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener
-            }
-
-            val especialidad = binding.inputEspecialidad.text.toString().trim()
-            if (especialidad.isEmpty() || diasSeleccionados.isEmpty()) {
-                Toast.makeText(this, "Por favor llena la especialidad y elige al menos un día", Toast.LENGTH_SHORT).show()
-                return@setOnClickListener 
-            }
-
-            Toast.makeText(this, "Consultorio agregado exitosamente", Toast.LENGTH_SHORT).show()
-            finish()
+        binding.inputEspecialidad.isFocusable = false
+        binding.inputEspecialidad.setOnClickListener {
+            mostrarSelectorEspecialidades()
         }
 
         binding.inputApertura.setOnClickListener {
@@ -120,6 +209,84 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         binding.inputCierre.setOnClickListener {
             mostrarSelectorHora("Hora de cierre") { hora, minuto ->
                 binding.inputCierre.setText(formatearHoraAMPM(hora, minuto))
+            }
+        }
+
+        binding.btnGuardarConsultorio.setOnClickListener {
+            ejecutarGuardadoConsultorio()
+        }
+    }
+
+    private fun mostrarSelectorEspecialidades() {
+        val listaEspecialidades = Specialty.values().sortedBy { it.nombreMostrar }
+        val nombresMostrar = listaEspecialidades.map { it.nombreMostrar }.toTypedArray()
+
+        MaterialAlertDialogBuilder(this)
+            .setTitle("Seleccione la Especialidad")
+            .setItems(nombresMostrar) { _, posicion ->
+                especialidadSeleccionada = listaEspecialidades[posicion]
+                binding.inputEspecialidad.setText(especialidadSeleccionada?.nombreMostrar)
+            }
+            .setNegativeButton("Cancelar", null)
+            .show()
+    }
+
+    private fun ejecutarGuardadoConsultorio() {
+        val centro = centroSeleccionado
+        val especialidad = especialidadSeleccionada
+        val horaApertura = binding.inputApertura.text.toString().trim()
+        val horaCierre = binding.inputCierre.text.toString().trim()
+        val idMedicoLogueado = auth.currentUser?.uid ?: ""
+
+        if (centro == null) {
+            Toast.makeText(this, "Por favor, selecciona un centro médico en el mapa", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (especialidad == null) {
+            Toast.makeText(this, "Debe seleccionar una especialidad médica", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (diasSeleccionados.isEmpty()) {
+            Toast.makeText(this, "Seleccione al menos un día de atención", Toast.LENGTH_SHORT).show()
+            return
+        }
+        if (idMedicoLogueado.isEmpty()) {
+            Toast.makeText(this, "Error de autenticación médico no válido", Toast.LENGTH_SHORT).show()
+            return
+        }
+
+        binding.btnGuardarConsultorio.isEnabled = false
+
+        lifecycleScope.launch(Dispatchers.IO) {
+            try {
+                val nuevoIdOffice = db.collection("consultorios").document().id
+
+                val nuevoConsultorio = OfficeDtoRemote(
+                    id = nuevoIdOffice,
+                    idCenter = centro.id,
+                    idDoctor = idMedicoLogueado,
+                    specialty = especialidad.name,
+                    availableDays = diasSeleccionados.toList(),
+                    openingTime = horaApertura,
+                    closingTime = horaCierre
+                )
+
+                db.collection("consultorios").document(nuevoIdOffice).set(nuevoConsultorio).await()
+
+                db.collection("centros_medicos").document(centro.id)
+                    .update("specialties", FieldValue.arrayUnion(especialidad.name))
+                    .await()
+
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@AgregarConsultorio, "¡Consultorio vinculado correctamente!", Toast.LENGTH_LONG).show()
+                    finish()
+                }
+
+            } catch (e: Exception) {
+                withContext(Dispatchers.Main) {
+                    Toast.makeText(this@AgregarConsultorio, "Error al guardar: ${e.message}", Toast.LENGTH_SHORT).show()
+                    binding.btnGuardarConsultorio.isEnabled = true
+                }
             }
         }
     }
