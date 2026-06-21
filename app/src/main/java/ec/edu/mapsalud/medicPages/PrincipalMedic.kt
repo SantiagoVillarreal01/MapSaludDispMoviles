@@ -63,7 +63,7 @@ class PrincipalMedic : AppCompatActivity() {
             boton.isSelected = estaSeleccionado
 
             val colorFrente = if (estaSeleccionado) {
-                resources.getColor(android.R.color.white, theme)
+                Color.WHITE
             } else {
                 Color.parseColor("#5F6368")
             }

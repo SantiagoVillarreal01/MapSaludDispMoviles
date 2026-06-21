@@ -54,8 +54,9 @@
 
         <ImageView
             android:id="@+id/btnConfiguracion"
-            android:layout_width="32dp"
-            android:layout_height="32dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:layout_marginTop="50dp"
             android:src="@drawable/configuration"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
@@ -135,6 +136,7 @@
         android:orientation="horizontal"
         android:weightSum="4"
         android:background="@android:color/white"
+        android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
         <LinearLayout
@@ -147,8 +149,8 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/addschedule" app:tint="#00695C" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Nueva\ncita" android:textColor="#00695C" android:textSize="12sp" android:textAlignment="center" android:textStyle="bold"/>
+            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/schedule"/>
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Citas" android:textColor="#00695C" android:textSize="12sp" android:textAlignment="center" android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout
@@ -161,7 +163,7 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/schedule" app:tint="#5F6368" />
+            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/horarios"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Reagendar" android:textColor="#5F6368" android:textSize="12sp" android:textStyle="bold"/>
         </LinearLayout>
 
@@ -175,7 +177,7 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/diagnostic" app:tint="#1976D2" />
+            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/diagnosticos"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Diagnósticos" android:textColor="#1976D2" android:textSize="12sp" android:textStyle="bold"/>
         </LinearLayout>
 
@@ -189,7 +191,7 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="24dp" android:layout_height="24dp" android:src="@drawable/cancel" app:tint="#D32F2F" />
+            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/cancelar"/>
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cancelar" android:textColor="#D32F2F" android:textSize="12sp" android:textStyle="bold"/>
         </LinearLayout>
 

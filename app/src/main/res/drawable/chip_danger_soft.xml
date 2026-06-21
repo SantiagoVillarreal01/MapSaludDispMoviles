@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Fondo tipo "pill" rojo suave para badges de estado negativo
+    (cancelada / inasistencia). Pensado para usarse junto con
+    chip_info_soft.xml y chip_primary_soft.xml desde Kotlin con
+    setBackgroundResource() al cambiar el estado de una cita.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#FFEBEE" />
+    <corners android:radius="20dp" />
+</shape>

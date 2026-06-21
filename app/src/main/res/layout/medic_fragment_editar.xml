@@ -25,7 +25,7 @@
     <com.google.android.material.card.MaterialCardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:cardCornerRadius="12dp"
+        app:cardCornerRadius="16dp"
         app:cardElevation="2dp"
         app:strokeWidth="0dp">
 
@@ -62,13 +62,13 @@
                 android:weightSum="7"
                 android:layout_marginBottom="24dp">
 
-                <TextView android:id="@+id/btnEditDiaL" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Lun" android:background="#E0E0E0" />
-                <TextView android:id="@+id/btnEditDiaM" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Mar" android:background="#E0E0E0" />
-                <TextView android:id="@+id/btnEditDiaMi" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Mié" android:background="#E0E0E0" />
-                <TextView android:id="@+id/btnEditDiaJ" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Jue" android:background="#E0E0E0" />
-                <TextView android:id="@+id/btnEditDiaV" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Vie" android:background="#E0E0E0" />
-                <TextView android:id="@+id/btnEditDiaS" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Sáb" android:background="#E0E0E0" />
-                <TextView android:id="@+id/btnEditDiaD" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Dom" android:background="#E0E0E0" />
+                <TextView android:id="@+id/btnEditDiaL" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Lun" android:background="@drawable/chip_day_unselected" />
+                <TextView android:id="@+id/btnEditDiaM" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Mar" android:background="@drawable/chip_day_unselected" />
+                <TextView android:id="@+id/btnEditDiaMi" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Mié" android:background="@drawable/chip_day_unselected" />
+                <TextView android:id="@+id/btnEditDiaJ" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Jue" android:background="@drawable/chip_day_unselected" />
+                <TextView android:id="@+id/btnEditDiaV" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Vie" android:background="@drawable/chip_day_unselected" />
+                <TextView android:id="@+id/btnEditDiaS" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:layout_marginEnd="4dp" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Sáb" android:background="@drawable/chip_day_unselected" />
+                <TextView android:id="@+id/btnEditDiaD" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:paddingVertical="10dp" android:textSize="12sp" android:text="Dom" android:background="@drawable/chip_day_unselected" />
 
             </LinearLayout>
 
@@ -118,7 +118,8 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:text="Guardar cambios"
-        app:cornerRadius="12dp"
+        android:textAllCaps="false"
+        app:cornerRadius="28dp"
         android:backgroundTint="#00695C"/>
 
 </LinearLayout>

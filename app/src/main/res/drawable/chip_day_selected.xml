@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Pill verde teal sólido para el estado SELECCIONADO de los
+    selectores de día (Lun, Mar, Mié...). El XML por defecto deja los
+    días en estado no seleccionado (chip_day_unselected.xml); usa este
+    drawable desde tu Kotlin con setBackgroundResource() y cambia el
+    color de texto a blanco cuando el usuario seleccione un día,
+    igual que el chip "TUE 17" activo del diseño de reserva de citas.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#00695C" />
+    <corners android:radius="20dp" />
+</shape>

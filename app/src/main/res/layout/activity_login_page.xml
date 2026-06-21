@@ -138,7 +138,8 @@
                         android:text="Patient"
                         android:textAllCaps="false"
                         android:textColor="@color/yellow_cremy"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:cornerRadius="20dp" />
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnDoctor"
@@ -149,7 +150,8 @@
                         android:backgroundTint="@color/surface_container_high"
                         android:textAllCaps="false"
                         android:textColor="@color/information_text_color"
-                        android:textStyle="bold" />
+                        android:textStyle="bold"
+                        app:cornerRadius="20dp" />
                 </LinearLayout>
 
                 <!-- Email -->
@@ -218,7 +220,8 @@
                     android:backgroundTint="@color/primary"
                     android:textColor="@color/white"
                     android:textSize="16sp"
-                    android:textStyle="bold" />
+                    android:textStyle="bold"
+                    app:cornerRadius="25dp" />
 
                 <!-- Divider -->
                 <LinearLayout
@@ -228,49 +231,16 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1"
-                        android:background="@color/outline_variant" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:paddingHorizontal="14dp"
-                        android:text="OR"
-                        android:textColor="@color/outline_color"
-                        android:textSize="11sp"
-                        android:textStyle="bold" />
-
-                    <View
-                        android:layout_width="0dp"
-                        android:layout_height="1dp"
-                        android:layout_weight="1"
-                        android:background="@color/outline_variant" />
                 </LinearLayout>
 
-                <!-- Google Button -->
-                <!-- Create Account -->
-                <com.google.android.material.button.MaterialButton
-                    android:id="@+id/btnGoogle"
-                    android:layout_width="match_parent"
-                    android:layout_height="50dp"
-                    android:layout_marginTop="12dp"
-                    android:backgroundTint="@color/surface_container_high"
-                    android:text="@string/continue_with_google"
-                    android:textColor="@color/small_text_color"
-                    app:icon="@drawable/ic_google"
-                    app:iconSize="24dp"
-                    app:iconGravity="textStart"
-                    app:iconTint="@null" />
+
 
                 <TextView
                     android:id="@+id/txtCreateAccount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="24dp"
+                    android:layout_marginTop="20dp"
                     android:text="New user? Create an account"
                     android:textColor="@color/information_text_color"
                     android:textSize="13sp" />
@@ -280,7 +250,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="32dp"
+                android:layout_marginTop="20dp"
                 android:layout_marginBottom="16dp"
                 android:text="© 2026 MAP SALUD"
                 android:textColor="@color/outline_color"

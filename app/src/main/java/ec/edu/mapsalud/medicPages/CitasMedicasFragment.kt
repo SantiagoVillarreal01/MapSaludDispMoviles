@@ -61,7 +61,9 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
                 val officeIds = officesSnapshot.documents.map { it.id }
 
                 if (officeIds.isEmpty()) {
-                    actualizarUI(emptyList(), emptyList())
+                    withContext(Dispatchers.Main) {
+                        actualizarUI(emptyList(), emptyList())
+                    }
                     return@launch
                 }
 

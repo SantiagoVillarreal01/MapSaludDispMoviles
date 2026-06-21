@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+    Fondo tipo "pill" gris neutro para badges/etiquetas informativas
+    (ej: txtTipoCentro en cuadro_centro_medico.xml).
+    Reemplaza un android:background="#E0E0E0" plano por uno con
+    esquinas totalmente redondeadas, igual al estilo de chips del
+    diseño Stitch.
+-->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="#E0E0E0" />
+    <corners android:radius="20dp" />
+</shape>

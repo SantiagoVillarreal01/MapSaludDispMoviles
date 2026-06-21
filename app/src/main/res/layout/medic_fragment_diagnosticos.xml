@@ -39,7 +39,8 @@
             android:layout_width="wrap_content"
             android:layout_height="56dp"
             android:text="Buscar"
-            app:cornerRadius="12dp"
+            android:textAllCaps="false"
+            app:cornerRadius="16dp"
             android:backgroundTint="#00695C"/>
     </LinearLayout>
 

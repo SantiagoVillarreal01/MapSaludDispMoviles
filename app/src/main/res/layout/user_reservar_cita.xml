@@ -54,7 +54,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="16dp"
                 app:cardElevation="0dp"
                 app:strokeWidth="1dp"
                 app:strokeColor="#EAEAEA"
@@ -154,7 +154,7 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                app:cardCornerRadius="12dp"
+                app:cardCornerRadius="16dp"
                 app:strokeWidth="1dp"
                 app:strokeColor="#EAEAEA"
                 android:layout_marginBottom="24dp">
@@ -206,7 +206,7 @@
             android:text="Confirmar cita"
             android:textAllCaps="false"
             android:textSize="16sp"
-            app:cornerRadius="12dp"
+            app:cornerRadius="28dp"
             android:backgroundTint="#00695C"/>
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

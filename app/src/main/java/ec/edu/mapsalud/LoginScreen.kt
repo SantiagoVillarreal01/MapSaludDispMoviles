@@ -44,24 +44,6 @@ class LoginScreen : AppCompatActivity() {
     private lateinit var binding: ActivityLoginPageBinding
     private lateinit var googleSignInClient: GoogleSignInClient
 
-    private val googleSignInLauncher = registerForActivityResult(
-        ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == RESULT_OK) {
-            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
-            try {
-                val account = task.getResult(ApiException::class.java)
-                account?.idToken?.let { idToken ->
-                    firebaseAuthWithGoogle(idToken)
-                }
-            } catch (e: ApiException) {
-                showMessage("Error de conexión con Google: ${e.localizedMessage}")
-            }
-        } else {
-            binding.btnGoogle.isEnabled = true
-            showMessage("Inicio de sesión cancelado.")
-        }
-    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -89,10 +71,6 @@ class LoginScreen : AppCompatActivity() {
     private fun initListeners() {
         binding.btnSignin.setOnClickListener {
             loginUser()
-        }
-
-        binding.btnGoogle.setOnClickListener {
-            signInWithGoogle()
         }
 
         binding.btnDoctor.setOnClickListener {
@@ -200,14 +178,6 @@ class LoginScreen : AppCompatActivity() {
         }
     }
 
-    private fun signInWithGoogle() {
-        binding.btnGoogle.isEnabled = false
-        googleSignInClient.signOut().addOnCompleteListener {
-            val signInIntent = googleSignInClient.signInIntent
-            googleSignInLauncher.launch(signInIntent)
-        }
-    }
-
     private fun firebaseAuthWithGoogle(idToken: String) {
         binding.btnSignin.isEnabled = false
 
@@ -229,7 +199,6 @@ class LoginScreen : AppCompatActivity() {
             }
             .addOnFailureListener { exception ->
                 binding.btnSignin.isEnabled = true
-                binding.btnGoogle.isEnabled = true
                 showMessage("Autenticación fallida: ${exception.localizedMessage}")
             }
     }
@@ -259,7 +228,6 @@ class LoginScreen : AppCompatActivity() {
             .setNegativeButton("Cancelar") { d, _ ->
                 FirebaseManager.auth.signOut()
                 binding.btnSignin.isEnabled = true
-                binding.btnGoogle.isEnabled = true
                 d.dismiss()
             }
             .create()
@@ -308,12 +276,10 @@ class LoginScreen : AppCompatActivity() {
                 .document(firebaseUser.uid)
                 .set(entidadAGuardar)
                 .addOnSuccessListener {
-                    binding.btnGoogle.isEnabled = true
                     navegarAlHome(isPatient = !isDoctor)
                 }
                 .addOnFailureListener {
                     binding.btnSignin.isEnabled = true
-                    binding.btnGoogle.isEnabled = true
                     FirebaseManager.auth.signOut()
                     showMessage("Error al crear perfil: ${it.localizedMessage}")
                 }
@@ -322,8 +288,6 @@ class LoginScreen : AppCompatActivity() {
 
     private fun navegarAlHome(isPatient: Boolean) {
         showMessage("Bienvenido")
-        binding.btnGoogle.isEnabled = true
-
         val intent = if (isPatient) {
             Intent(this, PrincipalUser::class.java)
         } else {
