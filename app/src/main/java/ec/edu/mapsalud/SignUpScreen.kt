@@ -8,7 +8,6 @@ import ec.edu.mapsalud.datos.FirebaseManager
 import com.google.android.material.snackbar.Snackbar
 import ec.edu.mapsalud.databinding.ActivitySignUpPageBinding
 import android.view.View
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import ec.edu.mapsalud.dto.Medico
 import ec.edu.mapsalud.dto.Paciente
@@ -20,7 +19,8 @@ import ec.edu.mapsalud.enum.Genero
 
 class SignUpScreen : AppCompatActivity() {
 
-    lateinit var binding: ActivitySignUpPageBinding
+    private lateinit var binding: ActivitySignUpPageBinding
+    private var selectedType: Type = Type.PATIENT
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -29,27 +29,10 @@ class SignUpScreen : AppCompatActivity() {
 
         configurarSpinners()
         initListeners()
+        updateRoleSelection()
     }
 
     private fun configurarSpinners() {
-        val tiposUsuario = arrayOf("Soy Paciente", "Soy Médico")
-        val adapterTipo = ArrayAdapter(this, android.R.layout.simple_spinner_item, tiposUsuario)
-        adapterTipo.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerTipoUsuario.adapter = adapterTipo
-
-        binding.spinnerTipoUsuario.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                if (position == 0) { // Paciente
-                    binding.containerPaciente.visibility = View.VISIBLE
-                    binding.containerMedico.visibility = View.GONE
-                } else { // Médico
-                    binding.containerPaciente.visibility = View.GONE
-                    binding.containerMedico.visibility = View.VISIBLE
-                }
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
         val generosVisibles = Genero.values().map { it.valor }.toTypedArray()
         val adapterGenero = ArrayAdapter(this, android.R.layout.simple_spinner_item, generosVisibles)
         adapterGenero.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
@@ -68,6 +51,16 @@ class SignUpScreen : AppCompatActivity() {
     }
 
     private fun initListeners() {
+        binding.btnPatientSignUp.setOnClickListener {
+            selectedType = Type.PATIENT
+            updateRoleSelection()
+        }
+
+        binding.btnDoctorSignUp.setOnClickListener {
+            selectedType = Type.DOCTOR
+            updateRoleSelection()
+        }
+
         binding.btnSignUp.setOnClickListener {
             if (!validateFields()) return@setOnClickListener
             registerUser()
@@ -77,6 +70,26 @@ class SignUpScreen : AppCompatActivity() {
             val intent = Intent(this, LoginScreen::class.java)
             startActivity(intent)
             finish()
+        }
+    }
+
+    private fun updateRoleSelection() {
+        if (selectedType == Type.PATIENT) {
+            binding.btnPatientSignUp.setBackgroundTintList(getColorStateList(R.color.primary))
+            binding.btnDoctorSignUp.setBackgroundTintList(getColorStateList(R.color.surface_container_high))
+            binding.btnPatientSignUp.setTextColor(getColor(R.color.white))
+            binding.btnDoctorSignUp.setTextColor(getColor(R.color.information_text_color))
+            
+            binding.containerPaciente.visibility = View.VISIBLE
+            binding.containerMedico.visibility = View.GONE
+        } else {
+            binding.btnDoctorSignUp.setBackgroundTintList(getColorStateList(R.color.primary))
+            binding.btnPatientSignUp.setBackgroundTintList(getColorStateList(R.color.surface_container_high))
+            binding.btnDoctorSignUp.setTextColor(getColor(R.color.white))
+            binding.btnPatientSignUp.setTextColor(getColor(R.color.information_text_color))
+            
+            binding.containerPaciente.visibility = View.GONE
+            binding.containerMedico.visibility = View.VISIBLE
         }
     }
 
@@ -97,10 +110,8 @@ class SignUpScreen : AppCompatActivity() {
                     return@addOnSuccessListener
                 }
 
-                // Determinar el rol
-                val isDoctor = binding.spinnerTipoUsuario.selectedItemPosition == 1
+                val isDoctor = selectedType == Type.DOCTOR
 
-                // Extraemos el valor del enum según la posición seleccionada
                 val generoSeleccionado = Genero.values()[binding.spinnerGenero.selectedItemPosition].valor
 
                 val infoComun = UsuarioInfo(
@@ -110,8 +121,8 @@ class SignUpScreen : AppCompatActivity() {
                     correo = email,
                     telefono = binding.telefono.text.toString().trim(),
                     cedula = binding.idNumber.text.toString().trim(),
-                    genero = generoSeleccionado, // Mapeado correctamente
-                    tipoUsuario = if (isDoctor) Type.DOCTOR else Type.PATIENT
+                    genero = generoSeleccionado,
+                    tipoUsuario = selectedType
                 )
 
                 val entidadAGuardar: Any = if (isDoctor) {
@@ -179,7 +190,7 @@ class SignUpScreen : AppCompatActivity() {
             return false
         }
 
-        val isDoctor = binding.spinnerTipoUsuario.selectedItemPosition == 1
+        val isDoctor = selectedType == Type.DOCTOR
         if (isDoctor) {
             if (binding.anosExperiencia.text.toString().isEmpty()) {
                 showMessage("Ingrese los años de experiencia")

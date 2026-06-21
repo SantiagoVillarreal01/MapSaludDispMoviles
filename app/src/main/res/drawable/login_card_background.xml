@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Antes: solid @color/surface_container (oscuro #1D2027). Ahora -->
+<!-- surface_container es blanco vía colors.xml -> tarjeta blanca -->
+<!-- flotante, sin tocar este archivo más que el comentario. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 
     <solid android:color="@color/surface_container"/>

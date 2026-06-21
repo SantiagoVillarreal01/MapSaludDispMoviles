@@ -1,14 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!--
+    Ajuste de diseño respecto al original:
+    - Antes: el estado seleccionado rellenaba todo el segmento del
+      bottom nav con #00695C sólido de borde a borde (look duro).
+    - Ahora: highlight suave tipo "pill" (wash de teal al 10% con
+      esquinas redondeadas) detrás de todo el segmento, más cercano al
+      acento circular sutil que usa el mockup. No se tocó la
+      estructura del layout (sigue siendo el fondo de todo el
+      contenedor ícono+texto, igual que antes), solo la forma/color
+      del propio drawable.
+-->
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
     <item android:state_selected="true">
         <shape android:shape="rectangle">
-            <solid android:color="#00695C" />
+            <solid android:color="#1A00695C" />
+            <corners android:radius="16dp" />
         </shape>
     </item>
 
     <item android:state_pressed="true">
         <shape android:shape="rectangle">
             <solid android:color="#2600695C" />
+            <corners android:radius="16dp" />
         </shape>
     </item>
 

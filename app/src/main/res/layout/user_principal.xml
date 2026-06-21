@@ -149,7 +149,7 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/schedule"/>
+            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/schedule" app:tint="#00695C" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Citas" android:textColor="#00695C" android:textSize="12sp" android:textAlignment="center" android:textStyle="bold"/>
         </LinearLayout>
 
@@ -163,7 +163,7 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/horarios"/>
+            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/horarios" app:tint="#5F6368" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Reagendar" android:textColor="#5F6368" android:textSize="12sp" android:textStyle="bold"/>
         </LinearLayout>
 
@@ -177,7 +177,7 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/diagnosticos"/>
+            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/diagnosticos" app:tint="#1976D2" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Diagnósticos" android:textColor="#1976D2" android:textSize="12sp" android:textStyle="bold"/>
         </LinearLayout>
 
@@ -191,7 +191,7 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/cancelar"/>
+            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/cancelar" app:tint="#D32F2F" />
             <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cancelar" android:textColor="#D32F2F" android:textSize="12sp" android:textStyle="bold"/>
         </LinearLayout>
 

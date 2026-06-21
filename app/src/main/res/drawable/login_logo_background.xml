@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Ya era blanco sólido, sirve perfecto tal cual para sostener el -->
+<!-- logo @drawable/logo a color completo. Sin cambios. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 
     <solid android:color="#FFFFFF"/>

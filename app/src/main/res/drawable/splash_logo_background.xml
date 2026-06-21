@@ -1,5 +1,9 @@
 <!-- res/drawable/logo_background.xml -->
+<!-- Antes: solid #D8E2FF (azul muy claro). Ahora: teal sólido de marca, -->
+<!-- igual al patrón de "caja de ícono sólida + ícono blanco" que ya -->
+<!-- usa el resto de la app (ver cuadro_centro_medico.xml). El tint del -->
+<!-- ImageView interior (logo_color) ya se actualizó a blanco en colors.xml. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#D8E2FF"/>
-    <corners android:radius="16dp"/>
+    <solid android:color="#00695C"/>
+    <corners android:radius="18dp"/>
 </shape>

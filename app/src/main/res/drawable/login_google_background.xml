@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Antes oscuro. surface_container_high y outline_variant ahora son -->
+<!-- claros vía colors.xml, este botón pasa a gris muy claro con borde -->
+<!-- gris claro automáticamente. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 
     <solid android:color="@color/surface_container_high"/>

@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- surface_container_high ahora es gris muy claro (#F1F4F3) vía -->
+<!-- colors.xml -> input fill claro, legible con texto oscuro. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 
     <solid android:color="@color/surface_container_high"/>

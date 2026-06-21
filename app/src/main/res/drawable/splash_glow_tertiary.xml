@@ -1,5 +1,7 @@
 <!-- res/drawable/glow_tertiary.xml -->
+<!-- Acento cálido suave (peach) que contrasta con el teal, funciona -->
+<!-- igual de bien como mancha decorativa difusa sobre fondo claro. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#22FFB786"/>
+    <solid android:color="#22FFCC80"/>
     <corners android:radius="999dp"/>
 </shape>

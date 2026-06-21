@@ -1,4 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- primary_container ahora es teal (#00695C) vía colors.xml -> pill -->
+<!-- seleccionado teal sólido, igual al resto de acentos de la app. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
 
     <solid android:color="@color/primary_container"/>

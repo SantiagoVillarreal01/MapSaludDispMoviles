@@ -145,7 +145,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="24/7 Soporte"
-                    android:textColor="#00285D"
+                    android:textColor="#FFFFFF"
                     android:textStyle="bold"
                     android:textSize="14sp"
                     android:layout_marginStart="8dp"/>
@@ -182,15 +182,15 @@
             android:layout_marginTop="36dp"
             style="?android:attr/progressBarStyleHorizontal"
             android:indeterminate="true"
-            android:indeterminateTint="#ADC6FF"
-            android:progressBackgroundTint="#32353C"/>
+            android:indeterminateTint="#00695C"
+            android:progressBackgroundTint="#E0E0E0"/>
 
         <!-- Loading Text -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SINCRONIZANDO UBICACIÓN..."
-            android:textColor="#8C909F"
+            android:textColor="#757575"
             android:textSize="12sp"
             android:letterSpacing="0.15"
             android:layout_marginTop="12dp"/>

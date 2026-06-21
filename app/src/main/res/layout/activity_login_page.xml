@@ -76,7 +76,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/map_salud"
-                    android:textColor="@color/white"
+                    android:textColor="@color/logo_text_color"
                     android:textSize="30sp"
                     android:textStyle="bold" />
 
@@ -107,7 +107,7 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:text="Welcome back"
-                    android:textColor="@color/white"
+                    android:textColor="@color/small_text_color"
                     android:textSize="26sp"
                     android:textStyle="bold" />
 
@@ -137,7 +137,7 @@
                         android:backgroundTint="@color/primary"
                         android:text="Patient"
                         android:textAllCaps="false"
-                        android:textColor="@color/yellow_cremy"
+                        android:textColor="@color/white"
                         android:textStyle="bold"
                         app:cornerRadius="20dp" />
 
@@ -231,16 +231,15 @@
                     android:gravity="center_vertical"
                     android:orientation="horizontal">
 
+
                 </LinearLayout>
-
-
 
                 <TextView
                     android:id="@+id/txtCreateAccount"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="20dp"
+                    android:layout_marginTop="15dp"
                     android:text="New user? Create an account"
                     android:textColor="@color/information_text_color"
                     android:textSize="13sp" />
@@ -250,7 +249,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="20dp"
+                android:layout_marginTop="32dp"
                 android:layout_marginBottom="16dp"
                 android:text="© 2026 MAP SALUD"
                 android:textColor="@color/outline_color"

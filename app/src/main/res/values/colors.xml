@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+    <!-- Sin uso confirmado en los layouts revisados: se dejan igual para no -->
+    <!-- romper referencias en otras partes del proyecto que no he visto.   -->
     <color name="purple_200">#FFBB86FC</color>
     <color name="purple_500">#FF6200EE</color>
     <color name="purple_700">#FF3700B3</color>
@@ -7,34 +9,45 @@
     <color name="teal_700">#FF018786</color>
     <color name="black">#FF000000</color>
     <color name="white">#FFFFFFFF</color>
-    <color name="primary">#3b82f6</color>
-    <color name="background_color">#10131A</color>
-    <color name="logo_color">#00285D</color>
-    <color name="logo_text_color">#ADC6FF</color>
-    <color name="small_text_color">#E1E2EC</color>
-    <color name="small_icon_color">#ADC6FF</color>
-    <color name="information_text_color">#C2C6D6</color>
-    <color name="surface_container">#1D2027</color>
-    <color name="surface_container_high">#272A31</color>
-    <color name="surface_container_low">#191B23</color>
-    <color name="surface_variant">#32353C</color>
-    <color name="surface_bright">#363941</color>
-    <color name="outline_color">#8C909F</color>
-    <color name="outline_variant">#424754</color>
-    <color name="primary_container">#4D8EFF</color>
-    <color name="primary_fixed">#D8E2FF</color>
-    <color name="on_primary_container">#00285D</color>
-    <color name="on_primary">#002E6A</color>
-    <color name="card_shadow">#4D000000</color>
+    <color name="black_soft">#2E3038</color>
+    <color name="mapsalud_on_surface_variant">#8C909F</color>
+
+    <!-- ===== Paleta clara / teal (Stitch) ===== -->
+    <!-- Antes: tema oscuro azul (#10131A / #3b82f6). Ahora: igual al resto -->
+    <!-- de la app (teal #00695C sobre fondo claro #F8F9FA). -->
+    <color name="primary">#00695C</color>
+    <color name="background_color">#F8F9FA</color>
+    <color name="logo_color">#FFFFFFFF</color>
+    <color name="logo_text_color">#00695C</color>
+    <color name="small_text_color">#212121</color>
+    <color name="small_icon_color">#00695C</color>
+    <color name="information_text_color">#757575</color>
+
+    <color name="surface_container">#FFFFFF</color>
+    <color name="surface_container_high">#F1F4F3</color>
+    <color name="surface_container_low">#F4F6F5</color>
+    <color name="surface_variant">#F1F4F3</color>
+    <color name="surface_bright">#FFFFFF</color>
+
+    <color name="outline_color">#BDBDBD</color>
+    <color name="outline_variant">#E0E0E0</color>
+
+    <color name="primary_container">#00695C</color>
+    <color name="primary_fixed">#00695C</color>
+    <color name="on_primary_container">#FFFFFF</color>
+    <color name="on_primary">#FFFFFF</color>
+
+    <color name="card_shadow">#33000000</color>
+
     <color name="google_blue">#4285F4</color>
     <color name="google_green">#34A853</color>
     <color name="google_yellow">#FBBC05</color>
     <color name="google_red">#EA4335</color>
+
     <color name="white_soft">#E1E2EC</color>
-    <color name="black_soft">#2E3038</color>
     <color name="yellow_cremy">#FFF3A4</color>
-    <color name="mapsalud_on_surface_variant">#8C909F</color>
-    <color name="mapsalud_on_primary">#001A42</color>
-    <color name="mapsalud_glass_card">#B31D2027</color>
-    <color name="mapsalud_error">#FFB4AB</color>
+
+    <color name="mapsalud_on_primary">#FFFFFF</color>
+    <color name="mapsalud_glass_card">#F7FFFFFF</color>
+    <color name="mapsalud_error">#C62828</color>
 </resources>

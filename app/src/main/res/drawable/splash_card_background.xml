@@ -1,8 +1,10 @@
 <!-- res/drawable/card_background.xml -->
+<!-- Antes: solid #272A31 (gris oscuro) + stroke #424754. Ahora: tarjeta -->
+<!-- blanca con borde gris claro, igual al resto de cards de la app. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#272A31"/>
+    <solid android:color="#FFFFFF"/>
     <corners android:radius="32dp"/>
     <stroke
         android:width="1dp"
-        android:color="#424754"/>
+        android:color="#EAEAEA"/>
 </shape>

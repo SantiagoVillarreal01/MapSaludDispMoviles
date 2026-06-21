@@ -1,5 +1,7 @@
 <!-- res/drawable/support_chip.xml -->
+<!-- Antes: solid #CC4D8EFF (azul, 80% opacidad). Ahora: teal sólido de -->
+<!-- marca, mismo patrón que el resto de badges teal de la app. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#CC4D8EFF"/>
-    <corners android:radius="14dp"/>
+    <solid android:color="#E600695C"/>
+    <corners android:radius="18dp"/>
 </shape>

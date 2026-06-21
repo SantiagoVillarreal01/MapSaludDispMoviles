@@ -1,7 +1,11 @@
 <!-- res/drawable/gradient_overlay.xml -->
+<!-- Antes: gradiente hacia gris oscuro #CC272A31 (oscurecía la foto). -->
+<!-- Ahora: wash teal suave de marca en vez de oscurecer, ya que los -->
+<!-- chips superpuestos tienen su propio fondo opaco y no dependen del -->
+<!-- degradado para legibilidad. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
     <gradient
         android:startColor="#00000000"
-        android:endColor="#CC272A31"
+        android:endColor="#4D00695C"
         android:angle="90"/>
 </shape>

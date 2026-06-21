@@ -1,5 +1,7 @@
 <!-- res/drawable/glow_primary.xml -->
+<!-- Antes: solid #224D8EFF (glow azul, 13% opacidad). Ahora: glow teal -->
+<!-- suave, coherente con el color de marca del resto de la app. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-    <solid android:color="#224D8EFF"/>
+    <solid android:color="#2000695C"/>
     <corners android:radius="999dp"/>
 </shape>
