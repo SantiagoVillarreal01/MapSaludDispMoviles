@@ -137,15 +137,30 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
         return coroutineScope {
             citasRemote.map { appointment ->
                 async {
-                    val docPaciente = db.collection("usuarios").document(appointment.idUser).get().await()
-                    val paciente = docPaciente.toObject(Paciente::class.java) ?: Paciente()
+                    if (appointment.patientName.isNotEmpty()) {
+                        // Uso de datos denormalizados
+                        val dummyPaciente = Paciente(info = ec.edu.mapsalud.dto.UsuarioInfo(
+                            nombres = appointment.patientName,
+                            apellidos = ""
+                        ))
+                        AppointmentPaciente(
+                            appointment = appointment,
+                            paciente = dummyPaciente,
+                            horaFormateada = appointment.time,
+                            amPm = ""
+                        )
+                    } else {
+                        // Fallback para citas antiguas
+                        val docPaciente = db.collection("usuarios").document(appointment.idUser).get().await()
+                        val paciente = docPaciente.toObject(Paciente::class.java) ?: Paciente()
 
-                    AppointmentPaciente(
-                        appointment = appointment,
-                        paciente = paciente,
-                        horaFormateada = appointment.time,
-                        amPm = ""
-                    )
+                        AppointmentPaciente(
+                            appointment = appointment,
+                            paciente = paciente,
+                            horaFormateada = appointment.time,
+                            amPm = ""
+                        )
+                    }
                 }
             }.awaitAll()
         }

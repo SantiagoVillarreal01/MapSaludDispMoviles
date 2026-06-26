@@ -7,7 +7,6 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.widget.addTextChangedListener
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -24,8 +23,10 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import ec.edu.mapsalud.enum.CenterType
 import ec.edu.mapsalud.enum.Specialty
+import java.util.Locale
 
 
 class NuevaCita : AppCompatActivity() {
@@ -113,27 +114,53 @@ class NuevaCita : AppCompatActivity() {
         binding.autoCompleteEspecialidad.setAdapter(adapterEspecialidades)
         binding.autoCompleteEspecialidad.setText("Todas", false)
 
-        binding.autoCompleteTipoCentro.addTextChangedListener { cargarCentrosFiltrados() }
-        binding.autoCompleteEspecialidad.addTextChangedListener { cargarCentrosFiltrados() }
+        // Cambiamos addTextChangedListener por setOnItemClickListener para mayor estabilidad
+        binding.autoCompleteTipoCentro.setOnItemClickListener { _, _, _, _ -> 
+            cargarCentrosFiltrados() 
+        }
+        binding.autoCompleteEspecialidad.setOnItemClickListener { _, _, _, _ -> 
+            cargarCentrosFiltrados() 
+        }
     }
 
     private fun configurarRecyclerView() {
         adapter = CentroMedicoAdapter(emptyList()) { seleccion ->
-            val intent = Intent(this, Especialistas::class.java)
-            intent.putExtra("ID_CENTRO", seleccion.center.id)
+            if (seleccion.distanceMeters > 1000) {
+                val distanciaTexto = if (seleccion.distanceMeters >= 1000) {
+                    String.format(Locale.getDefault(), "%.1f km", seleccion.distanceMeters / 1000)
+                } else {
+                    "${seleccion.distanceMeters.roundToInt()} m"
+                }
 
-            val espSeleccionada = binding.autoCompleteEspecialidad.text.toString()
-            val especialidadAEnviar = if (espSeleccionada == "Todas") {
-                Specialty.GENERAL.name
+                MaterialAlertDialogBuilder(this)
+                    .setTitle("Centro Alejado")
+                    .setMessage("Este centro se encuentra a $distanciaTexto de tu ubicación. ¿Deseas continuar con la reserva?")
+                    .setPositiveButton("Sí, continuar") { _, _ ->
+                        navegarAEspecialistas(seleccion)
+                    }
+                    .setNegativeButton("Cancelar", null)
+                    .show()
             } else {
-                Specialty.values().find { it.nombreMostrar == espSeleccionada }?.name ?: Specialty.GENERAL.name
+                navegarAEspecialistas(seleccion)
             }
-
-            intent.putExtra("ESPECIALIDAD_FILTRO", especialidadAEnviar)
-            startActivity(intent)
         }
         binding.recyclerViewCentros.layoutManager = LinearLayoutManager(this)
         binding.recyclerViewCentros.adapter = adapter
+    }
+
+    private fun navegarAEspecialistas(seleccion: CenterWithDistance) {
+        val intent = Intent(this, Especialistas::class.java)
+        intent.putExtra("ID_CENTRO", seleccion.center.id)
+
+        val espSeleccionada = binding.autoCompleteEspecialidad.text.toString()
+        val especialidadAEnviar = if (espSeleccionada == "Todas") {
+            Specialty.GENERAL.name
+        } else {
+            Specialty.values().find { it.nombreMostrar == espSeleccionada }?.name ?: Specialty.GENERAL.name
+        }
+
+        intent.putExtra("ESPECIALIDAD_FILTRO", especialidadAEnviar)
+        startActivity(intent)
     }
 
     private fun cargarCentrosFiltrados() {
@@ -153,11 +180,13 @@ class NuevaCita : AppCompatActivity() {
         }
 
         lifecycleScope.launch {
+            // Aumentamos el radio a 500km para mostrar prácticamente todos los centros
             val result = repository.getCentersFiltered(
                 userLat,
                 userLon,
                 tipoFiltroDb,
-                especialidadFiltroDb
+                especialidadFiltroDb,
+                radiusInMeters = 500000.0 
             )
 
             result.onSuccess { list ->
@@ -205,8 +234,12 @@ class NuevaCita : AppCompatActivity() {
                 }
                 itemBinding.txtTipoCentro.text = tipoAmigable
 
-                val metrosRedondeados = item.distanceMeters.roundToInt()
-                itemBinding.txtDistancia.text = "A ${metrosRedondeados}m de distancia"
+                val distanciaTexto = if (item.distanceMeters >= 1000) {
+                    String.format(Locale.getDefault(), "A %.1f km de distancia", item.distanceMeters / 1000)
+                } else {
+                    "A ${item.distanceMeters.roundToInt()} m de distancia"
+                }
+                itemBinding.txtDistancia.text = distanciaTexto
 
                 itemBinding.root.setOnClickListener { onClick(item) }
             }

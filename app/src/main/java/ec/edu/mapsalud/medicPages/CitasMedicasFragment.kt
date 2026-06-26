@@ -79,13 +79,27 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
 
                 for (cita in todasLasCitas) {
                     if (cita.date == fechaHoy || cita.date == fechaManana) {
-                        val pacienteDoc = db.collection("usuarios").document(cita.idUser).get().await()
-                        val paciente = pacienteDoc.toObject(Paciente::class.java)
-
-                        if (paciente != null) {
+                        // 1. Intentar usar datos denormalizados
+                        val citaUI = if (cita.patientName.isNotEmpty()) {
                             val (horaFormat, amPm) = formatearHora(cita.time)
-                            val citaUI = AppointmentPaciente(cita, paciente, horaFormat, amPm)
+                            // Creamos un Paciente ficticio para el DTO AppointmentPaciente si es necesario, 
+                            // o mejor adaptamos AppointmentPaciente
+                            val dummyPaciente = Paciente(info = ec.edu.mapsalud.dto.UsuarioInfo(
+                                nombres = cita.patientName,
+                                apellidos = ""
+                            ))
+                            AppointmentPaciente(cita, dummyPaciente, horaFormat, amPm)
+                        } else {
+                            // 2. Fallback: Consultar base de datos (para citas antiguas)
+                            val pacienteDoc = db.collection("usuarios").document(cita.idUser).get().await()
+                            val paciente = pacienteDoc.toObject(Paciente::class.java)
+                            if (paciente != null) {
+                                val (horaFormat, amPm) = formatearHora(cita.time)
+                                AppointmentPaciente(cita, paciente, horaFormat, amPm)
+                            } else null
+                        }
 
+                        if (citaUI != null) {
                             if (cita.date == fechaHoy) citasHoy.add(citaUI)
                             else citasManana.add(citaUI)
                         }

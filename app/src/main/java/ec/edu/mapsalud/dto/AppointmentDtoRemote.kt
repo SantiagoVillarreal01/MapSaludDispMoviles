@@ -7,6 +7,10 @@ data class AppointmentDtoRemote(
     val idDoctor: String = "",
     val idOffice: String = "",
     val idCenter: String = "",
+    val patientName: String = "", // Denormalización
+    val patientPhone: String = "", // Denormalización
+    val doctorName: String = "", // Denormalización
+    val centerName: String = "", // Denormalización
     val reason: String = "",
     val description: String = "",
     val date: String = "", //dd/MM/yyyy

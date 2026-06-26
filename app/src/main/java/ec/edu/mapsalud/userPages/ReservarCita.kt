@@ -17,9 +17,12 @@ import java.util.Calendar
 import java.util.Locale
 import ec.edu.mapsalud.dto.AppointmentDtoRemote
 import ec.edu.mapsalud.dto.OfficeDtoRemote
+import ec.edu.mapsalud.dto.Paciente
 import ec.edu.mapsalud.remote.impl.AppointmentRemoteImpl
 import ec.edu.mapsalud.remote.inter.AppointmentRemote
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 
 class ReservarCita : AppCompatActivity() {
     private lateinit var binding: UserReservarCitaBinding
@@ -181,11 +184,38 @@ class ReservarCita : AppCompatActivity() {
                     return@onSuccess
                 }
 
+                // 1. Obtener datos para denormalización
+                val appointmentData = withContext(Dispatchers.IO) {
+                    runCatching {
+                        coroutineScope {
+                            val pacienteTask = async { repository.getPacienteById(uidPaciente).getOrNull() }
+                            val doctorTask = async { repository.getDoctorById(idDoctor).getOrNull() }
+                            val centerTask = async { 
+                                currentOffice?.idCenter?.let { repository.getCenterById(it).getOrNull() }
+                            }
+                            
+                            val p = pacienteTask.await()
+                            val d = doctorTask.await()
+                            val c = centerTask.await()
+                            
+                            Triple(p, d, c)
+                        }
+                    }.getOrNull()
+                }
+
+                val p = appointmentData?.first
+                val d = appointmentData?.second
+                val c = appointmentData?.third
+
                 val nuevaCita = AppointmentDtoRemote(
                     idUser = uidPaciente,
                     idDoctor = idDoctor,
                     idOffice = idOffice,
                     idCenter = currentOffice?.idCenter ?: "",
+                    patientName = if (p != null) "${p.info.nombres} ${p.info.apellidos}".trim() else "",
+                    patientPhone = p?.info?.telefono ?: "",
+                    doctorName = if (d != null) "Dr. ${d.info.nombres} ${d.info.apellidos}".trim() else binding.txtNombreDoctor.text.toString(),
+                    centerName = c?.name ?: "",
                     reason = reason,
                     description = description,
                     date = selectedDate,

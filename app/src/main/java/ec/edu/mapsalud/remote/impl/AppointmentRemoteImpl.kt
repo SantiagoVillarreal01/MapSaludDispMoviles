@@ -3,8 +3,10 @@ package ec.edu.mapsalud.remote.impl
 import com.google.firebase.firestore.FirebaseFirestore
 import ec.edu.mapsalud.dto.AppointmentDetail
 import ec.edu.mapsalud.dto.AppointmentDtoRemote
+import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
 import ec.edu.mapsalud.dto.Medico
 import ec.edu.mapsalud.dto.OfficeDtoRemote
+import ec.edu.mapsalud.dto.Paciente
 import ec.edu.mapsalud.remote.inter.AppointmentRemote
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -42,6 +44,32 @@ class AppointmentRemoteImpl : AppointmentRemote {
             val appointmentToSave = appointment.copy(id = docRef.id)
             docRef.set(appointmentToSave).await()
         }
+
+    override suspend fun getPacienteById(idUser: String): Result<Paciente?> = runCatching {
+        val snapshot = db.collection("usuarios").document(idUser).get().await()
+        if (snapshot.exists()) {
+            snapshot.toObject(Paciente::class.java)?.copy(
+                info = snapshot.toObject(Paciente::class.java)!!.info.copy(id = snapshot.id)
+            )
+        } else null
+    }
+
+    override suspend fun getCenterById(idCenter: String): Result<MedicalCenterDtoRemote?> = runCatching {
+        val snapshot = db.collection("centros_medicos").document(idCenter).get().await()
+        if (snapshot.exists()) {
+            snapshot.toObject(MedicalCenterDtoRemote::class.java)?.copy(id = snapshot.id)
+        } else null
+    }
+
+    override suspend fun getDoctorById(idDoctor: String): Result<Medico?> = runCatching {
+        val snapshot = db.collection("usuarios").document(idDoctor).get().await()
+        if (snapshot.exists()) {
+            val medico = snapshot.toObject(Medico::class.java)
+            medico?.copy(
+                info = medico.info.copy(id = snapshot.id)
+            )
+        } else null
+    }
 
     suspend fun getPendingAppointmentsWithDetails(userId: String): Result<List<AppointmentDetail>> {
         return fetchAppointmentsWithDetails(userId, "Pendiente")
