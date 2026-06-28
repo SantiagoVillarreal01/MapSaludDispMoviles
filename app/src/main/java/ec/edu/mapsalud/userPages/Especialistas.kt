@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import ec.edu.mapsalud.remote.impl.OfficeRemoteImpl
 import ec.edu.mapsalud.remote.inter.OfficeRemote
+import ec.edu.mapsalud.utils.ThemeUtils
 
 class Especialistas : AppCompatActivity() {
 
@@ -28,6 +29,7 @@ class Especialistas : AppCompatActivity() {
     private var especialidadSeleccionada: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = UserEspecialistasBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -36,6 +38,10 @@ class Especialistas : AppCompatActivity() {
         especialidadSeleccionada = intent.getStringExtra("ESPECIALIDAD_FILTRO") ?: "General"
 
         binding.txtTituloEspecialistas.text = "Especialistas en\n$especialidadSeleccionada"
+
+        binding.btnRegresar.setOnClickListener {
+            finish()
+        }
 
         configurarRecyclerView()
         cargarConsultoriosYDoctores()

@@ -5,7 +5,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_color"
+    android:background="?android:attr/windowBackground"
     tools:context=".SplashScreen">
 
     <!-- Background Blur Circles -->
@@ -53,24 +53,23 @@
             android:layout_marginTop="32dp">
 
             <FrameLayout
-                android:layout_width="56dp"
-                android:layout_height="56dp"
-                android:background="@drawable/splash_logo_background"
+                android:layout_width="80dp"
+                android:layout_height="80dp"
+                android:background="@drawable/login_logo_background"
                 android:elevation="8dp">
 
                 <ImageView
-                    android:layout_width="32dp"
-                    android:layout_height="32dp"
+                    android:layout_width="56dp"
+                    android:layout_height="56dp"
                     android:layout_gravity="center"
-                    android:src="@android:drawable/ic_dialog_map"
-                    app:tint="@color/logo_color"/>
+                    android:src="@drawable/logo" />
             </FrameLayout>
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="@string/map_salud"
-                android:textColor="@color/logo_text_color"
+                android:textColor="?attr/colorPrimary"
                 android:textStyle="bold"
                 android:textSize="28sp"
                 android:layout_marginStart="12dp"
@@ -91,7 +90,6 @@
                 android:layout_height="match_parent"
                 android:scaleType="centerCrop"
                 android:alpha="0.8"
-
                 android:src="@drawable/medical_map"/>
 
             <!-- Top Chip -->
@@ -113,13 +111,13 @@
                     android:layout_width="18dp"
                     android:layout_height="18dp"
                     android:src="@android:drawable/ic_menu_mylocation"
-                    app:tint="@color/small_icon_color"/>
+                    app:tint="?attr/colorPrimary"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Cerca de ti"
-                    android:textColor="@color/small_text_color"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="13sp"
                     android:layout_marginStart="6dp"/>
             </LinearLayout>
@@ -139,13 +137,13 @@
                     android:layout_width="20dp"
                     android:layout_height="20dp"
                     android:src="@android:drawable/ic_menu_info_details"
-                    app:tint="@color/logo_color"/>
+                    app:tint="@color/white"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="24/7 Soporte"
-                    android:textColor="#FFFFFF"
+                    android:textColor="@color/white"
                     android:textStyle="bold"
                     android:textSize="14sp"
                     android:layout_marginStart="8dp"/>
@@ -158,7 +156,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Encuentra atención médica cerca de ti"
-            android:textColor="@color/small_text_color"
+            android:textColor="?attr/colorOnSurface"
             android:textSize="22sp"
             android:textStyle="bold"
             android:gravity="center"
@@ -169,7 +167,7 @@
             android:layout_width="280dp"
             android:layout_height="wrap_content"
             android:text="Tu salud no puede esperar. Localiza los mejores centros médicos en tiempo real."
-            android:textColor="@color/information_text_color"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="14sp"
             android:gravity="center"
             android:layout_marginTop="12dp"
@@ -182,15 +180,15 @@
             android:layout_marginTop="36dp"
             style="?android:attr/progressBarStyleHorizontal"
             android:indeterminate="true"
-            android:indeterminateTint="#00695C"
-            android:progressBackgroundTint="#E0E0E0"/>
+            android:indeterminateTint="?attr/colorPrimary"
+            android:progressBackgroundTint="?attr/colorSurfaceVariant"/>
 
         <!-- Loading Text -->
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="SINCRONIZANDO UBICACIÓN..."
-            android:textColor="#757575"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:textSize="12sp"
             android:letterSpacing="0.15"
             android:layout_marginTop="12dp"/>

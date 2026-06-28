@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:background="#F8F9FA">
+    android:background="?android:attr/windowBackground">
 
     <TextView
         android:id="@+id/titulo"
@@ -14,7 +14,7 @@
         android:text="Mis Diagnósticos"
         android:textSize="20sp"
         android:textStyle="bold"
-        android:textColor="#00695C"
+        android:textColor="?attr/colorPrimary"
         app:layout_constraintTop_toTopOf="parent"/>
 
     <TextView
@@ -23,10 +23,10 @@
         android:layout_height="wrap_content"
         android:text="Aún no tienes diagnósticos registrados."
         android:textSize="16sp"
-        android:textColor="#757575"
+        android:textColor="?attr/colorOnSurfaceVariant"
         android:visibility="gone"
         app:layout_constraintTop_toBottomOf="@id/titulo"
-        app:layout_constraintBottom_toTopOf="@id/btnRegresar"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toEndOf="parent" />
 
@@ -37,18 +37,6 @@
         android:clipToPadding="false"
         android:paddingBottom="16dp"
         app:layout_constraintTop_toBottomOf="@id/titulo"
-        app:layout_constraintBottom_toTopOf="@id/btnRegresar"/>
-
-    <com.google.android.material.button.MaterialButton
-        android:id="@+id/btnRegresar"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_margin="16dp"
-        android:text="Regresar"
-        android:textAllCaps="false"
-        android:textSize="16sp"
-        app:cornerRadius="28dp"
-        android:backgroundTint="#00695C"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

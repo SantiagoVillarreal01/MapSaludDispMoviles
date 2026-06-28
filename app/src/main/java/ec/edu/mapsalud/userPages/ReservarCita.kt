@@ -23,8 +23,10 @@ import ec.edu.mapsalud.remote.inter.AppointmentRemote
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import ec.edu.mapsalud.utils.ThemeUtils
 
 class ReservarCita : AppCompatActivity() {
+
     private lateinit var binding: UserReservarCitaBinding
     private val repository: AppointmentRemote = AppointmentRemoteImpl()
     private val auth = FirebaseAuth.getInstance()
@@ -42,6 +44,7 @@ class ReservarCita : AppCompatActivity() {
     )
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = UserReservarCitaBinding.inflate(layoutInflater)
         setContentView(binding.root)

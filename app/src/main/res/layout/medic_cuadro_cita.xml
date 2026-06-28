@@ -20,7 +20,7 @@
             android:id="@+id/indicadorColor"
             android:layout_width="4dp"
             android:layout_height="0dp"
-            android:background="#00695C"
+            android:background="?attr/colorPrimary"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintStart_toStartOf="parent" />
@@ -32,7 +32,7 @@
             android:text="09:00"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="#212121"
+            android:textColor="?attr/colorOnSurface"
             android:layout_marginStart="16dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toEndOf="@id/indicadorColor" />
@@ -43,7 +43,7 @@
             android:layout_height="wrap_content"
             android:text="AM"
             android:textSize="12sp"
-            android:textColor="#757575"
+            android:textColor="?attr/colorOnSurfaceVariant"
             app:layout_constraintTop_toBottomOf="@id/txtHoraCita"
             app:layout_constraintStart_toStartOf="@id/txtHoraCita"
             app:layout_constraintEnd_toEndOf="@id/txtHoraCita"/>
@@ -52,7 +52,7 @@
             android:id="@+id/divisorVertical"
             android:layout_width="1dp"
             android:layout_height="0dp"
-            android:background="#E0E0E0"
+            android:background="?attr/colorOutline"
             android:layout_marginStart="16dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -65,12 +65,11 @@
             android:text="Nombre Paciente"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#212121"
+            android:textColor="?attr/colorOnSurface"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="12dp"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintStart_toEndOf="@id/divisorVertical"
-            app:layout_constraintEnd_toStartOf="@id/imgFlechaDer" />
+            app:layout_constraintStart_toEndOf="@id/divisorVertical" />
 
         <TextView
             android:id="@+id/txtMotivoCita"
@@ -78,21 +77,12 @@
             android:layout_height="wrap_content"
             android:text="Motivo de la consulta"
             android:textSize="14sp"
-            android:textColor="#5F6368"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:layout_marginTop="2dp"
             app:layout_constraintTop_toBottomOf="@id/txtNombrePaciente"
             app:layout_constraintStart_toStartOf="@id/txtNombrePaciente"
             app:layout_constraintEnd_toEndOf="@id/txtNombrePaciente" />
 
-        <ImageView
-            android:id="@+id/imgFlechaDer"
-            android:layout_width="20dp"
-            android:layout_height="20dp"
-            android:src="@android:drawable/ic_media_next"
-            app:tint="#9E9E9E"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"/>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

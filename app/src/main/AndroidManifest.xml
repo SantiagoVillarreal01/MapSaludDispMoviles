@@ -39,22 +39,17 @@
             android:name=".medicPages.PrincipalMedic"
             android:exported="false" />
         <activity
+            android:name=".userPages.PrincipalUser"
+            android:exported="false" />
+        <activity
+            android:name=".userPages.DetalleDiagnosticoUser"
+            android:exported="false" />
+
+        <activity
             android:name=".userPages.ReservarCita"
             android:exported="false" />
         <activity
             android:name=".userPages.Especialistas"
-            android:exported="false" />
-        <activity
-            android:name=".userPages.CancelarCita"
-            android:exported="false" />
-        <activity
-            android:name=".userPages.Diagnosticos"
-            android:exported="false" />
-        <activity
-            android:name=".userPages.ReagendarCita"
-            android:exported="false" />
-        <activity
-            android:name=".userPages.NuevaCita"
             android:exported="false" />
         <activity
             android:name=".ConfiguracionApp"
@@ -69,13 +64,6 @@
         <meta-data
             android:name="com.google.android.geo.API_KEY"
             android:value="AIzaSyB78b8GC5TAbQN2lPGFCvgNL81IKWCHFaY" />
-
-        <activity
-            android:name=".userPages.PrincipalUser"
-            android:exported="false" />
-        <activity
-            android:name=".MainActivity"
-            android:exported="false" />
         <activity
             android:name=".SplashScreen"
             android:exported="true"

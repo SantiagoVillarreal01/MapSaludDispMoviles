@@ -36,6 +36,8 @@ import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import ec.edu.mapsalud.enum.CenterType
+import ec.edu.mapsalud.utils.ThemeUtils
+import ec.edu.mapsalud.R
 
 class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
 
@@ -55,6 +57,7 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
     private val marcadoresCentrosMedicos = HashMap<Marker, MedicalCenterDtoRemote>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = MedicAgregarConsultorioBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -65,8 +68,21 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         mapFragment.getMapAsync(this)
 
         configurarPanelDeslizable()
+        configurarDropdownEspecialidades()
         initListeners()
         configurarBotonesDias()
+    }
+
+    private fun configurarDropdownEspecialidades() {
+        val listaEspecialidades = Specialty.entries.sortedBy { it.nombreMostrar }
+        val nombresMostrar = listaEspecialidades.map { it.nombreMostrar }.toTypedArray()
+        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, nombresMostrar)
+        binding.autoCompleteEspecialidad.setAdapter(adapter)
+
+        binding.autoCompleteEspecialidad.setOnItemClickListener { _, _, position, _ ->
+            val nombreSeleccionado = binding.autoCompleteEspecialidad.text.toString()
+            especialidadSeleccionada = Specialty.entries.find { it.nombreMostrar == nombreSeleccionado }
+        }
     }
 
     override fun onMapReady(googleMap: GoogleMap) {
@@ -77,6 +93,13 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         configurarUbicacionEnTiempoReal()
 
         obtenerCentrosMedicosDesdeFirestore()
+
+        // Estilo Oscuro del Mapa
+        if (ThemeUtils.isDark(this)) {
+            try {
+                mapa.setMapStyle(com.google.android.gms.maps.model.MapStyleOptions.loadRawResourceStyle(this, ec.edu.mapsalud.R.raw.map_style_dark))
+            } catch (e: Exception) { e.printStackTrace() }
+        }
 
         mapa.setOnMarkerClickListener { marker ->
             val centro = marcadoresCentrosMedicos[marker]
@@ -195,11 +218,6 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
             finish()
         }
 
-        binding.inputEspecialidad.isFocusable = false
-        binding.inputEspecialidad.setOnClickListener {
-            mostrarSelectorEspecialidades()
-        }
-
         binding.inputApertura.setOnClickListener {
             mostrarSelectorHora("Hora de apertura") { hora, minuto ->
                 binding.inputApertura.setText(formatearHoraAMPM(hora, minuto))
@@ -215,20 +233,6 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         binding.btnGuardarConsultorio.setOnClickListener {
             ejecutarGuardadoConsultorio()
         }
-    }
-
-    private fun mostrarSelectorEspecialidades() {
-        val listaEspecialidades = Specialty.values().sortedBy { it.nombreMostrar }
-        val nombresMostrar = listaEspecialidades.map { it.nombreMostrar }.toTypedArray()
-
-        MaterialAlertDialogBuilder(this)
-            .setTitle("Seleccione la Especialidad")
-            .setItems(nombresMostrar) { _, posicion ->
-                especialidadSeleccionada = listaEspecialidades[posicion]
-                binding.inputEspecialidad.setText(especialidadSeleccionada?.nombreMostrar)
-            }
-            .setNegativeButton("Cancelar", null)
-            .show()
     }
 
     private fun ejecutarGuardadoConsultorio() {
@@ -323,19 +327,17 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         )
 
         for ((textView, dia) in botonesDias) {
-            textView.setBackgroundColor(Color.parseColor("#E0E0E0"))
-            textView.setTextColor(Color.parseColor("#757575"))
+            val estaSeleccionado = diasSeleccionados.contains(dia)
+            textView.setBackgroundResource(if (estaSeleccionado) ec.edu.mapsalud.R.drawable.chip_day_selected else ec.edu.mapsalud.R.drawable.chip_day_unselected)
+            textView.setTextColor(if (estaSeleccionado) Color.WHITE else Color.parseColor("#757575"))
 
             textView.setOnClickListener {
                 if (diasSeleccionados.contains(dia)) {
                     diasSeleccionados.remove(dia)
-                    textView.setBackgroundColor(Color.parseColor("#E0E0E0"))
-                    textView.setTextColor(Color.parseColor("#757575"))
                 } else {
                     diasSeleccionados.add(dia)
-                    textView.setBackgroundColor(Color.parseColor("#00695C"))
-                    textView.setTextColor(Color.WHITE)
                 }
+                configurarBotonesDias() // Actualizar UI
             }
         }
     }

@@ -29,6 +29,7 @@ import ec.edu.mapsalud.dto.Paciente
 import ec.edu.mapsalud.dto.UsuarioInfo
 import ec.edu.mapsalud.enum.BloodType
 import ec.edu.mapsalud.enum.Specialty
+import ec.edu.mapsalud.utils.ThemeUtils
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
@@ -46,6 +47,7 @@ class LoginScreen : AppCompatActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = ActivityLoginPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -71,16 +73,6 @@ class LoginScreen : AppCompatActivity() {
     private fun initListeners() {
         binding.btnSignin.setOnClickListener {
             loginUser()
-        }
-
-        binding.btnDoctor.setOnClickListener {
-            type = Type.DOCTOR
-            updateSelection()
-        }
-
-        binding.btnPatient.setOnClickListener {
-            type = Type.PATIENT
-            updateSelection()
         }
 
         binding.txtCreateAccount.setOnClickListener {
@@ -114,15 +106,9 @@ class LoginScreen : AppCompatActivity() {
         FirebaseManager.auth.signInWithEmailAndPassword(email, password)
             .addOnSuccessListener { authResult ->
                 val user = FirebaseManager.auth.currentUser
-                user?.reload()?.addOnSuccessListener {
-                    if (user.isEmailVerified) {
-                        // SOLUCIÓN: Validamos el rol real directo desde Firestore
-                        obtenerPerfilYRedirigir(user.uid)
-                    } else {
-                        FirebaseManager.auth.signOut()
-                        showMessage("Debe verificar su correo electrónico")
-                        binding.btnSignin.isEnabled = true
-                    }
+                if (user != null) {
+                    // Bypass native verification as we use custom OTP during SignUp
+                    obtenerPerfilYRedirigir(user.uid)
                 }
             }
             .addOnFailureListener {
@@ -150,8 +136,8 @@ class LoginScreen : AppCompatActivity() {
                     }
 
                     when (tipoUsuarioReal) {
-                        Type.DOCTOR -> navegarAlHome(isPatient = false)
-                        Type.PATIENT -> navegarAlHome(isPatient = true)
+                        Type.DOCTOR -> guardarPerfilYContinuar(uid, Type.DOCTOR)
+                        Type.PATIENT -> guardarPerfilYContinuar(uid, Type.PATIENT)
                         null -> showMessage("Error: Tipo de usuario no identificado en el servidor.")
                     }
                 } else {
@@ -164,18 +150,34 @@ class LoginScreen : AppCompatActivity() {
             }
     }
 
-    private fun updateSelection() {
-        if (type == Type.PATIENT) {
-            binding.btnPatient.setBackgroundTintList(getColorStateList(R.color.primary))
-            binding.btnDoctor.setBackgroundTintList(getColorStateList(R.color.surface_container_high))
-            binding.btnPatient.setTextColor(getColor(R.color.yellow_cremy))
-            binding.btnDoctor.setTextColor(getColor(R.color.information_text_color))
-        } else {
-            binding.btnDoctor.setBackgroundTintList(getColorStateList(R.color.primary))
-            binding.btnPatient.setBackgroundTintList(getColorStateList(R.color.surface_container_high))
-            binding.btnDoctor.setTextColor(getColor(R.color.yellow_cremy))
-            binding.btnPatient.setTextColor(getColor(R.color.information_text_color))
-        }
+    private fun guardarPerfilYContinuar(uid: String, tipo: Type) {
+        // Obtenemos los datos restantes para el cache
+        FirebaseManager.db.collection("usuarios").document(uid).get()
+            .addOnSuccessListener { doc ->
+                val info = doc.get("info") as? Map<*, *>
+                val nombres = info?.get("nombres")?.toString() ?: ""
+                val apellidos = info?.get("apellidos")?.toString() ?: ""
+                val cedula = info?.get("cedula")?.toString() ?: ""
+                
+                val sharedPref = getSharedPreferences("MapSaludCache", MODE_PRIVATE)
+                sharedPref.edit().apply {
+                    putString("USER_NAME", "$nombres $apellidos".trim())
+                    putString("USER_NOMBRES", nombres)
+                    putString("USER_APELLIDOS", apellidos)
+                    putString("USER_CEDULA", cedula)
+                    putString("USER_TELEFONO", info?.get("telefono")?.toString() ?: "")
+                    putString("USER_GENERO", info?.get("genero")?.toString() ?: "")
+                    putString("USER_CORREO", info?.get("correo")?.toString() ?: "")
+                    putString("USER_TYPE", tipo.name)
+                    if (tipo == Type.DOCTOR) {
+                        putString("USER_EXTRA", doc.getString("specialty") ?: "Médico")
+                    } else {
+                        putString("USER_EXTRA", "Paciente Asegurado")
+                    }
+                    apply()
+                }
+                navegarAlHome(isPatient = tipo == Type.PATIENT)
+            }
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {

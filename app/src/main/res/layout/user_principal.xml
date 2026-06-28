@@ -4,23 +4,16 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA"
+    android:background="?android:attr/windowBackground"
     tools:context=".userPages.PrincipalUser">
-
-    <androidx.fragment.app.FragmentContainerView
-        android:id="@+id/mapContainer"
-        android:name="com.google.android.gms.maps.SupportMapFragment"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toTopOf="@+id/bottomMenuContainer" />
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/topBar"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:padding="16dp"
-        android:background="@android:color/transparent"
+        android:background="?attr/colorSurface"
+        android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent">
 
         <com.google.android.material.imageview.ShapeableImageView
@@ -29,105 +22,52 @@
             android:layout_height="48dp"
             android:src="@drawable/user"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent"/>
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent"/>
 
-        <TextView
-            android:id="@+id/txtBienvenido"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:text="Bienvenido,"
-            android:textSize="14sp"
+            android:orientation="vertical"
             android:layout_marginStart="12dp"
             app:layout_constraintStart_toEndOf="@+id/imgProfile"
-            app:layout_constraintTop_toTopOf="@+id/imgProfile" />
+            app:layout_constraintEnd_toStartOf="@+id/btnConfiguracion"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent">
 
-        <TextView
-            android:id="@+id/txtUserName"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="Nombre de Usuario"
-            android:textStyle="bold"
-            android:textColor="#00695C"
-            android:textSize="16sp"
-            app:layout_constraintStart_toStartOf="@+id/txtBienvenido"
-            app:layout_constraintTop_toBottomOf="@+id/txtBienvenido" />
+            <TextView
+                android:id="@+id/txtBienvenido"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Bienvenido,"
+                android:textSize="14sp" />
+
+            <TextView
+                android:id="@+id/txtUserName"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Paciente"
+                android:textStyle="bold"
+                android:textColor="#00695C"
+                android:textSize="16sp" />
+        </LinearLayout>
 
         <ImageView
             android:id="@+id/btnConfiguracion"
             android:layout_width="40dp"
             android:layout_height="40dp"
-            android:layout_marginTop="50dp"
             android:src="@drawable/configuration"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/searchCard"
+    <androidx.fragment.app.FragmentContainerView
+        android:id="@+id/fragmentContainerUser"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="24dp"
-        android:layout_marginTop="16dp"
-        app:cardCornerRadius="24dp"
-        app:cardElevation="8dp"
-        app:layout_constraintTop_toBottomOf="@+id/topBar">
-
-        <com.google.android.material.textfield.TextInputEditText
-            android:id="@+id/txtBuscarUbicacion"
-            android:layout_width="match_parent"
-            android:layout_height="48dp"
-            android:background="@android:color/transparent"
-            android:hint="Buscar ubicación específica..."
-            android:paddingHorizontal="16dp"
-            android:textSize="14sp" />
-    </com.google.android.material.card.MaterialCardView>
-
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/cardInfoHospital"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginBottom="16dp"
-        android:visibility="gone"
-        app:cardCornerRadius="16dp"
-        app:cardElevation="6dp"
-        app:layout_constraintBottom_toTopOf="@+id/bottomMenuContainer">
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:padding="16dp"
-            android:background="@android:color/white">
-
-            <TextView
-                android:id="@+id/txtNombreHospitalCuadro"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Nombre del Hospital"
-                android:textStyle="bold"
-                android:textColor="#00695C"
-                android:textSize="18sp"/>
-
-            <TextView
-                android:id="@+id/txtDireccionHospitalCuadro"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Dirección del centro"
-                android:textColor="#424242"
-                android:textSize="14sp"
-                android:layout_marginTop="2dp"/>
-
-            <TextView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:text="Toca aquí para ver reseñas, especialidades y agendar una cita."
-                android:textColor="#757575"
-                android:textSize="12sp"
-                android:layout_marginTop="4dp"/>
-        </LinearLayout>
-    </com.google.android.material.card.MaterialCardView>
+        android:layout_height="0dp"
+        app:layout_constraintTop_toBottomOf="@id/topBar"
+        app:layout_constraintBottom_toTopOf="@id/bottomMenuContainer" />
 
     <LinearLayout
         android:id="@+id/bottomMenuContainer"
@@ -135,7 +75,7 @@
         android:layout_height="80dp"
         android:orientation="horizontal"
         android:weightSum="4"
-        android:background="@android:color/white"
+        android:background="?attr/colorSurface"
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -149,8 +89,19 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/schedule" app:tint="#00695C" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Citas" android:textColor="#00695C" android:textSize="12sp" android:textAlignment="center" android:textStyle="bold"/>
+            <ImageView
+                android:id="@+id/imgMenuCitas"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/schedule"/>
+            <TextView
+                android:id="@+id/txtMenuCitas"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Citas"
+                android:textSize="12sp"
+                android:textAlignment="center"
+                android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout
@@ -163,8 +114,18 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/horarios" app:tint="#5F6368" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Reagendar" android:textColor="#5F6368" android:textSize="12sp" android:textStyle="bold"/>
+            <ImageView
+                android:id="@+id/imgMenuReagendar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/horarios"/>
+            <TextView
+                android:id="@+id/txtMenuReagendar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Reagendar"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout
@@ -177,8 +138,18 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/diagnosticos" app:tint="#1976D2" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Diagnósticos" android:textColor="#1976D2" android:textSize="12sp" android:textStyle="bold"/>
+            <ImageView
+                android:id="@+id/imgMenuDiagnosticos"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/diagnosticos"/>
+            <TextView
+                android:id="@+id/txtMenuDiagnosticos"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Historial"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
         </LinearLayout>
 
         <LinearLayout
@@ -191,8 +162,18 @@
             android:focusable="true"
             android:gravity="center"
             android:orientation="vertical">
-            <ImageView android:layout_width="40dp" android:layout_height="40dp" android:src="@drawable/cancelar" app:tint="#D32F2F" />
-            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Cancelar" android:textColor="#D32F2F" android:textSize="12sp" android:textStyle="bold"/>
+            <ImageView
+                android:id="@+id/imgMenuCancelar"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:src="@drawable/cancelar"/>
+            <TextView
+                android:id="@+id/txtMenuCancelar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Cancelar"
+                android:textSize="12sp"
+                android:textStyle="bold"/>
         </LinearLayout>
 
     </LinearLayout>

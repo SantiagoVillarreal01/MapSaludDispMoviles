@@ -7,12 +7,14 @@ import androidx.appcompat.app.AppCompatActivity
 import ec.edu.mapsalud.datos.FirebaseManager
 import com.google.android.material.snackbar.Snackbar
 import ec.edu.mapsalud.databinding.ActivityForgotPasswordBinding
+import ec.edu.mapsalud.utils.ThemeUtils
 
 class ForgotPasswordScreen : AppCompatActivity() {
 
     private lateinit var binding: ActivityForgotPasswordBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = ActivityForgotPasswordBinding.inflate(layoutInflater)
         setContentView(binding.root)

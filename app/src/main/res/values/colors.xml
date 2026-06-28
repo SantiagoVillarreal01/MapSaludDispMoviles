@@ -1,53 +1,61 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Sin uso confirmado en los layouts revisados: se dejan igual para no -->
-    <!-- romper referencias en otras partes del proyecto que no he visto.   -->
-    <color name="purple_200">#FFBB86FC</color>
-    <color name="purple_500">#FF6200EE</color>
-    <color name="purple_700">#FF3700B3</color>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="black">#FF000000</color>
-    <color name="white">#FFFFFFFF</color>
-    <color name="black_soft">#2E3038</color>
-    <color name="mapsalud_on_surface_variant">#8C909F</color>
+    <!-- Brand Colors -->
+    <color name="brand_primary">#00695C</color>
+    <color name="brand_primary_variant">#004D40</color>
+    <color name="brand_secondary">#00897B</color>
 
-    <!-- ===== Paleta clara / teal (Stitch) ===== -->
-    <!-- Antes: tema oscuro azul (#10131A / #3b82f6). Ahora: igual al resto -->
-    <!-- de la app (teal #00695C sobre fondo claro #F8F9FA). -->
+    <!-- UI Helpers -->
+    <color name="white">#FFFFFFFF</color>
+    <color name="black">#FF000000</color>
+    <color name="grey_dark">#212121</color>
+    <color name="grey_medium">#757575</color>
+    <color name="grey_light">#BDBDBD</color>
+    <color name="grey_very_light">#F8F9FA</color>
+
+    <!-- Light Mode specific -->
+    <color name="light_background">#F8F9FA</color>
+    <color name="light_surface">#FFFFFF</color>
+    <color name="light_on_surface">#212121</color>
+    <color name="light_on_surface_variant">#757575</color>
+    <color name="light_outline">#E0E0E0</color>
+
+    <!-- Dark Mode specific -->
+    <color name="dark_background">#121212</color>
+    <color name="dark_surface">#1E1E1E</color>
+    <color name="dark_on_surface">#E1E1E1</color>
+    <color name="dark_on_surface_variant">#B0B0B0</color>
+    <color name="dark_outline">#333333</color>
+
+    <!-- Semantic Colors -->
+    <color name="error">#C62828</color>
+    <color name="success">#388E3C</color>
+    <color name="warning">#FBC02D</color>
+
+    <!-- Legacy / Compatibility (to avoid breaking unknown code) -->
     <color name="primary">#00695C</color>
     <color name="background_color">#F8F9FA</color>
-    <color name="logo_color">#FFFFFFFF</color>
+    <color name="logo_color">#FFFFFF</color>
     <color name="logo_text_color">#00695C</color>
     <color name="small_text_color">#212121</color>
-    <color name="small_icon_color">#00695C</color>
     <color name="information_text_color">#757575</color>
-
     <color name="surface_container">#FFFFFF</color>
     <color name="surface_container_high">#F1F4F3</color>
     <color name="surface_container_low">#F4F6F5</color>
-    <color name="surface_variant">#F1F4F3</color>
-    <color name="surface_bright">#FFFFFF</color>
-
-    <color name="outline_color">#BDBDBD</color>
-    <color name="outline_variant">#E0E0E0</color>
-
-    <color name="primary_container">#00695C</color>
-    <color name="primary_fixed">#00695C</color>
-    <color name="on_primary_container">#FFFFFF</color>
     <color name="on_primary">#FFFFFF</color>
-
-    <color name="card_shadow">#33000000</color>
-
-    <color name="google_blue">#4285F4</color>
-    <color name="google_green">#34A853</color>
-    <color name="google_yellow">#FBBC05</color>
-    <color name="google_red">#EA4335</color>
-
     <color name="white_soft">#E1E2EC</color>
+    <color name="black_soft">#2E3038</color>
     <color name="yellow_cremy">#FFF3A4</color>
 
-    <color name="mapsalud_on_primary">#FFFFFF</color>
+    <!-- Build Fix / Legacy Aliases (pointing to new brand colors) -->
+    <color name="outline_variant">@color/light_outline</color>
+    <color name="primary_container">@color/brand_secondary</color>
+    <color name="primary_fixed">@color/brand_primary</color>
+    <color name="on_primary_container">@color/white</color>
     <color name="mapsalud_glass_card">#F7FFFFFF</color>
-    <color name="mapsalud_error">#C62828</color>
+    <color name="surface_variant">@color/grey_very_light</color>
+    <color name="mapsalud_on_primary">@color/white</color>
+    <color name="outline_color">@color/grey_light</color>
+    <color name="small_icon_color">@color/brand_primary</color>
+    <color name="small_text_color_legacy">#212121</color>
 </resources>

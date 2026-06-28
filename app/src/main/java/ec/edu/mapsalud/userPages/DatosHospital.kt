@@ -26,6 +26,8 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
+import ec.edu.mapsalud.utils.ThemeUtils
+import ec.edu.mapsalud.R
 
 class DatosHospital : AppCompatActivity() {
 
@@ -44,6 +46,7 @@ class DatosHospital : AppCompatActivity() {
     private var tarjetaSeleccionada: MaterialCardView? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = UserDatosHospitalBinding.inflate(layoutInflater)
         setContentView(binding.root)

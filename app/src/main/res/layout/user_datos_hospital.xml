@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:background="#F8F9FA">
+    android:background="?android:attr/windowBackground">
 
     <LinearLayout
         android:id="@+id/topBar"
@@ -13,16 +13,17 @@
         android:orientation="horizontal"
         android:padding="16dp"
         android:gravity="center_vertical"
-        android:background="@android:color/white"
+        android:background="?attr/colorSurface"
         android:elevation="4dp"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btnBack"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:src="@android:drawable/ic_menu_revert"
-            app:tint="#00695C"/>
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="?attr/colorPrimary"/>
 
         <TextView
             android:layout_width="0dp"
@@ -31,14 +32,14 @@
             android:text="Datos del Centro Medico"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="#00695C"
+            android:textColor="?attr/colorPrimary"
             android:textAlignment="center"/>
 
         <ImageView
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:src="@android:drawable/ic_menu_sort_by_size"
-            app:tint="#00695C"/>
+            app:tint="?attr/colorPrimary"/>
     </LinearLayout>
 
     <ScrollView
@@ -61,7 +62,7 @@
                     android:layout_height="match_parent"
                     android:src="@android:drawable/ic_menu_gallery"
                     android:scaleType="centerCrop"
-                    android:background="#CFD8DC"/>
+                    android:background="?attr/colorSurfaceVariant"/>
 
                 <LinearLayout
                     android:layout_width="match_parent"
@@ -82,7 +83,7 @@
                         android:id="@+id/txtDireccionHospital"
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:text="📍 Avenida Central 452, Medical District"
+                        android:text="📍 Avenida Central 452"
                         android:textColor="#E0E0E0"
                         android:textSize="14sp"/>
                 </LinearLayout>
@@ -98,7 +99,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Acerca de"
-                    android:textColor="#00695C"
+                    android:textColor="?attr/colorPrimary"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="8dp"/>
@@ -108,7 +109,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     tools:text="Descripción del centro médico..."
-                    android:textColor="#424242"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:lineSpacingExtra="4dp"
                     android:layout_marginBottom="16dp"/>
 
@@ -116,7 +117,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Especialidades"
-                    android:textColor="#00695C"
+                    android:textColor="?attr/colorPrimary"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp"/>
@@ -129,13 +130,13 @@
                     android:layout_marginBottom="24dp">
                 </GridLayout>
 
-                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E0E0E0" android:layout_marginBottom="16dp"/>
+                <View android:layout_width="match_parent" android:layout_height="1dp" android:background="?attr/colorOutline" android:layout_marginBottom="16dp"/>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Reseñas y Comentarios"
-                    android:textColor="#00695C"
+                    android:textColor="?attr/colorPrimary"
                     android:textSize="18sp"
                     android:textStyle="bold"
                     android:layout_marginBottom="12dp"/>
@@ -143,9 +144,7 @@
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    app:cardCornerRadius="16dp"
-                    app:cardElevation="1dp"
-                    app:strokeWidth="0dp"
+                    style="@style/Widget.MapSalud.MaterialCardView"
                     android:layout_marginBottom="16dp">
                     <LinearLayout
                         android:layout_width="match_parent"
@@ -156,6 +155,7 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Califica tu experiencia"
+                            android:textColor="?attr/colorOnSurface"
                             android:textStyle="bold"
                             android:layout_marginBottom="8dp"/>
 
@@ -164,6 +164,8 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:numStars="5"
+                            android:progressTint="?attr/colorPrimary"
+                            android:secondaryProgressTint="?attr/colorOnSurfaceVariant"
                             android:stepSize="1.0"
                             android:layout_marginBottom="8dp"/>
 
@@ -172,16 +174,18 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:hint="Escribe tu opinión aquí..."
-                            android:background="@android:drawable/editbox_background"
+                            android:background="?attr/colorSurfaceVariant"
+                            android:textColor="?attr/colorOnSurface"
+                            android:textColorHint="?attr/colorOnSurfaceVariant"
                             android:padding="12dp"
                             android:minLines="2"
                             android:layout_marginBottom="12dp"/>
-                        <Button
+                        <com.google.android.material.button.MaterialButton
                             android:id="@+id/btnEnviarResena"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:text="Publicar Reseña"
-                            android:backgroundTint="#00695C"
+                            android:backgroundTint="?attr/colorPrimary"
                             android:layout_gravity="end"/>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -191,7 +195,7 @@
                     android:layout_height="wrap_content"
                     android:text="Comentarios de otros usuarios"
                     android:textStyle="bold"
-                    android:textColor="#757575"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:layout_marginBottom="8dp"/>
 
                 <LinearLayout
@@ -211,7 +215,7 @@
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:padding="16dp"
-        android:background="@android:color/white"
+        android:background="?attr/colorSurface"
         android:elevation="8dp"
         app:layout_constraintBottom_toBottomOf="parent">
 
@@ -223,7 +227,7 @@
             android:textAllCaps="false"
             android:textSize="16sp"
             app:cornerRadius="28dp"
-            android:backgroundTint="#00695C"
+            android:backgroundTint="?attr/colorPrimary"
             app:icon="@android:drawable/ic_menu_today"
             app:iconGravity="textStart"/>
     </LinearLayout>

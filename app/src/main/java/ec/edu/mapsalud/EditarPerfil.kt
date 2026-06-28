@@ -8,6 +8,7 @@ import com.google.android.material.snackbar.Snackbar
 import ec.edu.mapsalud.datos.FirebaseManager
 import android.widget.ArrayAdapter
 import ec.edu.mapsalud.enum.Genero
+import ec.edu.mapsalud.utils.ThemeUtils
 
 class EditarPerfil : AppCompatActivity() {
 
@@ -15,6 +16,7 @@ class EditarPerfil : AppCompatActivity() {
     private var usuarioUid: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = ActivityEditarPerfilBinding.inflate(layoutInflater)
         setContentView(binding.root)
@@ -26,6 +28,7 @@ class EditarPerfil : AppCompatActivity() {
         }
 
         configurarSpinner()
+        cargarDatosDesdeCache()
 
         if (usuarioUid != null) {
             cargarDatosDesdeFirestore()
@@ -37,11 +40,21 @@ class EditarPerfil : AppCompatActivity() {
         configurarListeners()
     }
 
+    private fun cargarDatosDesdeCache() {
+        val sharedPref = getSharedPreferences("MapSaludCache", MODE_PRIVATE)
+        binding.inputNombre.setText(sharedPref.getString("USER_NOMBRES", ""))
+        binding.inputApellido.setText(sharedPref.getString("USER_APELLIDOS", ""))
+        binding.inputCorreo.setText(sharedPref.getString("USER_CORREO", ""))
+        binding.inputTelefono.setText(sharedPref.getString("USER_TELEFONO", ""))
+        
+        val genero = sharedPref.getString("USER_GENERO", Genero.NO_ESPECIFICADO.valor)
+        binding.autoCompleteGeneroPerfil.setText(genero, false)
+    }
+
     private fun configurarSpinner() {
-        val generosVisibles = Genero.values().map { it.valor }.toTypedArray()
-        val adapterGenero = ArrayAdapter(this, android.R.layout.simple_spinner_item, generosVisibles)
-        adapterGenero.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
-        binding.spinnerGeneroPerfil.adapter = adapterGenero
+        val generosVisibles = Genero.entries.map { it.valor }.toTypedArray()
+        val adapterGenero = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, generosVisibles)
+        binding.autoCompleteGeneroPerfil.setAdapter(adapterGenero)
     }
 
     private fun cargarDatosDesdeFirestore() {
@@ -51,16 +64,27 @@ class EditarPerfil : AppCompatActivity() {
                     if (document != null && document.exists()) {
                         val infoMap = document.get("info") as? Map<*, *>
                         if (infoMap != null) {
-                            binding.inputNombre.setText(infoMap["nombres"]?.toString() ?: "")
-                            binding.inputApellido.setText(infoMap["apellidos"]?.toString() ?: "")
-                            binding.inputCorreo.setText(infoMap["correo"]?.toString() ?: "")
-                            binding.inputTelefono.setText(infoMap["telefono"]?.toString() ?: "")
-
-                            // Cargar Género
+                            val nombres = infoMap["nombres"]?.toString() ?: ""
+                            val apellidos = infoMap["apellidos"]?.toString() ?: ""
+                            val correo = infoMap["correo"]?.toString() ?: ""
+                            val telefono = infoMap["telefono"]?.toString() ?: ""
                             val generoStr = infoMap["genero"]?.toString() ?: Genero.NO_ESPECIFICADO.valor
-                            val index = Genero.values().indexOfFirst { it.valor == generoStr }
-                            if (index >= 0) {
-                                binding.spinnerGeneroPerfil.setSelection(index)
+
+                            binding.inputNombre.setText(nombres)
+                            binding.inputApellido.setText(apellidos)
+                            binding.inputCorreo.setText(correo)
+                            binding.inputTelefono.setText(telefono)
+                            binding.autoCompleteGeneroPerfil.setText(generoStr, false)
+
+                            // Actualizar Cache
+                            getSharedPreferences("MapSaludCache", MODE_PRIVATE).edit().apply {
+                                putString("USER_NOMBRES", nombres)
+                                putString("USER_APELLIDOS", apellidos)
+                                putString("USER_CORREO", correo)
+                                putString("USER_TELEFONO", telefono)
+                                putString("USER_GENERO", generoStr)
+                                putString("USER_NAME", "$nombres $apellidos".trim())
+                                apply()
                             }
                         }
                     } else {
@@ -82,7 +106,7 @@ class EditarPerfil : AppCompatActivity() {
             val nombre = binding.inputNombre.text.toString().trim()
             val apellido = binding.inputApellido.text.toString().trim()
             val telefono = binding.inputTelefono.text.toString().trim()
-            val generoSeleccionado = Genero.values()[binding.spinnerGeneroPerfil.selectedItemPosition].valor
+            val generoSeleccionado = binding.autoCompleteGeneroPerfil.text.toString()
 
             if (nombre.isEmpty() || apellido.isEmpty() || telefono.isEmpty()) {
                 mostrarMensaje("Por favor, completa todos los campos obligatorios.")
@@ -106,6 +130,15 @@ class EditarPerfil : AppCompatActivity() {
             FirebaseManager.db.collection("usuarios").document(uid)
                 .update(actualizaciones)
                 .addOnSuccessListener {
+                    // Actualizar Cache local
+                    getSharedPreferences("MapSaludCache", MODE_PRIVATE).edit().apply {
+                        putString("USER_NOMBRES", nombre)
+                        putString("USER_APELLIDOS", apellido)
+                        putString("USER_TELEFONO", telefono)
+                        putString("USER_GENERO", genero)
+                        putString("USER_NAME", "$nombre $apellido".trim())
+                        apply()
+                    }
                     Toast.makeText(this, "Perfil actualizado con éxito", Toast.LENGTH_LONG).show()
                     finish()
                 }

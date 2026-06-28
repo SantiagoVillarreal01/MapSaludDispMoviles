@@ -6,6 +6,7 @@ import android.widget.Toast
 import com.google.firebase.firestore.FirebaseFirestore
 import ec.edu.mapsalud.databinding.MedicDetalleDiagnosticoBinding
 import ec.edu.mapsalud.dto.DiagnosisEmbedded
+import ec.edu.mapsalud.utils.ThemeUtils
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -17,6 +18,7 @@ class DetalleDiagnosticoMedic : AppCompatActivity() {
     private var appointmentId: String = ""
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = MedicDetalleDiagnosticoBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -1,12 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Antes: gradiente hacia gris oscuro casi negro (#F210131A). Ahora: -->
-<!-- gradiente hacia el mismo fondo claro de la pantalla (#F8F9FA), -->
-<!-- para que la foto se funda con la página en vez de oscurecerla. -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android">
-
     <gradient
         android:angle="270"
-        android:startColor="#00F8F9FA"
-        android:endColor="#F2F8F9FA"/>
-
+        android:startColor="#00000000"
+        android:endColor="?android:attr/windowBackground"/>
 </shape>

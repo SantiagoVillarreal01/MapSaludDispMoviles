@@ -10,7 +10,7 @@
         android:id="@+id/txtUsuarioEstrellas"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#212121"
+        android:textColor="?attr/colorOnSurface"
         android:textSize="16sp"
         android:textStyle="bold" />
 
@@ -18,7 +18,7 @@
         android:id="@+id/txtTextoComentario"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textColor="#757575"
+        android:textColor="?attr/colorOnSurfaceVariant"
         android:textSize="14sp"
         android:layout_marginTop="4dp" />
 

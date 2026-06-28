@@ -4,7 +4,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#F8F9FA">
+    android:background="?android:attr/windowBackground">
 
     <LinearLayout
         android:id="@+id/topBarDiag"
@@ -13,15 +13,16 @@
         android:orientation="horizontal"
         android:padding="16dp"
         android:gravity="center_vertical"
-        android:background="@android:color/white"
+        android:background="?attr/colorSurface"
         app:layout_constraintTop_toTopOf="parent">
 
-        <ImageView
+        <ImageButton
             android:id="@+id/btnRegresarDiag"
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:src="@android:drawable/ic_menu_revert"
-            app:tint="#00695C" />
+            android:layout_width="48dp"
+            android:layout_height="48dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
+            android:src="@drawable/ic_arrow_back"
+            app:tint="?attr/colorPrimary" />
 
         <TextView
             android:layout_width="wrap_content"
@@ -29,8 +30,8 @@
             android:text="Redactar Diagnóstico"
             android:textSize="20sp"
             android:textStyle="bold"
-            android:textColor="#00695C"
-            android:layout_marginStart="16dp"/>
+            android:textColor="?attr/colorPrimary"
+            android:layout_marginStart="8dp"/>
     </LinearLayout>
 
     <ScrollView
@@ -52,6 +53,7 @@
                 android:text="Paciente: Nombre"
                 android:textSize="18sp"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"
                 android:layout_marginBottom="4dp"/>
 
             <TextView
@@ -59,7 +61,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="Motivo: Consulta"
-                android:textColor="#5F6368"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:layout_marginBottom="24dp"/>
 
             <!-- 1. Diagnóstico Clínico -->
@@ -68,17 +70,15 @@
                 android:layout_height="wrap_content"
                 android:text="Diagnóstico Clínico"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"
                 android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/Widget.MapSalud.TextInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp">
+                app:boxBackgroundColor="?attr/colorSurfaceVariant">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputDiagnostico"
@@ -87,7 +87,9 @@
                     android:hint="Ej. Faringitis aguda..."
                     android:inputType="textMultiLine"
                     android:minLines="3"
-                    android:gravity="top|start"/>
+                    android:gravity="top|start"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="?attr/colorOnSurfaceVariant"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- 2. Tratamiento -->
@@ -96,17 +98,15 @@
                 android:layout_height="wrap_content"
                 android:text="Tratamiento"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"
                 android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/Widget.MapSalud.TextInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp">
+                app:boxBackgroundColor="?attr/colorSurfaceVariant">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputTratamiento"
@@ -115,7 +115,9 @@
                     android:hint="Ej. Amoxicilina 500mg cada 8h..."
                     android:inputType="textMultiLine"
                     android:minLines="3"
-                    android:gravity="top|start"/>
+                    android:gravity="top|start"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="?attr/colorOnSurfaceVariant"/>
             </com.google.android.material.textfield.TextInputLayout>
 
             <!-- 3. Sugerencias -->
@@ -124,17 +126,15 @@
                 android:layout_height="wrap_content"
                 android:text="Sugerencias y Cuidados"
                 android:textStyle="bold"
+                android:textColor="?attr/colorOnSurface"
                 android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
-                style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+                style="@style/Widget.MapSalud.TextInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxCornerRadiusTopStart="12dp"
-                app:boxCornerRadiusTopEnd="12dp"
-                app:boxCornerRadiusBottomStart="12dp"
-                app:boxCornerRadiusBottomEnd="12dp">
+                app:boxBackgroundColor="?attr/colorSurfaceVariant">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputSugerencias"
@@ -143,7 +143,9 @@
                     android:hint="Ej. Reposo absoluto, hidratación constante..."
                     android:inputType="textMultiLine"
                     android:minLines="3"
-                    android:gravity="top|start"/>
+                    android:gravity="top|start"
+                    android:textColor="?attr/colorOnSurface"
+                    android:textColorHint="?attr/colorOnSurfaceVariant"/>
             </com.google.android.material.textfield.TextInputLayout>
 
         </LinearLayout>
@@ -157,7 +159,7 @@
         android:text="Guardar y Completar Cita"
         android:textAllCaps="false"
         app:cornerRadius="28dp"
-        android:backgroundTint="#00695C"
+        android:backgroundTint="?attr/colorPrimary"
         app:layout_constraintBottom_toBottomOf="parent"/>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

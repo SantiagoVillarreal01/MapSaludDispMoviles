@@ -4,7 +4,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="#F8F9FA">
+    android:background="?android:attr/windowBackground">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -12,26 +12,25 @@
         android:orientation="horizontal"
         android:padding="16dp"
         android:gravity="center_vertical"
-        android:background="@android:color/white">
+        android:background="?attr/colorSurface">
 
         <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            style="@style/Widget.MapSalud.TextInputLayout"
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginEnd="8dp"
             app:startIconDrawable="@android:drawable/ic_menu_search"
-            app:boxCornerRadiusTopStart="12dp"
-            app:boxCornerRadiusTopEnd="12dp"
-            app:boxCornerRadiusBottomStart="12dp"
-            app:boxCornerRadiusBottomEnd="12dp">
+            app:boxBackgroundColor="?attr/colorSurfaceVariant">
 
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/inputBuscarCedula"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Ingresa Cédula o DNI"
-                android:inputType="number"/>
+                android:inputType="number"
+                android:textColor="?attr/colorOnSurface"
+                android:textColorHint="?attr/colorOnSurfaceVariant"/>
         </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.button.MaterialButton
@@ -41,7 +40,7 @@
             android:text="Buscar"
             android:textAllCaps="false"
             app:cornerRadius="16dp"
-            android:backgroundTint="#00695C"/>
+            android:backgroundTint="?attr/colorPrimary"/>
     </LinearLayout>
 
     <TextView
@@ -50,7 +49,7 @@
         android:text="CITAS PARA DIAGNÓSTICO"
         android:padding="16dp"
         android:textStyle="bold"
-        android:textColor="#757575"/>
+        android:textColor="?attr/colorOnSurfaceVariant"/>
 
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recyclerCitasDiagnostico"

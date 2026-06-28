@@ -9,11 +9,13 @@ import ec.edu.mapsalud.datos.FirebaseManager
 import ec.edu.mapsalud.enum.Type
 import ec.edu.mapsalud.medicPages.PrincipalMedic
 import ec.edu.mapsalud.userPages.PrincipalUser
+import ec.edu.mapsalud.utils.ThemeUtils
 
 
 class SplashScreen : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_splash_screen)
 

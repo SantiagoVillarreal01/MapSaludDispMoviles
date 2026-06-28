@@ -19,7 +19,7 @@
             android:id="@+id/colorBordeLateral"
             android:layout_width="6dp"
             android:layout_height="match_parent"
-            android:background="#00838F" />
+            android:background="?attr/colorPrimary" />
 
         <LinearLayout
             android:layout_width="match_parent"
@@ -36,17 +36,10 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="15 MAY 2024"
-                    android:textColor="#00838F"
+                    android:textColor="?attr/colorPrimary"
                     android:textSize="12sp"
                     android:textStyle="bold"
                     android:layout_alignParentStart="true"/>
-
-                <ImageView
-                    android:layout_width="20dp"
-                    android:layout_height="20dp"
-                    android:src="@android:drawable/ic_media_next"
-                    app:tint="#757575"
-                    android:layout_alignParentEnd="true"/>
             </RelativeLayout>
 
             <TextView
@@ -54,7 +47,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Juan Delgado"
-                android:textColor="#212121"
+                android:textColor="?attr/colorOnSurface"
                 android:textSize="18sp"
                 android:textStyle="bold"
                 android:layout_marginTop="4dp"/>
@@ -70,14 +63,14 @@
                     android:layout_width="16dp"
                     android:layout_height="16dp"
                     android:src="@android:drawable/ic_menu_agenda"
-                    app:tint="#5F6368"/>
+                    app:tint="?attr/colorOnSurfaceVariant"/>
 
                 <TextView
                     android:id="@+id/txtMotivo"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Consulta General"
-                    android:textColor="#5F6368"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:layout_marginStart="8dp"
                     android:textSize="14sp"/>
             </LinearLayout>

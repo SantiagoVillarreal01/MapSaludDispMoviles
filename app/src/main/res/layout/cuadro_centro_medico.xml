@@ -9,7 +9,7 @@
     app:cardCornerRadius="16dp"
     app:cardElevation="0dp"
     app:strokeWidth="1dp"
-    app:strokeColor="#E0E0E0">
+    app:strokeColor="?attr/colorOutline">
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
@@ -20,7 +20,7 @@
             android:id="@+id/imgIcon"
             android:layout_width="48dp"
             android:layout_height="48dp"
-            android:background="#00695C"
+            android:background="?attr/colorPrimary"
             android:padding="12dp"
             app:tint="@android:color/white"
             app:layout_constraintStart_toStartOf="parent"
@@ -34,7 +34,7 @@
             android:text="St. Jude Medical"
             android:textSize="16sp"
             android:textStyle="bold"
-            android:textColor="#212121"
+            android:textColor="?attr/colorOnSurface"
             android:layout_marginStart="16dp"
             android:layout_marginEnd="8dp"
             app:layout_constraintStart_toEndOf="@id/imgIcon"
@@ -51,7 +51,7 @@
             android:paddingHorizontal="8dp"
             android:paddingVertical="4dp"
             android:background="@drawable/chip_neutral"
-            android:textColor="#757575"
+            android:textColor="?attr/colorOnSurface"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent"/>
 
@@ -61,7 +61,7 @@
             android:layout_height="wrap_content"
             android:text="Cardiology Specialists"
             android:textSize="14sp"
-            android:textColor="#757575"
+            android:textColor="?attr/colorOnSurfaceVariant"
             android:layout_marginTop="4dp"
             app:layout_constraintStart_toStartOf="@id/txtNombreCentro"
             app:layout_constraintTop_toBottomOf="@id/txtNombreCentro"
@@ -73,9 +73,9 @@
             android:layout_height="wrap_content"
             android:text="45m away"
             android:textSize="12sp"
-            android:textColor="#00695C"
+            android:textColor="?attr/colorPrimary"
             android:layout_marginTop="8dp"
-            app:drawableTint="#00695C"
+            app:drawableTint="?attr/colorPrimary"
             android:drawablePadding="4dp"
             app:layout_constraintStart_toStartOf="@id/txtNombreCentro"
             app:layout_constraintTop_toBottomOf="@id/txtEspecialidad"/>

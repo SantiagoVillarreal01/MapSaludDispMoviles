@@ -8,7 +8,6 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.MedicFragmentEditarBinding
-import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.lifecycle.lifecycleScope
@@ -26,7 +25,8 @@ import kotlinx.coroutines.withContext
 
 class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
 
-    private lateinit var binding: MedicFragmentEditarBinding
+    private var _binding: MedicFragmentEditarBinding? = null
+    private val binding get() = _binding!!
     private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
@@ -48,7 +48,7 @@ class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = MedicFragmentEditarBinding.bind(view)
+        _binding = MedicFragmentEditarBinding.bind(view)
 
         configurarListeners()
         cargarConsultoriosDelMedico()
@@ -82,7 +82,7 @@ class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
                 }
 
                 withContext(Dispatchers.Main) {
-                    configurarSpinner(nombresMostrar)
+                    configurarDropdown(nombresMostrar)
                 }
 
             } catch (e: Exception) {
@@ -93,21 +93,17 @@ class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
         }
     }
 
-    private fun configurarSpinner(nombresMostrar: List<String>) {
+    private fun configurarDropdown(nombresMostrar: List<String>) {
         val adapter = ArrayAdapter(
             requireContext(),
-            android.R.layout.simple_spinner_dropdown_item,
+            android.R.layout.simple_dropdown_item_1line,
             nombresMostrar
         )
-        binding.spinnerConsultorios.adapter = adapter
+        binding.spinnerConsultorios.setAdapter(adapter)
 
-        binding.spinnerConsultorios.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                consultorioSeleccionado = listaConsultorios[position]
-                poblarDatosDelConsultorioSeleccionado()
-            }
-
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        binding.spinnerConsultorios.setOnItemClickListener { _, _, position, _ ->
+            consultorioSeleccionado = listaConsultorios[position]
+            poblarDatosDelConsultorioSeleccionado()
         }
     }
 
@@ -156,7 +152,7 @@ class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
         mapaBotonesDias.forEach { (textView, dia) ->
             val estaSeleccionado = diasSeleccionados.contains(dia)
 
-            textView.setBackgroundColor(Color.parseColor(if (estaSeleccionado) "#00695C" else "#E0E0E0"))
+            textView.setBackgroundResource(if (estaSeleccionado) R.drawable.chip_day_selected else R.drawable.chip_day_unselected)
             textView.setTextColor(Color.parseColor(if (estaSeleccionado) "#FFFFFF" else "#757575"))
         }
     }
@@ -226,5 +222,10 @@ class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
         val amPm = if (hora >= 12) "PM" else "AM"
         val horaFormateada = if (hora % 12 == 0) 12 else hora % 12
         return String.format("%02d:%02d %s", horaFormateada, minuto, amPm)
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 }

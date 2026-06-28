@@ -14,6 +14,7 @@ import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.MedicPrincipalBinding
 import ec.edu.mapsalud.dto.Medico
 import android.graphics.Color
+import ec.edu.mapsalud.utils.ThemeUtils
 
 
 class PrincipalMedic : AppCompatActivity() {
@@ -23,6 +24,7 @@ class PrincipalMedic : AppCompatActivity() {
     private val db = FirebaseFirestore.getInstance()
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = MedicPrincipalBinding.inflate(layoutInflater)
         setContentView(binding.root)

@@ -5,7 +5,7 @@
     android:id="@+id/mainLogin"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/background_color"
+    android:background="?android:attr/windowBackground"
     tools:context=".LoginScreen">
 
     <!-- Background Image -->
@@ -76,7 +76,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
                     android:text="@string/map_salud"
-                    android:textColor="@color/logo_text_color"
+                    android:textColor="?attr/colorPrimary"
                     android:textSize="30sp"
                     android:textStyle="bold" />
 
@@ -84,8 +84,8 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="4dp"
-                    android:text="Precision health mobility"
-                    android:textColor="@color/information_text_color"
+                    android:text="Salud con precisión"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="13sp" />
             </LinearLayout>
 
@@ -96,18 +96,18 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:background="@drawable/login_card_background"
+                android:backgroundTint="?attr/colorSurface"
                 android:clipToOutline="true"
                 android:elevation="10dp"
                 android:orientation="vertical"
                 android:padding="24dp">
 
-                <!-- Header -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:text="Welcome back"
-                    android:textColor="@color/small_text_color"
+                    android:text="Bienvenido de nuevo"
+                    android:textColor="?attr/colorOnSurface"
                     android:textSize="26sp"
                     android:textStyle="bold" />
 
@@ -116,109 +116,87 @@
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
                     android:layout_marginTop="6dp"
-                    android:text="Please select your role to continue"
-                    android:textColor="@color/information_text_color"
+                    android:text="Por favor, ingresa tus datos para continuar"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="13sp" />
 
-                <!-- Segmented Buttons -->
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:layout_marginTop="24dp"
-                    android:background="@drawable/login_segment_background"
-                    android:orientation="horizontal"
-                    android:padding="4dp">
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnPatient"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:backgroundTint="@color/primary"
-                        android:text="Patient"
-                        android:textAllCaps="false"
-                        android:textColor="@color/white"
-                        android:textStyle="bold"
-                        app:cornerRadius="20dp" />
-
-                    <com.google.android.material.button.MaterialButton
-                        android:id="@+id/btnDoctor"
-                        android:layout_width="0dp"
-                        android:layout_height="48dp"
-                        android:layout_weight="1"
-                        android:text="Doctor"
-                        android:backgroundTint="@color/surface_container_high"
-                        android:textAllCaps="false"
-                        android:textColor="@color/information_text_color"
-                        android:textStyle="bold"
-                        app:cornerRadius="20dp" />
-                </LinearLayout>
-
-                <!-- Email -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="24dp"
-                    android:text="Email Address"
-                    android:textColor="@color/information_text_color"
+                    android:text="Correo Electrónico"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="12sp" />
 
-                <!-- Password -->
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/txtEmail"
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MapSalud.TextInputLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:background="@drawable/login_input_background"
-                    android:hint="name@example.com"
-                    android:inputType="textEmailAddress"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:textColor="@color/small_text_color"
-                    android:textColorHint="@color/outline_color" />
+                    app:boxBackgroundColor="?attr/colorSurfaceVariant"
+                    app:hintEnabled="false">
+
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/txtEmail"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:hint="name@example.com"
+                        android:inputType="textEmailAddress"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textColorHint="?attr/colorOnSurfaceVariant" />
+                </com.google.android.material.textfield.TextInputLayout>
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginTop="16dp"
-                    android:text="Password"
-                    android:textColor="@color/information_text_color"
+                    android:text="Contraseña"
+                    android:textColor="?attr/colorOnSurfaceVariant"
                     android:textSize="12sp" />
 
-                <com.google.android.material.textfield.TextInputEditText
-                    android:id="@+id/txtPassword"
+                <com.google.android.material.textfield.TextInputLayout
+                    style="@style/Widget.MapSalud.TextInputLayout"
                     android:layout_width="match_parent"
-                    android:layout_height="56dp"
+                    android:layout_height="wrap_content"
                     android:layout_marginTop="6dp"
-                    android:background="@drawable/login_input_background"
-                    android:hint="••••••••"
-                    android:inputType="textPassword"
-                    android:paddingStart="16dp"
-                    android:paddingEnd="16dp"
-                    android:textColor="@color/small_text_color"
-                    android:textColorHint="@color/outline_color" />
+                    app:boxBackgroundColor="?attr/colorSurfaceVariant"
+                    app:hintEnabled="false"
+                    app:passwordToggleEnabled="true"
+                    app:passwordToggleTint="?attr/colorPrimary">
 
-                <!-- Forgot -->
+                    <com.google.android.material.textfield.TextInputEditText
+                        android:id="@+id/txtPassword"
+                        android:layout_width="match_parent"
+                        android:layout_height="56dp"
+                        android:hint="•••••••••••••••••"
+                        android:inputType="textPassword"
+                        android:paddingStart="16dp"
+                        android:paddingEnd="16dp"
+                        android:textColor="?attr/colorOnSurface"
+                        android:textColorHint="?attr/colorOnSurfaceVariant" />
+                </com.google.android.material.textfield.TextInputLayout>
+
                 <TextView
                     android:id="@+id/forgotPassword"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="end"
                     android:layout_marginTop="10dp"
-                    android:text="Forgot password?"
-                    android:textColor="@color/logo_text_color"
+                    android:text="¿Olvidaste tu contraseña?"
+                    android:textColor="?attr/colorPrimary"
                     android:textSize="12sp"
                     android:textStyle="bold" />
 
-                <!-- Login Button -->
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnSignin"
                     android:layout_width="match_parent"
                     android:layout_height="50dp"
                     android:layout_marginTop="16dp"
-                    android:text="Sign In"
-                    android:backgroundTint="@color/primary"
-                    android:textColor="@color/white"
+                    android:text="Iniciar Sesión"
+                    android:backgroundTint="?attr/colorPrimary"
+                    android:textColor="?attr/colorOnPrimary"
                     android:textSize="16sp"
                     android:textStyle="bold"
                     app:cornerRadius="25dp" />
@@ -239,10 +217,13 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_gravity="center_horizontal"
-                    android:layout_marginTop="15dp"
-                    android:text="New user? Create an account"
-                    android:textColor="@color/information_text_color"
-                    android:textSize="13sp" />
+                    android:layout_marginTop="20dp"
+                    android:text="¿Nuevo usuario? Crea una cuenta"
+                    android:textColor="?attr/colorPrimary"
+                    android:textSize="14sp"
+                    android:textStyle="bold"
+                    android:padding="8dp"
+                    android:background="?attr/selectableItemBackground" />
 
             </LinearLayout>
 
@@ -252,7 +233,7 @@
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="16dp"
                 android:text="© 2026 MAP SALUD"
-                android:textColor="@color/outline_color"
+                android:textColor="?attr/colorOnSurfaceVariant"
                 android:textSize="11sp" />
 
         </LinearLayout>

@@ -12,6 +12,7 @@ import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import ec.edu.mapsalud.dto.AppointmentDtoRemote
 import ec.edu.mapsalud.dto.Paciente
+import ec.edu.mapsalud.utils.ThemeUtils
 
 class DetalleCitaMedic : AppCompatActivity() {
 
@@ -20,6 +21,7 @@ class DetalleCitaMedic : AppCompatActivity() {
     private var idCitaActual: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = MedicDetalleCitaBinding.inflate(layoutInflater)
         setContentView(binding.root)
