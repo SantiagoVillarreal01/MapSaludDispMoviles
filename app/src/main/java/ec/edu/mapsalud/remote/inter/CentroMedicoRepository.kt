@@ -2,7 +2,7 @@ package ec.edu.mapsalud.remote.inter
 
 import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
 
-interface MedicalCenterRemote {
+interface CentroMedicoRepository {
     suspend fun getAllCenters(): Result<List<MedicalCenterDtoRemote>>
     suspend fun getCenterById(id: String): Result<MedicalCenterDtoRemote?>
 
@@ -13,4 +13,6 @@ interface MedicalCenterRemote {
         specialty: String?, // Especialidad o null para todas
         radiusInMeters: Double = 1000.0
     ): Result<List<Pair<MedicalCenterDtoRemote, Float>>>
+
+    suspend fun addSpecialtyToCenter(idCenter: String, specialty: String): Result<Unit>
 }

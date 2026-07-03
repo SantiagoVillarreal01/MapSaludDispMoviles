@@ -10,17 +10,26 @@ import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.MedicCuadroCitaBinding
 import ec.edu.mapsalud.databinding.MedicFragmentCitasBinding
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.widget.Toast
+import androidx.fragment.app.viewModels
 import ec.edu.mapsalud.dto.AppointmentDtoRemote
 import ec.edu.mapsalud.dto.AppointmentPaciente
 import ec.edu.mapsalud.dto.Paciente
-import kotlinx.coroutines.tasks.await
+import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
+import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
+import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
+import ec.edu.mapsalud.remote.inter.CitaRepository
+import ec.edu.mapsalud.remote.inter.ConsultorioRepository
+import ec.edu.mapsalud.remote.inter.UsuariosRepository
+import ec.edu.mapsalud.usercases.citasUC.GetPendingAppointmentsByOfficesUC
+import ec.edu.mapsalud.usercases.consultoriosUC.GetOfficesByDoctorUC
+import ec.edu.mapsalud.viewmodel.CitaViewModel
+import ec.edu.mapsalud.viewmodel.ConsultorioViewModel
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
@@ -31,9 +40,12 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
 
     private var _binding: MedicFragmentCitasBinding? = null
     private val binding get() = _binding!!
-
-    private val db = FirebaseFirestore.getInstance()
     private val currentDoctorId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
+    private val consultorioVM by viewModels<ConsultorioViewModel>()
+    private val citaVM by viewModels<CitaViewModel>()
+    private val consultorioRepository = ConsultorioRepositoryImpl()
+    private val citaRepository = CitaRepositoryImpl()
+    private val usuarioRepository = UsuariosRepositoryImpl()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -42,80 +54,72 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
         binding.recyclerCitasHoy.layoutManager = LinearLayoutManager(requireContext())
         binding.recyclerCitasManana.layoutManager = LinearLayoutManager(requireContext())
 
+        initObservers()
         cargarCitas()
     }
 
     private fun cargarCitas() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-                val cal = Calendar.getInstance()
-                val fechaHoy = dateFormat.format(cal.time)
-                cal.add(Calendar.DAY_OF_YEAR, 1)
-                val fechaManana = dateFormat.format(cal.time)
+        if (currentDoctorId.isEmpty()) return
+        consultorioVM.cargarConsultoriosPorDoctor(
+            idDoctor = currentDoctorId,
+            getOfficesByDoctorUC = GetOfficesByDoctorUC(consultorioRepository)
+        )
+    }
 
-                val officesSnapshot = db.collection("consultorios")
-                    .whereEqualTo("idDoctor", currentDoctorId)
-                    .get().await()
+    private fun initObservers() {
+        consultorioVM.officesList.observe(viewLifecycleOwner) { offices ->
+            val officeIds = offices.map { it.id }
+            if (officeIds.isEmpty()) {
+                actualizarUI(emptyList(), emptyList())
+                return@observe
+            }
+            citaVM.cargarCitasPendientesPorConsultorios(
+                officeIds = officeIds,
+                getByOfficesUC = GetPendingAppointmentsByOfficesUC(citaRepository)
+            )
+        }
+        citaVM.appointmentsRawList.observe(viewLifecycleOwner) { todasLasCitas ->
+            lifecycleScope.launch(Dispatchers.Main) {
+                try {
+                    val listasFiltradas = withContext(Dispatchers.IO) {
+                        val dateFormat = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+                        val cal = Calendar.getInstance()
+                        val fechaHoy = dateFormat.format(cal.time)
+                        cal.add(Calendar.DAY_OF_YEAR, 1)
+                        val fechaManana = dateFormat.format(cal.time)
 
-                val officeIds = officesSnapshot.documents.map { it.id }
+                        val citasHoy = mutableListOf<AppointmentPaciente>()
+                        val citasManana = mutableListOf<AppointmentPaciente>()
 
-                if (officeIds.isEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        actualizarUI(emptyList(), emptyList())
-                    }
-                    return@launch
-                }
+                        for (cita in todasLasCitas) {
+                            if (cita.date == fechaHoy || cita.date == fechaManana) {
 
-                val citasSnapshot = db.collection("citas")
-                    .whereIn("idOffice", officeIds)
-                    .whereEqualTo("status", "Pendiente")
-                    .get().await()
+                                val paciente = if (cita.patientName.isNotEmpty()) {
+                                    Paciente(info = ec.edu.mapsalud.dto.UsuarioInfo(
+                                        nombres = cita.patientName,
+                                        apellidos = ""
+                                    ))
+                                } else {
+                                    usuarioRepository.getPacienteById(cita.idUser).getOrNull()
+                                }
 
-                val todasLasCitas = citasSnapshot.toObjects(AppointmentDtoRemote::class.java)
+                                if (paciente != null) {
+                                    val (horaFormat, amPm) = formatearHora(cita.time)
+                                    val citaUI = AppointmentPaciente(cita, paciente, horaFormat, amPm)
 
-                val citasHoy = mutableListOf<AppointmentPaciente>()
-                val citasManana = mutableListOf<AppointmentPaciente>()
-
-                for (cita in todasLasCitas) {
-                    if (cita.date == fechaHoy || cita.date == fechaManana) {
-                        // 1. Intentar usar datos denormalizados
-                        val citaUI = if (cita.patientName.isNotEmpty()) {
-                            val (horaFormat, amPm) = formatearHora(cita.time)
-                            // Creamos un Paciente ficticio para el DTO AppointmentPaciente si es necesario, 
-                            // o mejor adaptamos AppointmentPaciente
-                            val dummyPaciente = Paciente(info = ec.edu.mapsalud.dto.UsuarioInfo(
-                                nombres = cita.patientName,
-                                apellidos = ""
-                            ))
-                            AppointmentPaciente(cita, dummyPaciente, horaFormat, amPm)
-                        } else {
-                            // 2. Fallback: Consultar base de datos (para citas antiguas)
-                            val pacienteDoc = db.collection("usuarios").document(cita.idUser).get().await()
-                            val paciente = pacienteDoc.toObject(Paciente::class.java)
-                            if (paciente != null) {
-                                val (horaFormat, amPm) = formatearHora(cita.time)
-                                AppointmentPaciente(cita, paciente, horaFormat, amPm)
-                            } else null
+                                    if (cita.date == fechaHoy) citasHoy.add(citaUI)
+                                    else citasManana.add(citaUI)
+                                }
+                            }
                         }
-
-                        if (citaUI != null) {
-                            if (cita.date == fechaHoy) citasHoy.add(citaUI)
-                            else citasManana.add(citaUI)
-                        }
+                        citasHoy.sortBy { it.appointment.time }
+                        citasManana.sortBy { it.appointment.time }
+                        Pair(citasHoy, citasManana)
                     }
-                }
-                citasHoy.sortBy { it.appointment.time }
-                citasManana.sortBy { it.appointment.time }
+                    actualizarUI(listasFiltradas.first, listasFiltradas.second)
 
-                // 6. Enviar a la UI en el hilo principal
-                withContext(Dispatchers.Main) {
-                    actualizarUI(citasHoy, citasManana)
-                }
-
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Error al cargar citas: ${e.message}", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    Toast.makeText(requireContext(), "Error al procesar citas: ${e.message}", Toast.LENGTH_SHORT).show()
                 }
             }
         }
@@ -146,7 +150,6 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
 
     private fun abrirDetalleCita(cita: AppointmentPaciente) {
         val intent = Intent(requireContext(), DetalleCitaMedic::class.java)
-        // Pasamos el ID de la cita para que la otra ventana pueda gestionarla o agregar el diagnóstico
         intent.putExtra("ID_CITA", cita.appointment.id)
         startActivity(intent)
     }

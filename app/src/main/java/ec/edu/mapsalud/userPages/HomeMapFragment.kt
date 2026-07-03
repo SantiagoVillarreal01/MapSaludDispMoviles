@@ -6,8 +6,10 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
@@ -20,12 +22,15 @@ import com.google.android.gms.maps.model.MarkerOptions
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.FragmentHomeMapBinding
 import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
-import ec.edu.mapsalud.remote.impl.MedicalCenterRemoteImpl
-import ec.edu.mapsalud.remote.inter.MedicalCenterRemote
+import ec.edu.mapsalud.remote.impl.CentroMedicoRepositoryImpl
+import ec.edu.mapsalud.remote.inter.CentroMedicoRepository
+import ec.edu.mapsalud.usercases.centrosUC.GetAllCentersUC
 import ec.edu.mapsalud.utils.ThemeUtils
+import ec.edu.mapsalud.viewmodel.CentroMedicoViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.getValue
 
 class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback {
 
@@ -34,7 +39,8 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private val centerRepository: MedicalCenterRemote = MedicalCenterRemoteImpl()
+    private val centroMedicoRepository = CentroMedicoRepositoryImpl()
+    private val centroMedicoVM by viewModels<CentroMedicoViewModel>()
     private var centroSeleccionado: MedicalCenterDtoRemote? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -47,6 +53,7 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
         mapFragment?.getMapAsync(this)
 
         initListeners()
+        initObservers()
     }
 
     private fun updateMapStyle(googleMap: GoogleMap) {
@@ -76,11 +83,31 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
         }
     }
 
+    private fun initObservers() {
+        centroMedicoVM.centersList.observe(viewLifecycleOwner) { listaCentros ->
+            if (!::mMap.isInitialized) return@observe
+            mMap.clear()
+
+            if (listaCentros.isEmpty()) {
+                Toast.makeText(requireContext(), "No se encontraron centros médicos disponibles", Toast.LENGTH_LONG).show()
+                return@observe
+            }
+            for (centro in listaCentros) {
+                val latLng = LatLng(centro.latitude, centro.longitude)
+                val marker = mMap.addMarker(
+                    MarkerOptions()
+                        .position(latLng)
+                        .title(centro.name)
+                )
+                marker?.tag = centro
+            }
+        }
+    }
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         updateMapStyle(googleMap)
-
-        cargarCentrosEnMapa()
+        centroMedicoVM.cargarTodosLosCentros(GetAllCentersUC(centroMedicoRepository))
         configurarUbicacionEnTiempoReal()
 
         mMap.setOnMarkerClickListener { marker ->
@@ -99,29 +126,6 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
             centroSeleccionado = null
         }
     }
-
-    private fun cargarCentrosEnMapa() {
-        lifecycleScope.launch(Dispatchers.Main) {
-            val result = withContext(Dispatchers.IO) {
-                centerRepository.getAllCenters()
-            }
-
-            result.onSuccess { listaCentros ->
-                for (centro in listaCentros) {
-                    val latLng = LatLng(centro.latitude, centro.longitude)
-                    val marker = mMap.addMarker(
-                        MarkerOptions()
-                            .position(latLng)
-                            .title(centro.name)
-                    )
-                    marker?.tag = centro
-                }
-            }.onFailure { error ->
-                Toast.makeText(requireContext(), "Error al cargar el mapa: ${error.message}", Toast.LENGTH_LONG).show()
-            }
-        }
-    }
-
     private fun configurarUbicacionEnTiempoReal() {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {

@@ -1,12 +1,13 @@
 package ec.edu.mapsalud.remote.impl
 
 import com.google.firebase.firestore.FirebaseFirestore
-import ec.edu.mapsalud.remote.inter.MedicalCenterRemote
+import ec.edu.mapsalud.remote.inter.CentroMedicoRepository
 import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
 import kotlinx.coroutines.tasks.await
 import android.location.Location
+import com.google.firebase.firestore.FieldValue
 
-class MedicalCenterRemoteImpl : MedicalCenterRemote {
+class CentroMedicoRepositoryImpl : CentroMedicoRepository {
 
     private val db = FirebaseFirestore.getInstance()
 
@@ -29,6 +30,7 @@ class MedicalCenterRemoteImpl : MedicalCenterRemote {
             } else null
         }
     }
+
 
     override suspend fun getCentersFiltered(
         userLat: Double,
@@ -67,5 +69,12 @@ class MedicalCenterRemoteImpl : MedicalCenterRemote {
         }
         results.sortBy { it.second }
         results
+    }
+
+    override suspend fun addSpecialtyToCenter(idCenter: String, specialty: String): Result<Unit> = runCatching {
+        db.collection("centros_medicos").document(idCenter)
+            .update("specialties", FieldValue.arrayUnion(specialty))
+            .await()
+        Unit
     }
 }

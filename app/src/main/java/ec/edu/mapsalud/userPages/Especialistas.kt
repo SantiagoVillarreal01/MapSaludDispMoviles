@@ -10,6 +10,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ec.edu.mapsalud.databinding.CuadroDoctorBinding
 import ec.edu.mapsalud.databinding.UserEspecialistasBinding
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
 import ec.edu.mapsalud.dto.DoctorOfficeItem
 import kotlinx.coroutines.Dispatchers
@@ -17,14 +18,21 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import ec.edu.mapsalud.remote.impl.OfficeRemoteImpl
-import ec.edu.mapsalud.remote.inter.OfficeRemote
+import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
+import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
+import ec.edu.mapsalud.remote.inter.ConsultorioRepository
+import ec.edu.mapsalud.usercases.consultoriosUC.GetOfficesByCenterAndSpecialtyUC
 import ec.edu.mapsalud.utils.ThemeUtils
+import ec.edu.mapsalud.viewmodel.ConsultorioViewModel
+import ec.edu.mapsalud.viewmodel.UsuarioViewModel
+import kotlinx.coroutines.coroutineScope
 
 class Especialistas : AppCompatActivity() {
 
     private lateinit var binding: UserEspecialistasBinding
-    private val repository: OfficeRemote = OfficeRemoteImpl()
+    private val consultorioVM by viewModels<ConsultorioViewModel>()
+    private val consultorioRepository = ConsultorioRepositoryImpl()
+    private val usuarioRepository = UsuariosRepositoryImpl()
     private var idCentroActual: String = ""
     private var especialidadSeleccionada: String = ""
 
@@ -44,6 +52,7 @@ class Especialistas : AppCompatActivity() {
         }
 
         configurarRecyclerView()
+        initObservers()
         cargarConsultoriosYDoctores()
     }
 
@@ -65,24 +74,26 @@ class Especialistas : AppCompatActivity() {
     }
 
     private fun cargarConsultoriosYDoctores() {
-        lifecycleScope.launch(Dispatchers.Main) {
+        consultorioVM.cargarConsultoriosPorEspecialidad(
+            idCenter = idCentroActual,
+            specialty = especialidadSeleccionada,
+            getOfficesUC = GetOfficesByCenterAndSpecialtyUC(consultorioRepository)
+        )
+    }
 
-            val officesResult = withContext(Dispatchers.IO) {
-                repository.getOfficesByCenterAndSpecialty(idCentroActual, especialidadSeleccionada)
+    private fun initObservers() {
+        consultorioVM.officesList.observe(this) { offices ->
+            if (offices.isEmpty()) {
+                Toast.makeText(this@Especialistas, "No hay consultorios disponibles", Toast.LENGTH_LONG).show()
+                (binding.recyclerViewEspecialistas.adapter as DoctorAdapter).updateData(emptyList())
+                return@observe
             }
-
-            officesResult.onSuccess { offices ->
-                if (offices.isEmpty()) {
-                    Toast.makeText(this@Especialistas, "No hay consultorios disponibles", Toast.LENGTH_LONG).show()
-                    return@onSuccess
-                }
-
-                val combinedItems = withContext(Dispatchers.IO) {
+            lifecycleScope.launch {
+                val combinedItems = coroutineScope {
                     offices.map { office ->
                         async {
-                            // Verificamos que el office tenga un idDoctor válido
                             if (office.idDoctor.isNotEmpty()) {
-                                val doctorResult = repository.getDoctorById(office.idDoctor).getOrNull()
+                                val doctorResult = usuarioRepository.getDoctorById(office.idDoctor).getOrNull()
                                 if (doctorResult != null) {
                                     DoctorOfficeItem(office, doctorResult)
                                 } else null
@@ -90,11 +101,7 @@ class Especialistas : AppCompatActivity() {
                         }
                     }.awaitAll().filterNotNull()
                 }
-
                 (binding.recyclerViewEspecialistas.adapter as DoctorAdapter).updateData(combinedItems)
-
-            }.onFailure { error ->
-                Toast.makeText(this@Especialistas, "Error de conexión: ${error.message}", Toast.LENGTH_SHORT).show()
             }
         }
     }

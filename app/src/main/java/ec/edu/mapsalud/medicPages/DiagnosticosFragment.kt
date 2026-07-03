@@ -14,30 +14,42 @@ import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.CuadroCitaCompletaBinding
 import ec.edu.mapsalud.databinding.MedicFragmentDiagnosticosBinding
 import android.widget.Toast
+import androidx.activity.viewModels
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import ec.edu.mapsalud.dto.AppointmentDtoRemote
 import ec.edu.mapsalud.dto.AppointmentPaciente
 import ec.edu.mapsalud.dto.Paciente
+import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
+import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
+import ec.edu.mapsalud.remote.inter.CitaRepository
+import ec.edu.mapsalud.remote.inter.UsuariosRepository
+import ec.edu.mapsalud.usercases.citasUC.GetCompletedAppointmentsByDoctorAndPatientUC
+import ec.edu.mapsalud.usercases.citasUC.GetCompletedAppointmentsByDoctorUC
+import ec.edu.mapsalud.usercases.usuariosUC.GetPacienteByCedulaUC
+import ec.edu.mapsalud.viewmodel.CitaViewModel
+import ec.edu.mapsalud.viewmodel.UsuarioViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
+import kotlin.getValue
 
 class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
 
     private lateinit var binding: MedicFragmentDiagnosticosBinding
     private lateinit var adapter: DiagnosticosAdapter
-
-    private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
+    private val citaVM by viewModels<CitaViewModel>()
+    private val usuarioVM by viewModels<UsuarioViewModel>()
+    private val citaRepository = CitaRepositoryImpl()
+    private val usuarioRepository = UsuariosRepositoryImpl()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -45,6 +57,7 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
 
         configurarRecycler()
         configurarBuscador()
+        initObservers()
         cargarTodasLasCitas()
     }
 
@@ -73,72 +86,59 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
         }
     }
 
-    private fun cargarTodasLasCitas() { // Cambiamos el nombre
+    private fun cargarTodasLasCitas() {
         val uidMedico = auth.currentUser?.uid ?: return
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val snapshotCitas = db.collection("citas")
-                    .whereEqualTo("idDoctor", uidMedico)
-                    .whereEqualTo("status", "Completada")
-                    .get().await()
-
-                val citasRemote = snapshotCitas.toObjects(AppointmentDtoRemote::class.java)
-                val listaCompleta = cruzarCitasConPacientes(citasRemote)
-
-                withContext(Dispatchers.Main) {
-                    actualizarListaOrdenada(listaCompleta)
-                }
-            } catch (e: Exception) {
-                Log.e("DiagnosticosFragment", "Error al cargar histórico: ${e.message}", e)
-            }
-        }
+        citaVM.cargarCitasCompletadasPorDoctor(
+            uidMedico,
+            GetCompletedAppointmentsByDoctorUC(citaRepository)
+        )
     }
 
     private fun buscarCitasPorCedula(cedula: String) {
-        val uidMedico = auth.currentUser?.uid ?: return
+        usuarioVM.buscarPacientePorCedula(
+            cedula = cedula,
+            getPacienteByCedulaUC = GetPacienteByCedulaUC(usuarioRepository)
+        )
+    }
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val snapshotUsuarios = db.collection("usuarios")
-                    .whereEqualTo("info.cedula", cedula)
-                    .get().await()
-
-                if (snapshotUsuarios.isEmpty) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(requireContext(), "No se encontró paciente con esa cédula", Toast.LENGTH_SHORT).show()
-                        adapter.actualizarDatos(emptyList())
+    private fun initObservers() {
+        citaVM.appointmentsRawList.observe(viewLifecycleOwner) { citasRemote ->
+            lifecycleScope.launch(Dispatchers.Main) {
+                try {
+                    val listaCompleta = withContext(Dispatchers.IO) {
+                        cruzarCitasConPacientes(citasRemote)
                     }
-                    return@launch
-                }
-
-                val idPaciente = snapshotUsuarios.documents.first().id
-
-                val snapshotCitas = db.collection("citas")
-                    .whereEqualTo("idUser", idPaciente)
-                    .whereEqualTo("idDoctor", uidMedico)
-                    .whereEqualTo("status", "Completada")
-                    .get().await()
-
-                val citasRemote = snapshotCitas.toObjects(AppointmentDtoRemote::class.java)
-                val listaCompleta = cruzarCitasConPacientes(citasRemote)
-
-                withContext(Dispatchers.Main) {
                     actualizarListaOrdenada(listaCompleta)
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Error en la búsqueda", Toast.LENGTH_SHORT).show()
+                } catch (e: Exception) {
+                    Log.e("DiagnosticosFragment", "Error al cargar histórico: ${e.message}", e)
+                    Toast.makeText(requireContext(), "Error al cargar el historial de citas", Toast.LENGTH_SHORT).show()
                 }
             }
         }
+        usuarioVM.paciente.observe(viewLifecycleOwner) { paciente ->
+            val uidMedico = auth.currentUser?.uid ?: return@observe
+
+            if (paciente == null) {
+                Toast.makeText(requireContext(), "No se encontró paciente con esa cédula", Toast.LENGTH_SHORT).show()
+                adapter.actualizarDatos(emptyList())
+                return@observe
+            }
+            citaVM.cargarHistorialCompartido(
+                idDoctor = uidMedico,
+                idUser = paciente.info.id,
+                getByDoctorAndPatientUC = GetCompletedAppointmentsByDoctorAndPatientUC(
+                    citaRepository
+                )
+            )
+        }
     }
+
     private suspend fun cruzarCitasConPacientes(citasRemote: List<AppointmentDtoRemote>): List<AppointmentPaciente> {
         return coroutineScope {
             citasRemote.map { appointment ->
                 async {
                     if (appointment.patientName.isNotEmpty()) {
-                        // Uso de datos denormalizados
                         val dummyPaciente = Paciente(info = ec.edu.mapsalud.dto.UsuarioInfo(
                             nombres = appointment.patientName,
                             apellidos = ""
@@ -150,9 +150,8 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
                             amPm = ""
                         )
                     } else {
-                        // Fallback para citas antiguas
-                        val docPaciente = db.collection("usuarios").document(appointment.idUser).get().await()
-                        val paciente = docPaciente.toObject(Paciente::class.java) ?: Paciente()
+                        val patientResult = usuarioRepository.getPacienteById(appointment.idUser)
+                        val paciente = patientResult.getOrNull() ?: Paciente()
 
                         AppointmentPaciente(
                             appointment = appointment,
@@ -165,7 +164,6 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
             }.awaitAll()
         }
     }
-
     private fun actualizarListaOrdenada(lista: List<AppointmentPaciente>) {
         val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 

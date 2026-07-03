@@ -1,0 +1,129 @@
+package ec.edu.mapsalud.remote.impl
+
+import com.google.firebase.firestore.FirebaseFirestore
+import ec.edu.mapsalud.dto.AppointmentDetail
+import ec.edu.mapsalud.dto.AppointmentDtoRemote
+import ec.edu.mapsalud.dto.DiagnosisEmbedded
+import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
+import ec.edu.mapsalud.dto.Medico
+import ec.edu.mapsalud.dto.OfficeDtoRemote
+import ec.edu.mapsalud.dto.Paciente
+import ec.edu.mapsalud.remote.inter.CitaRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.tasks.await
+
+
+class CitaRepositoryImpl : CitaRepository {
+    private val db = FirebaseFirestore.getInstance()
+
+    override suspend fun checkIsSlotTaken(
+        idOffice: String,
+        date: String,
+        time: String
+    ): Result<Boolean> = runCatching {
+        val snapshot = db.collection("citas")
+            .whereEqualTo("idOffice", idOffice)
+            .whereEqualTo("date", date)
+            .whereEqualTo("time", time)
+            .whereNotEqualTo("status", "Cancelada")
+            .get()
+            .await()
+        !snapshot.isEmpty
+    }
+
+    override suspend fun saveAppointment(appointment: AppointmentDtoRemote): Result<Unit> =
+        runCatching {
+            val docRef = db.collection("citas").document()
+            val appointmentToSave = appointment.copy(id = docRef.id)
+            docRef.set(appointmentToSave).await()
+        }
+
+    override suspend fun updateAppointment(appointmentId: String, newDate: String, newTime: String): Result<Unit> = runCatching {
+        db.collection("citas").document(appointmentId)
+            .update(
+                mapOf(
+                    "date" to newDate,
+                    "time" to newTime
+                )
+            ).await()
+    }
+
+    override suspend fun cancelAppointment(appointmentId: String): Result<Unit> = runCatching {
+        db.collection("citas").document(appointmentId)
+            .update("status", "Cancelada")
+            .await()
+    }
+
+    override suspend fun getPendingAppointmentsByOffices(officeIds: List<String>): Result<List<AppointmentDtoRemote>> = runCatching {
+        if (officeIds.isEmpty()) return@runCatching emptyList()
+
+        val snapshot = db.collection("citas")
+            .whereIn("idOffice", officeIds)
+            .whereEqualTo("status", "Pendiente")
+            .get()
+            .await()
+        snapshot.toObjects(AppointmentDtoRemote::class.java)
+    }
+
+    override suspend fun getAppointmentById(appointmentId: String): Result<AppointmentDtoRemote?> = runCatching {
+        val snap = db.collection("citas").document(appointmentId).get().await()
+        if (snap.exists()) {
+            snap.toObject(AppointmentDtoRemote::class.java)?.copy(id = snap.id)
+        } else null
+    }
+
+    override suspend fun updateAppointmentStatus(appointmentId: String, status: String): Result<Unit> = runCatching {
+        db.collection("citas").document(appointmentId)
+            .update("status", status)
+            .await()
+        Unit
+    }
+
+    override suspend fun getCompletedAppointmentsByDoctor(idDoctor: String): Result<List<AppointmentDtoRemote>> = runCatching {
+        val snapshot = db.collection("citas")
+            .whereEqualTo("idDoctor", idDoctor)
+            .whereEqualTo("status", "Completada")
+            .get()
+            .await()
+        snapshot.documents.mapNotNull { doc ->
+            doc.toObject(AppointmentDtoRemote::class.java)?.copy(id = doc.id)
+        }
+    }
+
+    override suspend fun getCompletedAppointmentsByDoctorAndPatient(idDoctor: String, idUser: String): Result<List<AppointmentDtoRemote>> = runCatching {
+        val snapshot = db.collection("citas")
+            .whereEqualTo("idUser", idUser)
+            .whereEqualTo("idDoctor", idDoctor)
+            .whereEqualTo("status", "Completada")
+            .get()
+            .await()
+        snapshot.documents.mapNotNull { doc ->
+            doc.toObject(AppointmentDtoRemote::class.java)?.copy(id = doc.id)
+        }
+    }
+
+    override suspend fun updateAppointmentDiagnosis(appointmentId: String, diagnosis: DiagnosisEmbedded): Result<Unit> = runCatching {
+        db.collection("citas").document(appointmentId)
+            .update(
+                mapOf(
+                    "diagnosis" to diagnosis,
+                    "status" to "Completada"
+                )
+            ).await()
+        Unit
+    }
+
+    override suspend fun fetchAppointmentsRaw(userId: String, status: String): Result<List<AppointmentDtoRemote>> = runCatching {
+        val appointmentsSnapshot = db.collection("citas")
+            .whereEqualTo("idUser", userId)
+            .whereEqualTo("status", status)
+            .get()
+            .await()
+
+        appointmentsSnapshot.documents.mapNotNull { doc ->
+            doc.toObject(AppointmentDtoRemote::class.java)?.copy(id = doc.id)
+        }
+    }
+}

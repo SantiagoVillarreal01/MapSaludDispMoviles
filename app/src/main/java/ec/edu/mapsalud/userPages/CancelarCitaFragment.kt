@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,9 +15,14 @@ import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.CuadroCitaCompletaBinding
 import ec.edu.mapsalud.databinding.UserCancelarCitaBinding
 import ec.edu.mapsalud.dto.AppointmentDetail
-import ec.edu.mapsalud.remote.impl.AppointmentRemoteImpl
-import ec.edu.mapsalud.remote.inter.AppointmentRemote
+import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
+import ec.edu.mapsalud.remote.inter.CitaRepository
 import com.google.firebase.auth.FirebaseAuth
+import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
+import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
+import ec.edu.mapsalud.usercases.citasUC.CancelAppointmentUC
+import ec.edu.mapsalud.usercases.citasUC.FetchAppointmentsWithDetailsUC
+import ec.edu.mapsalud.viewmodel.CitaViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -25,7 +31,10 @@ class CancelarCitaFragment : Fragment(R.layout.user_cancelar_cita) {
 
     private var _binding: UserCancelarCitaBinding? = null
     private val binding get() = _binding!!
-    private val appointmentRemote: AppointmentRemote = AppointmentRemoteImpl()
+    private val citaVM by viewModels<CitaViewModel>()
+    private val citaRepository = CitaRepositoryImpl()
+    private val consultorioRepository = ConsultorioRepositoryImpl()
+    private val usuarioRepository = UsuariosRepositoryImpl()
     private val auth = FirebaseAuth.getInstance()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -33,26 +42,43 @@ class CancelarCitaFragment : Fragment(R.layout.user_cancelar_cita) {
         _binding = UserCancelarCitaBinding.bind(view)
 
         binding.recyclerCitas.layoutManager = LinearLayoutManager(requireContext())
+        initObservers()
         cargarCitasPendientes()
     }
 
     private fun cargarCitasPendientes() {
         val userId = auth.currentUser?.uid ?: return
-        lifecycleScope.launch(Dispatchers.Main) {
-            val result = withContext(Dispatchers.IO) {
-                appointmentRemote.fetchAppointmentsWithDetails(userId, "Pendiente")
-            }
-            result.onSuccess { list ->
-                if (list.isEmpty()) {
-                    binding.txtEmptyState.visibility = View.VISIBLE
-                } else {
-                    binding.txtEmptyState.visibility = View.GONE
-                    binding.recyclerCitas.adapter = CancelarAdapter(list) { appointment ->
-                        confirmarCancelacion(appointment)
-                    }
+        citaVM.cargarCitasConDetalles(
+            userId = userId,
+            status = "Pendiente",
+            fetchDetailsUC = FetchAppointmentsWithDetailsUC(
+                citaRepo = citaRepository,
+                consultorioRepo = consultorioRepository,
+                usuarioRepo = usuarioRepository
+            )
+        )
+    }
+
+    private fun initObservers() {
+        citaVM.appointmentsDetails.observe(viewLifecycleOwner) { list ->
+            if (list.isEmpty()) {
+                binding.txtEmptyState.visibility = View.VISIBLE
+                binding.recyclerCitas.visibility = View.GONE
+            } else {
+                binding.txtEmptyState.visibility = View.GONE
+                binding.recyclerCitas.visibility = View.VISIBLE
+                binding.recyclerCitas.adapter = CancelarAdapter(list) { appointment ->
+                    confirmarCancelacion(appointment)
                 }
-            }.onFailure {
-                Toast.makeText(requireContext(), "Error al cargar las citas.", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        citaVM.operationSuccess.observe(viewLifecycleOwner) { exito ->
+            if (exito) {
+                Toast.makeText(requireContext(), "Cita cancelada correctamente", Toast.LENGTH_SHORT).show()
+                cargarCitasPendientes()
+            } else {
+                Toast.makeText(requireContext(), "Error al cancelar la cita", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -69,17 +95,10 @@ class CancelarCitaFragment : Fragment(R.layout.user_cancelar_cita) {
     }
 
     private fun ejecutarCancelacion(appointmentId: String) {
-        lifecycleScope.launch(Dispatchers.Main) {
-            val result = withContext(Dispatchers.IO) {
-                appointmentRemote.cancelAppointment(appointmentId)
-            }
-            result.onSuccess {
-                Toast.makeText(requireContext(), "Cita cancelada correctamente", Toast.LENGTH_SHORT).show()
-                cargarCitasPendientes()
-            }.onFailure {
-                Toast.makeText(requireContext(), "Error al cancelar la cita", Toast.LENGTH_SHORT).show()
-            }
-        }
+        citaVM.cancelarCita(
+            appointmentId = appointmentId,
+            cancelUC = CancelAppointmentUC(citaRepository)
+        )
     }
 
     override fun onDestroyView() {

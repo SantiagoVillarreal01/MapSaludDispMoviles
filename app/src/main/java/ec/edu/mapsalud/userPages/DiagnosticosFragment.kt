@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -14,18 +15,25 @@ import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.CuadroCitaCompletaBinding
 import ec.edu.mapsalud.databinding.UserDiagnosticosBinding
 import ec.edu.mapsalud.dto.AppointmentDetail
-import ec.edu.mapsalud.remote.impl.AppointmentRemoteImpl
-import ec.edu.mapsalud.remote.inter.AppointmentRemote
+import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
+import ec.edu.mapsalud.remote.inter.CitaRepository
 import com.google.firebase.auth.FirebaseAuth
+import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
+import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
+import ec.edu.mapsalud.usercases.citasUC.FetchAppointmentsWithDetailsUC
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import ec.edu.mapsalud.viewmodel.CitaViewModel
 
 class DiagnosticosFragment : Fragment(R.layout.user_diagnosticos) {
 
     private var _binding: UserDiagnosticosBinding? = null
     private val binding get() = _binding!!
-    private val appointmentRemote: AppointmentRemote = AppointmentRemoteImpl()
+    private val citaVM by viewModels<CitaViewModel>()
+    private val citaRepository = CitaRepositoryImpl()
+    private val consultorioRepository = ConsultorioRepositoryImpl()
+    private val usuarioRepository = UsuariosRepositoryImpl()
     private val auth = FirebaseAuth.getInstance()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
@@ -33,24 +41,32 @@ class DiagnosticosFragment : Fragment(R.layout.user_diagnosticos) {
         _binding = UserDiagnosticosBinding.bind(view)
 
         binding.recyclerDiagnosticos.layoutManager = LinearLayoutManager(requireContext())
+        initObservers()
         cargarDiagnosticos()
     }
 
     private fun cargarDiagnosticos() {
         val userId = auth.currentUser?.uid ?: return
-        lifecycleScope.launch(Dispatchers.Main) {
-            val result = withContext(Dispatchers.IO) {
-                appointmentRemote.fetchAppointmentsWithDetails(userId, "Completada")
-            }
-            result.onSuccess { list ->
-                if (list.isEmpty()) {
-                    binding.txtEmptyState.visibility = View.VISIBLE
-                } else {
-                    binding.txtEmptyState.visibility = View.GONE
-                    binding.recyclerDiagnosticos.adapter = DiagnosticosAdapter(list)
-                }
-            }.onFailure {
-                Toast.makeText(requireContext(), "Error al cargar los diagnósticos.", Toast.LENGTH_SHORT).show()
+        citaVM.cargarCitasConDetalles(
+            userId = userId,
+            status = "Completada",
+            fetchDetailsUC = FetchAppointmentsWithDetailsUC(
+                citaRepo = citaRepository,
+                consultorioRepo = consultorioRepository,
+                usuarioRepo = usuarioRepository
+            )
+        )
+    }
+
+    private fun initObservers() {
+        citaVM.appointmentsDetails.observe(viewLifecycleOwner) { list ->
+            if (list.isEmpty()) {
+                binding.txtEmptyState.visibility = View.VISIBLE
+                binding.recyclerDiagnosticos.visibility = View.GONE
+            } else {
+                binding.txtEmptyState.visibility = View.GONE
+                binding.recyclerDiagnosticos.visibility = View.VISIBLE
+                binding.recyclerDiagnosticos.adapter = DiagnosticosAdapter(list)
             }
         }
     }

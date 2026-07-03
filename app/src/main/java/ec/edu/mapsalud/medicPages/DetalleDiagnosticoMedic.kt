@@ -3,10 +3,20 @@ package ec.edu.mapsalud.medicPages
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
-import com.google.firebase.firestore.FirebaseFirestore
+import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
 import ec.edu.mapsalud.databinding.MedicDetalleDiagnosticoBinding
 import ec.edu.mapsalud.dto.DiagnosisEmbedded
+import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
+import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
+import ec.edu.mapsalud.remote.inter.CitaRepository
+import ec.edu.mapsalud.usercases.citasUC.UpdateAppointmentDiagnosisUC
 import ec.edu.mapsalud.utils.ThemeUtils
+import ec.edu.mapsalud.viewmodel.CitaViewModel
+import ec.edu.mapsalud.viewmodel.UsuarioViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -14,8 +24,9 @@ import java.util.Locale
 class DetalleDiagnosticoMedic : AppCompatActivity() {
 
     private lateinit var binding: MedicDetalleDiagnosticoBinding
-    private val db = FirebaseFirestore.getInstance()
     private var appointmentId: String = ""
+    private val citaRepository = CitaRepositoryImpl()
+    private val citaVM: CitaViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtils.applyTheme(this)
@@ -30,16 +41,39 @@ class DetalleDiagnosticoMedic : AppCompatActivity() {
         binding.txtPacienteDetalle.text = "Paciente: $nombrePaciente"
         binding.txtMotivoDetalle.text = "Motivo: $motivoCita"
 
+        initObservers()
+
         binding.btnRegresarDiag.setOnClickListener {
             finish()
         }
 
         binding.btnEnviarDiagnostico.setOnClickListener {
-            guardarDiagnosticoEnFirebase()
+            guardarDiagnosticoEnRepositorio()
         }
     }
 
-    private fun guardarDiagnosticoEnFirebase() {
+    private fun initObservers() {
+        citaVM.operationSuccess.observe(this) { exito ->
+            if (exito) {
+                Toast.makeText(
+                    this,
+                    "Diagnóstico guardado exitosamente",
+                    Toast.LENGTH_LONG
+                ).show()
+                finish()
+            } else {
+                binding.btnEnviarDiagnostico.isEnabled = true
+                binding.btnEnviarDiagnostico.text = "Guardar y Completar Cita"
+                Toast.makeText(
+                    this,
+                    "Error al guardar el diagnóstico",
+                    Toast.LENGTH_SHORT
+                ).show()
+            }
+        }
+    }
+
+    private fun guardarDiagnosticoEnRepositorio() {
         val diagnosticoTxt = binding.inputDiagnostico.text.toString().trim()
         val tratamientoTxt = binding.inputTratamiento.text.toString().trim()
         val sugerenciasTxt = binding.inputSugerencias.text.toString().trim()
@@ -50,7 +84,8 @@ class DetalleDiagnosticoMedic : AppCompatActivity() {
         }
 
         if (appointmentId.isEmpty()) {
-            Toast.makeText(this, "Error: No se encontró el ID de la cita", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "Error: No se encontró el ID de la cita", Toast.LENGTH_SHORT)
+                .show()
             return
         }
 
@@ -67,21 +102,10 @@ class DetalleDiagnosticoMedic : AppCompatActivity() {
             dateGiven = fechaActual
         )
 
-        db.collection("citas").document(appointmentId)
-            .update(
-                mapOf(
-                    "diagnosis" to nuevoDiagnostico,
-                    "status" to "Completada"
-                )
-            )
-            .addOnSuccessListener {
-                Toast.makeText(this, "Diagnóstico guardado exitosamente", Toast.LENGTH_LONG).show()
-                finish()
-            }
-            .addOnFailureListener { e ->
-                binding.btnEnviarDiagnostico.isEnabled = true
-                binding.btnEnviarDiagnostico.text = "Guardar y Completar Cita"
-                Toast.makeText(this, "Error al guardar: ${e.message}", Toast.LENGTH_SHORT).show()
-            }
+        citaVM.finalizarCitaConDiagnostico(
+            appointmentId = appointmentId,
+            diagnosis = nuevoDiagnostico,
+            updateDiagnosisUC = UpdateAppointmentDiagnosisUC(citaRepository)
+        )
     }
 }

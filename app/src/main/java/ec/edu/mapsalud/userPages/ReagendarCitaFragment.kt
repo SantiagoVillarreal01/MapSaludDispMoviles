@@ -11,8 +11,8 @@ import androidx.lifecycle.lifecycleScope
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.UserReagendarCitaBinding
 import ec.edu.mapsalud.dto.AppointmentDetail
-import ec.edu.mapsalud.remote.impl.AppointmentRemoteImpl
-import ec.edu.mapsalud.remote.inter.AppointmentRemote
+import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
+import ec.edu.mapsalud.remote.inter.CitaRepository
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -21,14 +21,24 @@ import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
 import android.view.LayoutInflater
-import android.view.ViewGroup
+import androidx.fragment.app.viewModels
 import ec.edu.mapsalud.databinding.CuadroCitaCompletaBinding
+import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
+import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
+import ec.edu.mapsalud.usercases.citasUC.CheckIsSlotTakenUC
+import ec.edu.mapsalud.usercases.citasUC.FetchAppointmentsWithDetailsUC
+import ec.edu.mapsalud.usercases.citasUC.UpdateAppointmentUC
+import ec.edu.mapsalud.viewmodel.CitaViewModel
 
 class ReagendarCitaFragment : Fragment(R.layout.user_reagendar_cita) {
 
     private var _binding: UserReagendarCitaBinding? = null
     private val binding get() = _binding!!
-    private val appointmentRemote: AppointmentRemote = AppointmentRemoteImpl()
+
+    private val citaVM by viewModels<CitaViewModel>()
+    private val citaRepository = CitaRepositoryImpl()
+    private val consultorioRepository = ConsultorioRepositoryImpl()
+    private val usuarioRepository = UsuariosRepositoryImpl()
     private val auth = FirebaseAuth.getInstance()
 
     private var selectedAppointment: AppointmentDetail? = null
@@ -41,6 +51,7 @@ class ReagendarCitaFragment : Fragment(R.layout.user_reagendar_cita) {
         _binding = UserReagendarCitaBinding.bind(view)
 
         configurarCalendario()
+        initObservers()
         cargarCitasPendientes()
 
         binding.btnReagendarCita.setOnClickListener {
@@ -50,14 +61,49 @@ class ReagendarCitaFragment : Fragment(R.layout.user_reagendar_cita) {
 
     private fun cargarCitasPendientes() {
         val userId = auth.currentUser?.uid ?: return
-        lifecycleScope.launch(Dispatchers.Main) {
-            val result = withContext(Dispatchers.IO) {
-                appointmentRemote.fetchAppointmentsWithDetails(userId, "Pendiente")
+        citaVM.cargarCitasConDetalles(
+            userId = userId,
+            status = "Pendiente",
+            fetchDetailsUC = FetchAppointmentsWithDetailsUC(
+                citaRepo = citaRepository,
+                consultorioRepo = consultorioRepository,
+                usuarioRepo = usuarioRepository
+            )
+        )
+    }
+
+    private fun initObservers() {
+        citaVM.appointmentsDetails.observe(viewLifecycleOwner) { list ->
+            poblarCitas(list)
+        }
+        citaVM.operationSuccess.observe(viewLifecycleOwner) { exito ->
+            binding.btnReagendarCita.isEnabled = true
+            if (exito) {
+                Toast.makeText(requireContext(), "Cita reagendada exitosamente", Toast.LENGTH_SHORT).show()
+                cargarCitasPendientes()
+                binding.containerHorarios.removeAllViews()
+                selectedAppointment = null
+                selectedDate = ""
+                selectedTime = ""
+            } else {
+                Toast.makeText(requireContext(), "Error al reagendar", Toast.LENGTH_SHORT).show()
             }
-            result.onSuccess { list ->
-                poblarCitas(list)
-            }.onFailure {
-                Toast.makeText(requireContext(), "Error al cargar citas", Toast.LENGTH_SHORT).show()
+        }
+
+        citaVM.isSlotTaken.observe(viewLifecycleOwner) { ocupado ->
+            val appointment = selectedAppointment
+            if (appointment == null || selectedDate.isEmpty() || selectedTime.isEmpty()) return@observe
+
+            if (ocupado) {
+                Toast.makeText(requireContext(), "El horario seleccionado ya está ocupado", Toast.LENGTH_LONG).show()
+                binding.btnReagendarCita.isEnabled = true
+            } else {
+                citaVM.reprogramarCita(
+                    appointmentId = appointment.appointment.id,
+                    newDate = selectedDate,
+                    newTime = selectedTime,
+                    updateUC = UpdateAppointmentUC(citaRepository)
+                )
             }
         }
     }
@@ -162,21 +208,14 @@ class ReagendarCitaFragment : Fragment(R.layout.user_reagendar_cita) {
             return
         }
 
-        lifecycleScope.launch(Dispatchers.Main) {
-            val result = withContext(Dispatchers.IO) {
-                appointmentRemote.updateAppointment(appointment.appointment.id, selectedDate, selectedTime)
-            }
-            result.onSuccess {
-                Toast.makeText(requireContext(), "Cita reagendada exitosamente", Toast.LENGTH_SHORT).show()
-                cargarCitasPendientes()
-                binding.containerHorarios.removeAllViews()
-                selectedAppointment = null
-                selectedDate = ""
-                selectedTime = ""
-            }.onFailure {
-                Toast.makeText(requireContext(), "Error al reagendar", Toast.LENGTH_SHORT).show()
-            }
-        }
+        binding.btnReagendarCita.isEnabled = false
+
+        citaVM.verificarDisponibilidad(
+            idOffice = appointment.office.id,
+            date = selectedDate,
+            time = selectedTime,
+            checkUC = CheckIsSlotTakenUC(citaRepository)
+        )
     }
 
     override fun onDestroyView() {

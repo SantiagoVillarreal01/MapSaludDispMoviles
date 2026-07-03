@@ -14,7 +14,7 @@ import androidx.recyclerview.widget.RecyclerView
 import ec.edu.mapsalud.databinding.CuadroCentroMedicoBinding
 import ec.edu.mapsalud.databinding.UserNuevaCitaBinding
 import ec.edu.mapsalud.dto.CenterWithDistance
-import ec.edu.mapsalud.remote.impl.MedicalCenterRemoteImpl
+import ec.edu.mapsalud.remote.impl.CentroMedicoRepositoryImpl
 import ec.edu.mapsalud.utils.ThemeUtils
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
@@ -23,6 +23,7 @@ import android.annotation.SuppressLint
 import android.content.pm.PackageManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.fragment.app.viewModels
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -33,6 +34,8 @@ import com.google.android.gms.maps.SupportMapFragment
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.LatLng
 import ec.edu.mapsalud.R
+import ec.edu.mapsalud.usercases.centrosUC.GetCentersFilteredUC
+import ec.edu.mapsalud.viewmodel.CentroMedicoViewModel
 
 class NuevaCitaFragment : Fragment(R.layout.user_nueva_cita) {
 
@@ -41,7 +44,8 @@ class NuevaCitaFragment : Fragment(R.layout.user_nueva_cita) {
     private lateinit var adapter: CentroMedicoAdapter
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private val repository = MedicalCenterRemoteImpl()
+    private val centroMedicoVM by viewModels<CentroMedicoViewModel>()
+    private val centroMedicoRepository = CentroMedicoRepositoryImpl()
 
     private var userLat: Double = -0.180653
     private var userLon: Double = -78.467834
@@ -68,6 +72,7 @@ class NuevaCitaFragment : Fragment(R.layout.user_nueva_cita) {
 
         configurarRecyclerView()
         configurarFiltros()
+        initObservers()
         verificarPermisosYGeolocalizar()
         configurarMapaPreview()
     }
@@ -179,6 +184,14 @@ class NuevaCitaFragment : Fragment(R.layout.user_nueva_cita) {
         binding.recyclerViewCentros.adapter = adapter
     }
 
+    private fun initObservers() {
+        centroMedicoVM.filteredCenters.observe(viewLifecycleOwner) { list ->
+            val itemsAdapter = list.map { CenterWithDistance(it.first, it.second) }
+            adapter.actualizarLista(itemsAdapter)
+            binding.txtCountCentros.text = "${list.size} encontrados"
+        }
+    }
+
     private fun navegarAEspecialistas(seleccion: CenterWithDistance) {
         val intent = Intent(requireContext(), Especialistas::class.java)
         intent.putExtra("ID_CENTRO", seleccion.center.id)
@@ -194,17 +207,14 @@ class NuevaCitaFragment : Fragment(R.layout.user_nueva_cita) {
 
         val tipoFiltroDb = if (tipoSeleccionado == "Todos") null else CenterType.values().find { it.nombreMostrar == tipoSeleccionado }?.name
         val especialidadFiltroDb = if (especialidadSeleccionada == "Todas") null else Specialty.values().find { it.nombreMostrar == especialidadSeleccionada }?.name
-
-        lifecycleScope.launch {
-            val result = repository.getCentersFiltered(userLat, userLon, tipoFiltroDb, especialidadFiltroDb, radiusInMeters = 500000.0)
-            result.onSuccess { list ->
-                val itemsAdapter = list.map { CenterWithDistance(it.first, it.second) }
-                adapter.actualizarLista(itemsAdapter)
-                binding.txtCountCentros.text = "${list.size} encontrados"
-            }.onFailure {
-                Toast.makeText(requireContext(), "Error al cargar centros: ${it.message}", Toast.LENGTH_SHORT).show()
-            }
-        }
+        centroMedicoVM.filtrarCentrosPorUbicacion(
+            userLat = userLat,
+            userLon = userLon,
+            type = tipoFiltroDb,
+            specialty = especialidadFiltroDb,
+            radiusInMeters = 500000.0,
+            getCentersFilteredUC = GetCentersFilteredUC(centroMedicoRepository)
+        )
     }
 
     override fun onDestroyView() {

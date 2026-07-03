@@ -19,25 +19,30 @@ import kotlin.collections.iterator
 import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Marker
-import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FieldValue
-import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
 import ec.edu.mapsalud.dto.OfficeDtoRemote
 import ec.edu.mapsalud.enum.Specialty
 import android.Manifest
 import android.content.pm.PackageManager
+import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import ec.edu.mapsalud.enum.CenterType
 import ec.edu.mapsalud.utils.ThemeUtils
-import ec.edu.mapsalud.R
+import ec.edu.mapsalud.remote.impl.CentroMedicoRepositoryImpl
+import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
+import ec.edu.mapsalud.remote.inter.CentroMedicoRepository
+import ec.edu.mapsalud.remote.inter.ConsultorioRepository
+import ec.edu.mapsalud.usercases.centrosUC.AddSpecialtyToCenterUC
+import ec.edu.mapsalud.usercases.centrosUC.GetAllCentersUC
+import ec.edu.mapsalud.usercases.consultoriosUC.SaveOfficeUC
+import ec.edu.mapsalud.viewmodel.CentroMedicoViewModel
+import ec.edu.mapsalud.viewmodel.ConsultorioViewModel
 
 class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
 
@@ -47,13 +52,16 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
-    private val db = FirebaseFirestore.getInstance()
+    private val centroMedicoVM by viewModels<CentroMedicoViewModel>()
+    private val consultorioVM by viewModels<ConsultorioViewModel>()
+
+    private val centroMedicoRepository = CentroMedicoRepositoryImpl()
+    private val consultorioRepository = ConsultorioRepositoryImpl()
     private val auth = FirebaseAuth.getInstance()
 
     private val diasSeleccionados = mutableSetOf<String>()
     private var centroSeleccionado: MedicalCenterDtoRemote? = null
     private var especialidadSeleccionada: Specialty? = null
-
     private val marcadoresCentrosMedicos = HashMap<Marker, MedicalCenterDtoRemote>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -70,7 +78,37 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         configurarPanelDeslizable()
         configurarDropdownEspecialidades()
         initListeners()
+        initObservers()
         configurarBotonesDias()
+    }
+
+    private fun initObservers() {
+        centroMedicoVM.centersList.observe(this) { listaCentros ->
+            mapa.clear()
+            marcadoresCentrosMedicos.clear()
+
+            for (centro in listaCentros) {
+                val coordenadas = LatLng(centro.latitude, centro.longitude)
+                val markerOptions = MarkerOptions()
+                    .position(coordenadas)
+                    .title(centro.name)
+                    .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
+
+                val m = mapa.addMarker(markerOptions)
+                if (m != null) {
+                    marcadoresCentrosMedicos[m] = centro
+                }
+            }
+        }
+        consultorioVM.operationResult.observe(this) { exito ->
+            if (exito) {
+                Toast.makeText(this, "¡Consultorio vinculado correctamente!", Toast.LENGTH_LONG).show()
+                finish()
+            } else {
+                Toast.makeText(this, "Error al guardar el consultorio", Toast.LENGTH_SHORT).show()
+                binding.btnGuardarConsultorio.isEnabled = true
+            }
+        }
     }
 
     private fun configurarDropdownEspecialidades() {
@@ -91,10 +129,8 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         mapa.uiSettings.isZoomControlsEnabled = true
 
         configurarUbicacionEnTiempoReal()
+        obtenerCentrosMedicosDesdeRepositorio()
 
-        obtenerCentrosMedicosDesdeFirestore()
-
-        // Estilo Oscuro del Mapa
         if (ThemeUtils.isDark(this)) {
             try {
                 mapa.setMapStyle(com.google.android.gms.maps.model.MapStyleOptions.loadRawResourceStyle(this, ec.edu.mapsalud.R.raw.map_style_dark))
@@ -115,9 +151,7 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
 
                 binding.txtNombreCentro.text = centro.name
                 binding.txtDireccionCentro.text = "${centro.address} • $tipoCentro"
-
                 bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-
                 mapa.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
             }
             true
@@ -130,36 +164,8 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
-    private fun obtenerCentrosMedicosDesdeFirestore() {
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val snapshot = db.collection("centros_medicos").get().await()
-                val listaCentros = snapshot.toObjects(MedicalCenterDtoRemote::class.java)
-
-                withContext(Dispatchers.Main) {
-                    mapa.clear()
-                    marcadoresCentrosMedicos.clear()
-
-                    for (centro in listaCentros) {
-                        val coordenadas = LatLng(centro.latitude, centro.longitude)
-                        val markerOptions = MarkerOptions()
-                            .position(coordenadas)
-                            .title(centro.name)
-                            .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_AZURE))
-
-                        val m = mapa.addMarker(markerOptions)
-                        if (m != null) {
-                            // Guardamos la relación en el mapa de memoria
-                            marcadoresCentrosMedicos[m] = centro
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@AgregarConsultorio, "Error al cargar centros médicos", Toast.LENGTH_SHORT).show()
-                }
-            }
-        }
+    private fun obtenerCentrosMedicosDesdeRepositorio() {
+        centroMedicoVM.cargarTodosLosCentros(GetAllCentersUC(centroMedicoRepository))
     }
 
     private fun configurarPanelDeslizable() {
@@ -261,38 +267,24 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
 
         binding.btnGuardarConsultorio.isEnabled = false
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val nuevoIdOffice = db.collection("consultorios").document().id
+        val nuevoIdOffice = consultorioRepository.generateNewOfficeId()
+        val nuevoConsultorio = OfficeDtoRemote(
+            id = nuevoIdOffice,
+            idCenter = centro.id,
+            idDoctor = idMedicoLogueado,
+            specialty = especialidad.name,
+            availableDays = diasSeleccionados.toList(),
+            openingTime = horaApertura,
+            closingTime = horaCierre
+        )
 
-                val nuevoConsultorio = OfficeDtoRemote(
-                    id = nuevoIdOffice,
-                    idCenter = centro.id,
-                    idDoctor = idMedicoLogueado,
-                    specialty = especialidad.name,
-                    availableDays = diasSeleccionados.toList(),
-                    openingTime = horaApertura,
-                    closingTime = horaCierre
-                )
+        consultorioVM.registrarConsultorio(nuevoConsultorio, SaveOfficeUC(consultorioRepository))
 
-                db.collection("consultorios").document(nuevoIdOffice).set(nuevoConsultorio).await()
-
-                db.collection("centros_medicos").document(centro.id)
-                    .update("specialties", FieldValue.arrayUnion(especialidad.name))
-                    .await()
-
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@AgregarConsultorio, "¡Consultorio vinculado correctamente!", Toast.LENGTH_LONG).show()
-                    finish()
-                }
-
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(this@AgregarConsultorio, "Error al guardar: ${e.message}", Toast.LENGTH_SHORT).show()
-                    binding.btnGuardarConsultorio.isEnabled = true
-                }
-            }
-        }
+        centroMedicoVM.agregarEspecialidad(
+            idCenter = centro.id,
+            specialty = especialidad.name,
+            addSpecialtyUC = AddSpecialtyToCenterUC(centroMedicoRepository)
+        )
     }
 
     private fun mostrarSelectorHora(titulo: String, onTimeSelected: (Int, Int) -> Unit) {

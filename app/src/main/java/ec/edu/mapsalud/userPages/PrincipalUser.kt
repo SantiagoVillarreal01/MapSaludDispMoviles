@@ -7,25 +7,27 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import ec.edu.mapsalud.ConfiguracionApp
 import ec.edu.mapsalud.EditarPerfil
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.UserPrincipalBinding
-import ec.edu.mapsalud.dto.Paciente
 import android.graphics.Color
+import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
+import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
+import ec.edu.mapsalud.remote.inter.UsuariosRepository
+import ec.edu.mapsalud.usercases.usuariosUC.GetPacienteByIdUC
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import ec.edu.mapsalud.utils.ThemeUtils
-
+import ec.edu.mapsalud.viewmodel.UsuarioViewModel
 class PrincipalUser : AppCompatActivity() {
 
     private lateinit var binding: UserPrincipalBinding
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
+    private val userVM by viewModels<UsuarioViewModel>()
+    private val usuarioRepository = UsuariosRepositoryImpl()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtils.applyTheme(this)
@@ -34,6 +36,7 @@ class PrincipalUser : AppCompatActivity() {
         setContentView(binding.root)
 
         actualizarEstiloMenu(R.id.btnMenuNuevaCita)
+        initObservers()
         cargarDatosUsuario()
 
         if (savedInstanceState == null) {
@@ -45,25 +48,10 @@ class PrincipalUser : AppCompatActivity() {
 
     private fun cargarDatosUsuario() {
         val uid = auth.currentUser?.uid ?: return
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val document = db.collection("usuarios").document(uid).get().await()
-                val paciente = document.toObject(Paciente::class.java)
-                withContext(Dispatchers.Main) {
-                    if (paciente != null) {
-                        val nombres = paciente.info.nombres.trim()
-                        val apellidos = paciente.info.apellidos.trim()
-                        val primerNombre = nombres.split(" ").firstOrNull() ?: ""
-                        val primerApellido = apellidos.split(" ").firstOrNull() ?: ""
-                        binding.txtUserName.text = "$primerNombre $primerApellido"
-                    }
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    binding.txtUserName.text = "Paciente"
-                }
-            }
-        }
+        userVM.cargarPaciente(
+            idUser = uid,
+            getPacienteByIdUC = GetPacienteByIdUC(usuarioRepository)
+        )
     }
 
     private fun actualizarEstiloMenu(idBotonSeleccionado: Int) {
@@ -124,5 +112,19 @@ class PrincipalUser : AppCompatActivity() {
         supportFragmentManager.beginTransaction()
             .replace(binding.fragmentContainerUser.id, fragment)
             .commit()
+    }
+
+    private fun initObservers() {
+        userVM.paciente.observe(this) { paciente ->
+            if (paciente != null) {
+                val nombres = paciente.info.nombres.trim()
+                val apellidos = paciente.info.apellidos.trim()
+                val primerNombre = nombres.split(" ").firstOrNull() ?: ""
+                val primerApellido = apellidos.split(" ").firstOrNull() ?: ""
+                binding.txtUserName.text = "$primerNombre $primerApellido"
+            } else {
+                binding.txtUserName.text = "Paciente"
+            }
+        }
     }
 }

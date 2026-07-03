@@ -5,40 +5,48 @@ import android.os.Bundle
 import android.widget.GridLayout
 import android.widget.TextView
 import android.widget.Toast
+import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import ec.edu.mapsalud.databinding.CuadroComentarioBinding
 import ec.edu.mapsalud.databinding.UserDatosHospitalBinding
 import ec.edu.mapsalud.dto.CommentDtoRemote
-import ec.edu.mapsalud.dto.Paciente
 import ec.edu.mapsalud.enum.CenterType
-import ec.edu.mapsalud.remote.impl.CommentRemoteImpl
-import ec.edu.mapsalud.remote.impl.MedicalCenterRemoteImpl
-import ec.edu.mapsalud.remote.inter.CommentRemote
-import ec.edu.mapsalud.remote.inter.MedicalCenterRemote
+import ec.edu.mapsalud.remote.impl.ComentarioRepositoryImpl
+import ec.edu.mapsalud.remote.impl.CentroMedicoRepositoryImpl
+import ec.edu.mapsalud.remote.inter.ComentarioRepository
+import ec.edu.mapsalud.remote.inter.CentroMedicoRepository
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import ec.edu.mapsalud.utils.ThemeUtils
-import ec.edu.mapsalud.R
+import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
+import ec.edu.mapsalud.remote.inter.UsuariosRepository
+import ec.edu.mapsalud.usercases.centrosUC.GetCenterByIdUC
+import ec.edu.mapsalud.usercases.comentriosUC.GetCommentsByCenterUC
+import ec.edu.mapsalud.usercases.comentriosUC.SaveCommentUC
+import ec.edu.mapsalud.viewmodel.CentroMedicoViewModel
+import ec.edu.mapsalud.viewmodel.ComentarioViewModel
+import ec.edu.mapsalud.viewmodel.UsuarioViewModel
 
 class DatosHospital : AppCompatActivity() {
 
     private lateinit var binding: UserDatosHospitalBinding
 
-    private val centerRepository: MedicalCenterRemote = MedicalCenterRemoteImpl()
-    private val commentRepository: CommentRemote = CommentRemoteImpl()
+    private val centroMedicoVM by viewModels<CentroMedicoViewModel>()
+    private val comentarioVM by viewModels<ComentarioViewModel>()
+
+    private val centroMedicoRepository = CentroMedicoRepositoryImpl()
+    private val comentarioRepository = ComentarioRepositoryImpl()
+    private val usuariosRepository = UsuariosRepositoryImpl()
 
     // Instancias de Firebase
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
 
     private var idCentroActual: String = ""
 
@@ -56,6 +64,7 @@ class DatosHospital : AppCompatActivity() {
 
         binding.txtNombreHospital.text = nombreInicial
 
+        initObservers()
         cargarInformacionDelCentro()
         cargarComentariosDeUsuarios()
 
@@ -63,7 +72,6 @@ class DatosHospital : AppCompatActivity() {
             val textoComentario = binding.editComentario.text.toString().trim()
             val estrellas = binding.ratingBar.rating.toDouble()
 
-            // Validamos que el usuario tenga sesión
             val uidPaciente = auth.currentUser?.uid
             if (uidPaciente == null) {
                 Toast.makeText(this, "Debes iniciar sesión para comentar", Toast.LENGTH_SHORT).show()
@@ -82,22 +90,10 @@ class DatosHospital : AppCompatActivity() {
                 review = textoComentario.ifEmpty { "Sin comentario" }
             )
 
-            lifecycleScope.launch(Dispatchers.Main) {
-                val result = withContext(Dispatchers.IO) {
-                    commentRepository.saveComment(nuevoComentario)
-                }
-
-                result.onSuccess { comentarioGuardado ->
-                    // Agregamos el comentario a la vista asumiendo que es el usuario actual
-                    agregarComentarioVista("Tú", "⭐".repeat(estrellas.toInt()), comentarioGuardado.review)
-
-                    binding.editComentario.text.clear()
-                    binding.ratingBar.rating = 0f
-                    Toast.makeText(this@DatosHospital, "¡Reseña publicada!", Toast.LENGTH_SHORT).show()
-                }.onFailure { error ->
-                    Toast.makeText(this@DatosHospital, "Error al subir reseña: ${error.message}", Toast.LENGTH_SHORT).show()
-                }
-            }
+            comentarioVM.guardarComentario(
+                comment = nuevoComentario,
+                saveCommentUC = SaveCommentUC(comentarioRepository)
+            )
         }
 
         binding.btnNuevaCita.setOnClickListener {
@@ -116,53 +112,50 @@ class DatosHospital : AppCompatActivity() {
     }
 
     private fun cargarInformacionDelCentro() {
-        lifecycleScope.launch(Dispatchers.Main) {
-            val result = withContext(Dispatchers.IO) {
-                centerRepository.getCenterById(idCentroActual)
-            }
-
-            result.onSuccess { centro ->
-                centro?.let {
-                    binding.txtNombreHospital.text = it.name
-
-                    val tipoCentro = try {
-                        CenterType.valueOf(it.type).nombreMostrar
-                    } catch (e: Exception) {
-                        "Centro Médico"
-                    }
-
-                    binding.txtDireccionHospital.text = "📍 ${it.address}"
-
-                    // Inyectamos la descripción real desde la base de datos
-                    binding.txtDescripcionHospital.text = it.description.ifEmpty {
-                        "No hay descripción disponible para este centro médico."
-                    }
-
-                    dibujarEspecialidades(it.specialties)
-                }
-            }
-        }
+        centroMedicoVM.obtenerCentroPorId(
+            id = idCentroActual,
+            getCenterByIdUC = GetCenterByIdUC(centroMedicoRepository)
+        )
     }
 
     private fun cargarComentariosDeUsuarios() {
-        lifecycleScope.launch(Dispatchers.Main) {
-            val result = withContext(Dispatchers.IO) {
-                commentRepository.getCommentsByCenter(idCentroActual)
+        comentarioVM.cargarComentariosPorCentro(
+            idCenter = idCentroActual,
+            getCommentsUC = GetCommentsByCenterUC(comentarioRepository)
+        )
+    }
+    private fun initObservers() {
+        centroMedicoVM.selectedCenter.observe(this) { centro ->
+            centro?.let {
+                binding.txtNombreHospital.text = it.name
+
+                val tipoCentro = try {
+                    CenterType.valueOf(it.type).nombreMostrar
+                } catch (e: Exception) {
+                    "Centro Médico"
+                }
+
+                binding.txtDireccionHospital.text = "📍 ${it.address}"
+
+                binding.txtDescripcionHospital.text = it.description.ifEmpty {
+                    "No hay descripción disponible para este centro médico."
+                }
+
+                dibujarEspecialidades(it.specialties)
             }
+        }
 
-            result.onSuccess { listaComentarios ->
-                binding.layoutComentarios.removeAllViews()
+        comentarioVM.commentsList.observe(this) { listaComentarios ->
+            binding.layoutComentarios.removeAllViews()
 
-                // Procesamos las búsquedas de usuarios en paralelo
-                val comentariosConNombres = withContext(Dispatchers.IO) {
-                    coroutineScope {
-                        listaComentarios.map { comentario ->
-                            async {
-                                val nombre = obtenerNombreUsuario(comentario.idUser)
-                                Pair(comentario, nombre)
-                            }
-                        }.awaitAll()
-                    }
+            lifecycleScope.launch {
+                val comentariosConNombres = coroutineScope {
+                    listaComentarios.map { comentario ->
+                        async {
+                            val nombre = obtenerNombreUsuario(comentario.idUser)
+                            Pair(comentario, nombre)
+                        }
+                    }.awaitAll()
                 }
 
                 for ((comentario, nombreUsuario) in comentariosConNombres) {
@@ -171,12 +164,26 @@ class DatosHospital : AppCompatActivity() {
                 }
             }
         }
+
+        comentarioVM.commentSaved.observe(this) { comentarioGuardado ->
+            if (comentarioGuardado != null) {
+                val estrellas = comentarioGuardado.rating.toInt()
+                agregarComentarioVista("Tú", "⭐".repeat(estrellas), comentarioGuardado.review)
+
+                binding.editComentario.text.clear()
+                binding.ratingBar.rating = 0f
+                Toast.makeText(this, "¡Reseña publicada!", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(this, "Error al subir reseña", Toast.LENGTH_SHORT).show()
+            }
+        }
     }
 
     private suspend fun obtenerNombreUsuario(uid: String): String {
         return try {
-            val doc = db.collection("usuarios").document(uid).get().await()
-            val paciente = doc.toObject(Paciente::class.java)
+            val result = usuariosRepository.getPacienteById(uid)
+            val paciente = result.getOrNull()
+
             if (paciente != null) {
                 val primerNombre = paciente.info.nombres.split(" ").firstOrNull() ?: ""
                 val primerApellido = paciente.info.apellidos.split(" ").firstOrNull() ?: ""

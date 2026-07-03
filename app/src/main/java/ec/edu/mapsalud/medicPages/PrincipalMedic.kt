@@ -7,29 +7,38 @@ import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import ec.edu.mapsalud.ConfiguracionApp
 import ec.edu.mapsalud.EditarPerfil
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.MedicPrincipalBinding
-import ec.edu.mapsalud.dto.Medico
 import android.graphics.Color
+import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
+import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
+import ec.edu.mapsalud.remote.inter.UsuariosRepository
+import ec.edu.mapsalud.usercases.usuariosUC.GetDoctorByIdUC
 import ec.edu.mapsalud.utils.ThemeUtils
+import ec.edu.mapsalud.viewmodel.UsuarioViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 
 class PrincipalMedic : AppCompatActivity() {
 
     private lateinit var binding: MedicPrincipalBinding
     private val auth = FirebaseAuth.getInstance()
-    private val db = FirebaseFirestore.getInstance()
+    private val usuarioVM by viewModels<UsuarioViewModel>()
+    private val usuarioRepository = UsuariosRepositoryImpl()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = MedicPrincipalBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
         actualizarEstiloMenu(R.id.btnMenuCitasMedicas)
+
+        initObservers()
         cargarDatosDoctor()
 
         if (savedInstanceState == null) {
@@ -41,15 +50,20 @@ class PrincipalMedic : AppCompatActivity() {
 
     private fun cargarDatosDoctor() {
         val uid = auth.currentUser?.uid ?: return
-        db.collection("usuarios").document(uid).get()
-            .addOnSuccessListener { document ->
-                if (document.exists()) {
-                    val medico = document.toObject(Medico::class.java)
-                    binding.txtBienvenidaMedic.text = "Buen día, Dr. ${medico?.info?.apellidos ?: ""}"
-                }
-            }.addOnFailureListener {
+        usuarioVM.cargarMedico(
+            idDoctor = uid,
+            getDoctorByIdUC = GetDoctorByIdUC(usuarioRepository)
+        )
+    }
+
+    private fun initObservers() {
+        usuarioVM.medico.observe(this) { medico ->
+            if (medico != null) {
+                binding.txtBienvenidaMedic.text = "Buen día, Dr. ${medico.info.apellidos}"
+            } else {
                 binding.txtBienvenidaMedic.text = "Buen día, Doctor"
             }
+        }
     }
 
     private fun actualizarEstiloMenu(idBotonSeleccionado: Int) {

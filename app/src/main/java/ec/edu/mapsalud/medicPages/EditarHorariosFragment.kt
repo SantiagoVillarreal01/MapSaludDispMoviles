@@ -10,16 +10,23 @@ import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.MedicFragmentEditarBinding
 import android.widget.ArrayAdapter
 import android.widget.Toast
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
 import ec.edu.mapsalud.dto.OfficeDtoRemote
+import ec.edu.mapsalud.remote.impl.CentroMedicoRepositoryImpl
+import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
+import ec.edu.mapsalud.remote.inter.CentroMedicoRepository
+import ec.edu.mapsalud.remote.inter.ConsultorioRepository
+import ec.edu.mapsalud.usercases.consultoriosUC.GetOfficesByDoctorUC
+import ec.edu.mapsalud.usercases.consultoriosUC.UpdateOfficeHorariesUC
+import ec.edu.mapsalud.viewmodel.CentroMedicoViewModel
+import ec.edu.mapsalud.viewmodel.ConsultorioViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 
 
@@ -27,9 +34,11 @@ class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
 
     private var _binding: MedicFragmentEditarBinding? = null
     private val binding get() = _binding!!
-    private val db = FirebaseFirestore.getInstance()
     private val auth = FirebaseAuth.getInstance()
 
+    private val consultorioVM by viewModels<ConsultorioViewModel>()
+    private val officeRepository = ConsultorioRepositoryImpl()
+    private val centroMedicoRepository = CentroMedicoRepositoryImpl()
     private var diasSeleccionados = mutableSetOf<String>()
     private var listaConsultorios = listOf<OfficeDtoRemote>()
     private var consultorioSeleccionado: OfficeDtoRemote? = null
@@ -51,44 +60,59 @@ class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
         _binding = MedicFragmentEditarBinding.bind(view)
 
         configurarListeners()
+        initObservers()
         cargarConsultoriosDelMedico()
     }
 
     private fun cargarConsultoriosDelMedico() {
         val uidMedico = auth.currentUser?.uid ?: return
+        consultorioVM.cargarConsultoriosPorDoctor(uidMedico, GetOfficesByDoctorUC(officeRepository))
+    }
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val snapshotOffices = db.collection("consultorios")
-                    .whereEqualTo("idDoctor", uidMedico)
-                    .get().await()
+    private fun initObservers() {
+        consultorioVM.officesList.observe(viewLifecycleOwner) { offices ->
+            listaConsultorios = offices
 
-                listaConsultorios = snapshotOffices.toObjects(OfficeDtoRemote::class.java)
-
-                if (listaConsultorios.isEmpty()) {
-                    withContext(Dispatchers.Main) {
-                        Toast.makeText(requireContext(), "No tienes consultorios registrados.", Toast.LENGTH_SHORT).show()
+            if (listaConsultorios.isEmpty()) {
+                Toast.makeText(requireContext(), "No tienes consultorios registrados.", Toast.LENGTH_SHORT).show()
+                return@observe
+            }
+            viewLifecycleOwner.lifecycleScope.launch {
+                try {
+                    val nombresMostrar = coroutineScope {
+                        listaConsultorios.map { office ->
+                            async {
+                                val centerResult = centroMedicoRepository.getCenterById(office.idCenter)
+                                val center = centerResult.getOrNull()
+                                val centerName = center?.name ?: "Centro Desconocido"
+                                "${office.specialty} - $centerName"
+                            }
+                        }.awaitAll()
                     }
-                    return@launch
-                }
-                val nombresMostrar = coroutineScope {
-                    listaConsultorios.map { office ->
-                        async {
-                            val centerDoc = db.collection("centros_medicos").document(office.idCenter).get().await()
-                            val centerName = centerDoc.getString("name") ?: "Centro Desconocido"
-                            "${office.specialty} - $centerName"
-                        }
-                    }.awaitAll()
-                }
-
-                withContext(Dispatchers.Main) {
                     configurarDropdown(nombresMostrar)
-                }
-
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
+                } catch (e: Exception) {
                     Toast.makeText(requireContext(), "Error al cargar datos", Toast.LENGTH_SHORT).show()
                 }
+            }
+        }
+        consultorioVM.operationResult.observe(viewLifecycleOwner) { exito ->
+            binding.btnEditarHorarios.isEnabled = true
+
+            if (exito) {
+                val consultorio = consultorioSeleccionado
+                if (consultorio != null) {
+                    val nuevaApertura = binding.editApertura.text.toString().trim()
+                    val nuevoCierre = binding.editCierre.text.toString().trim()
+
+                    consultorioSeleccionado = consultorio.copy(
+                        availableDays = diasSeleccionados.toList(),
+                        openingTime = nuevaApertura,
+                        closingTime = nuevoCierre
+                    )
+                }
+                Toast.makeText(requireContext(), "Horarios actualizados exitosamente", Toast.LENGTH_SHORT).show()
+            } else {
+                Toast.makeText(requireContext(), "Error al actualizar los horarios", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -174,34 +198,13 @@ class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
 
         binding.btnEditarHorarios.isEnabled = false
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            try {
-                val actualizaciones = mapOf(
-                    "availableDays" to diasSeleccionados.toList(),
-                    "openingTime" to nuevaApertura,
-                    "closingTime" to nuevoCierre
-                )
-
-                db.collection("consultorios").document(consultorio.id)
-                    .update(actualizaciones).await()
-
-                consultorioSeleccionado = consultorio.copy(
-                    availableDays = diasSeleccionados.toList(),
-                    openingTime = nuevaApertura,
-                    closingTime = nuevoCierre
-                )
-
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Horarios actualizados exitosamente", Toast.LENGTH_SHORT).show()
-                    binding.btnEditarHorarios.isEnabled = true
-                }
-            } catch (e: Exception) {
-                withContext(Dispatchers.Main) {
-                    Toast.makeText(requireContext(), "Error al actualizar: ${e.message}", Toast.LENGTH_SHORT).show()
-                    binding.btnEditarHorarios.isEnabled = true
-                }
-            }
-        }
+        consultorioVM.actualizarHorarios(
+            idOffice = consultorio.id,
+            availableDays = diasSeleccionados.toList(),
+            openingTime = nuevaApertura,
+            closingTime = nuevoCierre,
+            updateHorariesUC = UpdateOfficeHorariesUC(officeRepository)
+        )
     }
 
     private fun mostrarSelectorHora(titulo: String, onTimeSelected: (Int, Int) -> Unit) {

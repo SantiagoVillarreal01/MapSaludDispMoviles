@@ -2,11 +2,11 @@ package ec.edu.mapsalud.remote.impl
 
 import com.google.firebase.firestore.FirebaseFirestore
 import ec.edu.mapsalud.dto.CommentDtoRemote
-import ec.edu.mapsalud.remote.inter.CommentRemote
+import ec.edu.mapsalud.remote.inter.ComentarioRepository
 import kotlinx.coroutines.tasks.await
 
 
-class CommentRemoteImpl : CommentRemote {
+class ComentarioRepositoryImpl : ComentarioRepository {
     private val db = FirebaseFirestore.getInstance()
 
     override suspend fun saveComment(comment: CommentDtoRemote): Result<CommentDtoRemote> {
@@ -22,8 +22,8 @@ class CommentRemoteImpl : CommentRemote {
                 .whereEqualTo("idCenter", idCenter)
                 .get()
                 .await()
-            snapshot.documents.map { doc ->
-                doc.toObject(CommentDtoRemote::class.java)!!.copy(id = doc.id)
+            snapshot.documents.mapNotNull { doc ->
+                doc.toObject(CommentDtoRemote::class.java)?.copy(id = doc.id)
             }
         }
     }
