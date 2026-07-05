@@ -1,19 +1,45 @@
 package ec.edu.mapsalud
 
+import android.app.Activity
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import ec.edu.mapsalud.databinding.ActivityEditarPerfilBinding
 import com.google.android.material.snackbar.Snackbar
-import ec.edu.mapsalud.datos.FirebaseManager
+import ec.edu.mapsalud.config.FirebaseManager
 import android.widget.ArrayAdapter
+import androidx.activity.result.contract.ActivityResultContracts
+import com.bumptech.glide.Glide
+import com.cloudinary.android.MediaManager
+import com.cloudinary.android.callback.ErrorInfo
 import ec.edu.mapsalud.enum.Genero
 import ec.edu.mapsalud.utils.ThemeUtils
+import com.cloudinary.android.callback.UploadCallback
 
 class EditarPerfil : AppCompatActivity() {
 
     private lateinit var binding: ActivityEditarPerfilBinding
     private var usuarioUid: String? = null
+
+    private var imagenSeleccionadaUri: Uri? = null
+    private var urlFotoActualCloudinary: String = ""
+
+    private val seleccionarImagenLauncher = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { resultado ->
+        if (resultado.resultCode == Activity.RESULT_OK) {
+            val data: Intent? = resultado.data
+            imagenSeleccionadaUri = data?.data
+            if (imagenSeleccionadaUri != null) {
+                Glide.with(this)
+                    .load(imagenSeleccionadaUri)
+                    .centerCrop()
+                    .into(binding.imgAvatarPerfil)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtils.applyTheme(this)
@@ -49,6 +75,14 @@ class EditarPerfil : AppCompatActivity() {
         
         val genero = sharedPref.getString("USER_GENERO", Genero.NO_ESPECIFICADO.valor)
         binding.autoCompleteGeneroPerfil.setText(genero, false)
+
+        urlFotoActualCloudinary = sharedPref.getString("USER_FOTO_URL", "") ?: ""
+        if (urlFotoActualCloudinary.isNotEmpty()) {
+            Glide.with(this)
+                .load(urlFotoActualCloudinary)
+                .centerCrop()
+                .into(binding.imgAvatarPerfil)
+        }
     }
 
     private fun configurarSpinner() {
@@ -69,12 +103,21 @@ class EditarPerfil : AppCompatActivity() {
                             val correo = infoMap["correo"]?.toString() ?: ""
                             val telefono = infoMap["telefono"]?.toString() ?: ""
                             val generoStr = infoMap["genero"]?.toString() ?: Genero.NO_ESPECIFICADO.valor
+                            val fotoUrl = infoMap["imageUrl"]?.toString() ?: ""
 
                             binding.inputNombre.setText(nombres)
                             binding.inputApellido.setText(apellidos)
                             binding.inputCorreo.setText(correo)
                             binding.inputTelefono.setText(telefono)
                             binding.autoCompleteGeneroPerfil.setText(generoStr, false)
+
+                            urlFotoActualCloudinary = fotoUrl
+                            if (fotoUrl.isNotEmpty()) {
+                                Glide.with(this)
+                                    .load(fotoUrl)
+                                    .centerCrop()
+                                    .into(binding.imgAvatarPerfil)
+                            }
 
                             // Actualizar Cache
                             getSharedPreferences("MapSaludCache", MODE_PRIVATE).edit().apply {
@@ -83,6 +126,7 @@ class EditarPerfil : AppCompatActivity() {
                                 putString("USER_CORREO", correo)
                                 putString("USER_TELEFONO", telefono)
                                 putString("USER_GENERO", generoStr)
+                                putString("USER_FOTO_URL", fotoUrl)
                                 putString("USER_NAME", "$nombres $apellidos".trim())
                                 apply()
                             }
@@ -99,7 +143,9 @@ class EditarPerfil : AppCompatActivity() {
 
     private fun configurarListeners() {
         binding.btnCambiarFoto.setOnClickListener {
-            Toast.makeText(this, "Funcionalidad de galería en desarrollo.", Toast.LENGTH_SHORT).show()
+            val intent = Intent(Intent.ACTION_PICK)
+            intent.type = "image/*"
+            seleccionarImagenLauncher.launch(intent)
         }
 
         binding.btnGuardarCambios.setOnClickListener {
@@ -114,17 +160,58 @@ class EditarPerfil : AppCompatActivity() {
             }
 
             binding.btnGuardarCambios.isEnabled = false
-            guardarCambiosEnFirestore(nombre, apellido, telefono, generoSeleccionado)
+
+            if (imagenSeleccionadaUri != null) {
+                subirFotoACloudinaryYGuardar(nombre, apellido, telefono, generoSeleccionado)
+            } else {
+                guardarCambiosEnFirestore(nombre, apellido, telefono, generoSeleccionado, urlFotoActualCloudinary)
+            }
         }
     }
 
-    private fun guardarCambiosEnFirestore(nombre: String, apellido: String, telefono: String, genero: String) {
+    private fun subirFotoACloudinaryYGuardar(nombre: String, apellido: String, telefono: String, genero: String) {
+        imagenSeleccionadaUri?.let { uri ->
+            Toast.makeText(this, "Subiendo imagen...", Toast.LENGTH_SHORT).show()
+
+            MediaManager.get().upload(uri)
+                .callback(object : UploadCallback {
+                    override fun onStart(requestId: String?) {
+                    }
+
+                    override fun onProgress(requestId: String?, bytes: Long, totalBytes: Long) {
+                    }
+
+                    override fun onSuccess(requestId: String?, resultData: Map<*, *>?) {
+                        val secureUrl = resultData?.get("secure_url") as? String ?: ""
+                        if (secureUrl.isNotEmpty()) {
+                            urlFotoActualCloudinary = secureUrl
+                            guardarCambiosEnFirestore(nombre, apellido, telefono, genero, secureUrl)
+                        } else {
+                            binding.btnGuardarCambios.isEnabled = true
+                            mostrarMensaje("Error al procesar la respuesta de la foto.")
+                        }
+                    }
+
+                    override fun onError(requestId: String?, error: ErrorInfo?) {
+                        binding.btnGuardarCambios.isEnabled = true
+                        mostrarMensaje("Error al subir a Cloudinary: ${error?.description}")
+                    }
+
+                    override fun onReschedule(requestId: String?, error: ErrorInfo?) {
+                    }
+                })
+                .dispatch()
+        }
+    }
+
+    private fun guardarCambiosEnFirestore(nombre: String, apellido: String, telefono: String, genero: String, fotoUrl: String) {
         usuarioUid?.let { uid ->
             val actualizaciones = mapOf(
                 "info.nombres" to nombre,
                 "info.apellidos" to apellido,
                 "info.telefono" to telefono,
-                "info.genero" to genero
+                "info.genero" to genero,
+                "info.imageUrl" to fotoUrl
             )
 
             FirebaseManager.db.collection("usuarios").document(uid)
@@ -136,6 +223,7 @@ class EditarPerfil : AppCompatActivity() {
                         putString("USER_APELLIDOS", apellido)
                         putString("USER_TELEFONO", telefono)
                         putString("USER_GENERO", genero)
+                        putString("USER_FOTO_URL", fotoUrl)
                         putString("USER_NAME", "$nombre $apellido".trim())
                         apply()
                     }

@@ -1,6 +1,6 @@
 package ec.edu.mapsalud.dto
 
-data class CommentDtoRemote(
+data class ComentarioDtoRemote(
     val id: String = "",
     val idCenter: String = "",
     val idUser: String = "",

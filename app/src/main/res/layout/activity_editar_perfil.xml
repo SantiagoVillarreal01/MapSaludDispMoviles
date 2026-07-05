@@ -75,8 +75,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
                         android:scaleType="centerCrop"
-                        android:src="@drawable/ic_person"
-                        app:tint="?attr/colorOnSurfaceVariant" />
+                        android:src="@drawable/ic_person"/>
                 </com.google.android.material.card.MaterialCardView>
 
                 <com.google.android.material.floatingactionbutton.FloatingActionButton

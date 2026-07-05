@@ -1,35 +1,38 @@
-package ec.edu.mapsalud.userPages
+package ec.edu.mapsalud.patientPages
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import ec.edu.mapsalud.databinding.UserReservarCitaBinding
 import android.graphics.Color
+import android.speech.RecognizerIntent
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import com.bumptech.glide.Glide
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
-import ec.edu.mapsalud.dto.AppointmentDtoRemote
-import ec.edu.mapsalud.dto.OfficeDtoRemote
+import ec.edu.mapsalud.dto.CitaDtoRemote
+import ec.edu.mapsalud.dto.ConsultorioDtoRemote
 import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
-import ec.edu.mapsalud.remote.inter.CitaRepository
 import com.google.firebase.auth.FirebaseAuth
+import ec.edu.mapsalud.R
 import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
+import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
 import ec.edu.mapsalud.usercases.citasUC.CheckIsSlotTakenUC
 import ec.edu.mapsalud.usercases.citasUC.SaveAppointmentUC
 import ec.edu.mapsalud.usercases.consultoriosUC.GetOfficeByIdUC
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
 import ec.edu.mapsalud.utils.ThemeUtils
 import ec.edu.mapsalud.viewmodel.CitaViewModel
 import ec.edu.mapsalud.viewmodel.ConsultorioViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class ReservarCita : AppCompatActivity() {
 
@@ -39,12 +42,19 @@ class ReservarCita : AppCompatActivity() {
 
     private val citaRepository = CitaRepositoryImpl()
     private val consultorioRepository = ConsultorioRepositoryImpl()
+
+    private val usuarioRepository = UsuariosRepositoryImpl()
     private val auth = FirebaseAuth.getInstance()
 
-    private var currentOffice: OfficeDtoRemote? = null
+    private var currentOffice: ConsultorioDtoRemote? = null
     private var selectedDate: String = ""
     private var selectedTime: String = ""
     private var selectedTimeButton: Button? = null
+
+    private var idOffice: String = ""
+    private var idDoctor: String = ""
+
+    private var idCampoObjetivo: Int = 0
 
     private val diasSemanaMap = mapOf(
         Calendar.SUNDAY to "Domingo", Calendar.MONDAY to "Lunes",
@@ -53,6 +63,26 @@ class ReservarCita : AppCompatActivity() {
         Calendar.SATURDAY to "Sábado"
     )
 
+    private val speechLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultado ->
+        if (resultado.resultCode == Activity.RESULT_OK && resultado.data != null) {
+            val palabrasReconocidas = resultado.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            if (!palabrasReconocidas.isNullOrEmpty()) {
+                val textoDictado = palabrasReconocidas[0]
+
+                when (idCampoObjetivo) {
+                    binding.edtMotivo.id -> {
+                        binding.edtMotivo.setText(textoDictado)
+                        binding.edtMotivo.setSelection(textoDictado.length) // Mover cursor al final
+                    }
+                    binding.edtDescripcion.id -> {
+                        binding.edtDescripcion.setText(textoDictado)
+                        binding.edtDescripcion.setSelection(textoDictado.length)
+                    }
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
@@ -60,18 +90,32 @@ class ReservarCita : AppCompatActivity() {
         setContentView(binding.root)
 
         val doctorName = intent.getStringExtra("NOMBRE_DOCTOR") ?: ""
-        val idOffice = intent.getStringExtra("ID_OFFICE") ?: ""
+        idOffice = intent.getStringExtra("ID_OFFICE") ?: ""
+        idDoctor = intent.getStringExtra("ID_DOCTOR") ?: ""
 
-        val idDoctor = intent.getStringExtra("ID_DOCTOR") ?: ""
+        val fotoUrlDoctor = intent.getStringExtra("URL_FOTO_DOCTOR") ?: ""
 
         binding.txtNombreDoctor.text = doctorName
         binding.btnRegresar.setOnClickListener { finish() }
 
+        Glide.with(this).clear(binding.imgDoctorReserva)
+        if (fotoUrlDoctor.isNotEmpty()) {
+            Glide.with(this)
+                .load(fotoUrlDoctor)
+                .centerCrop()
+                .placeholder(R.drawable.user)
+                .error(R.drawable.user)
+                .into(binding.imgDoctorReserva)
+        } else {
+            binding.imgDoctorReserva.setImageResource(R.drawable.user)
+        }
+
+        configurarBotonesDeDictado()
         initObservers()
         cargarDatosConsultorio(idOffice)
 
         binding.btnConfirmarCita.setOnClickListener {
-            procesarReserva(idOffice, idDoctor)
+            procesarReserva()
         }
     }
 
@@ -96,7 +140,7 @@ class ReservarCita : AppCompatActivity() {
 
         citaVM.operationSuccess.observe(this) { success ->
             if (success) {
-                val intent = Intent(this, PrincipalUser::class.java)
+                val intent = Intent(this, PrincipalPatient::class.java)
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP)
                 intent.putExtra("MENSAJE_SNACKBAR", "Cita creada exitosamente")
                 startActivity(intent)
@@ -105,6 +149,61 @@ class ReservarCita : AppCompatActivity() {
                 binding.btnConfirmarCita.isEnabled = true
                 binding.btnConfirmarCita.text = "Confirmar cita"
             }
+        }
+
+        citaVM.isSlotTaken.observe(this) { isTaken ->
+            if (binding.btnConfirmarCita.isEnabled) return@observe
+
+            if (isTaken) {
+                Toast.makeText(this, "Horario ocupado, elige otro", Toast.LENGTH_LONG).show()
+                binding.btnConfirmarCita.isEnabled = true
+                binding.btnConfirmarCita.text = "Confirmar cita"
+            } else {
+                val uidPaciente = auth.currentUser?.uid ?: return@observe
+                val reason = binding.edtMotivo.text.toString().trim()
+                val description = binding.edtDescripcion.text.toString().trim()
+                val idOffice = intent.getStringExtra("ID_OFFICE") ?: ""
+                val idDoctor = intent.getStringExtra("ID_DOCTOR") ?: ""
+
+                val nuevaCita = CitaDtoRemote(
+                    idUser = uidPaciente,
+                    idDoctor = idDoctor,
+                    idOffice = idOffice,
+                    idCenter = currentOffice?.idCenter ?: "",
+                    reason = reason,
+                    description = description,
+                    date = selectedDate,
+                    time = selectedTime,
+                    status = "Pendiente"
+                )
+
+                citaVM.agendarCita(nuevaCita, SaveAppointmentUC(citaRepository))
+            }
+        }
+    }
+
+    private fun configurarBotonesDeDictado() {
+        binding.tilMotivo.setEndIconOnClickListener {
+            iniciarDictadoPorVoz(binding.edtMotivo.id)
+        }
+        binding.tilDescripcion.setEndIconOnClickListener {
+            iniciarDictadoPorVoz(binding.edtDescripcion.id)
+        }
+    }
+
+    private fun iniciarDictadoPorVoz(targetEditTextId: Int) {
+        idCampoObjetivo = targetEditTextId
+
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault()) // Usa el idioma del teléfono del usuario
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "Te escuchamos. Empieza a hablar...")
+        }
+
+        try {
+            speechLauncher.launch(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "Tu dispositivo no soporta reconocimiento de voz nativo", Toast.LENGTH_SHORT).show()
         }
     }
 
@@ -178,11 +277,9 @@ class ReservarCita : AppCompatActivity() {
         binding.layoutTimeSlots.addView(btn)
     }
 
-    private fun procesarReserva(idOffice: String, idDoctor: String) {
+    private fun procesarReserva() {
         val uidPaciente = auth.currentUser?.uid ?: return
-
         val reason = binding.edtMotivo.text.toString().trim()
-        val description = binding.edtDescripcion.text.toString().trim()
 
         if (reason.isEmpty()) {
             binding.edtMotivo.error = "Escribe el motivo"
@@ -196,33 +293,9 @@ class ReservarCita : AppCompatActivity() {
         binding.btnConfirmarCita.isEnabled = false
         binding.btnConfirmarCita.text = "Comprobando disponibilidad..."
 
-        citaVM.verificarDisponibilidad(idOffice, selectedDate, selectedTime,
+        citaVM.verificarDisponibilidad(
+            idOffice, selectedDate, selectedTime,
             CheckIsSlotTakenUC(citaRepository)
         )
-
-        citaVM.isSlotTaken.observe(this) { isTaken ->
-            if (isTaken) {
-                Toast.makeText(this, "Horario ocupado, elige otro", Toast.LENGTH_LONG).show()
-                binding.btnConfirmarCita.isEnabled = true
-                binding.btnConfirmarCita.text = "Confirmar cita"
-                return@observe
-            }
-            lifecycleScope.launch {
-                val nuevaCita = AppointmentDtoRemote(
-                    idUser = uidPaciente,
-                    idDoctor = idDoctor,
-                    idOffice = idOffice,
-                    idCenter = currentOffice?.idCenter ?: "",
-                    // ... resto de mapeo, idealmente estos datos vendrían ya resueltos del VM
-                    reason = reason,
-                    description = description,
-                    date = selectedDate,
-                    time = selectedTime,
-                    status = "Pendiente"
-                )
-
-                citaVM.agendarCita(nuevaCita, SaveAppointmentUC(citaRepository))
-            }
-        }
     }
 }

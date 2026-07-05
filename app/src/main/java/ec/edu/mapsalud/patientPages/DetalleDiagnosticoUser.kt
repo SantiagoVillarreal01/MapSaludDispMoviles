@@ -1,4 +1,4 @@
-package ec.edu.mapsalud.userPages
+package ec.edu.mapsalud.patientPages
 
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity

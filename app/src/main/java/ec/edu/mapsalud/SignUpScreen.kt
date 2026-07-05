@@ -4,7 +4,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Patterns
 import androidx.appcompat.app.AppCompatActivity
-import ec.edu.mapsalud.datos.FirebaseManager
+import ec.edu.mapsalud.config.FirebaseManager
 import com.google.android.material.snackbar.Snackbar
 import ec.edu.mapsalud.databinding.ActivitySignUpPageBinding
 import android.view.View

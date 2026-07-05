@@ -1,4 +1,4 @@
-package ec.edu.mapsalud.userPages
+package ec.edu.mapsalud.patientPages
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,15 +8,13 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import ec.edu.mapsalud.databinding.CuadroCentroMedicoBinding
 import ec.edu.mapsalud.databinding.UserNuevaCitaBinding
-import ec.edu.mapsalud.dto.CenterWithDistance
+import ec.edu.mapsalud.dto.CentroMedicoDistancia
 import ec.edu.mapsalud.remote.impl.CentroMedicoRepositoryImpl
 import ec.edu.mapsalud.utils.ThemeUtils
-import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 import android.Manifest
 import android.annotation.SuppressLint
@@ -24,6 +22,8 @@ import android.content.pm.PackageManager
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.viewModels
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -80,9 +80,8 @@ class NuevaCitaFragment : Fragment(R.layout.user_nueva_cita) {
     private fun configurarMapaPreview() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapPreviewContainer) as? SupportMapFragment
         mapFragment?.getMapAsync { googleMap ->
-            googleMap.uiSettings.setAllGesturesEnabled(false) // No interactuable
-            
-            // Aplicar estilo oscuro si es necesario
+            googleMap.uiSettings.setAllGesturesEnabled(false)
+
             if (ThemeUtils.isDark(requireContext())) {
                 googleMap.setMapStyle(com.google.android.gms.maps.model.MapStyleOptions.loadRawResourceStyle(requireContext(), ec.edu.mapsalud.R.raw.map_style_dark))
             }
@@ -92,11 +91,8 @@ class NuevaCitaFragment : Fragment(R.layout.user_nueva_cita) {
         }
 
         binding.mapOverlay.setOnClickListener {
-            // Navegar al Fragmento del Mapa (HomeMapFragment)
-            (activity as? PrincipalUser)?.let { principal ->
+            (activity as? PrincipalPatient)?.let { principal ->
                 principal.cambiarFragment(HomeMapFragment())
-                // No actualizamos estilo menu aquí si no hay botón específico para el mapa "puro"
-                // O podríamos tener el mapa como una opción oculta o secundaria.
             }
         }
     }
@@ -133,7 +129,6 @@ class NuevaCitaFragment : Fragment(R.layout.user_nueva_cita) {
     private fun actualizarMapaPreview() {
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapPreviewContainer) as? SupportMapFragment
         mapFragment?.getMapAsync { googleMap ->
-            // Aplicar estilo oscuro si es necesario
             if (ThemeUtils.isDark(requireContext())) {
                 googleMap.setMapStyle(com.google.android.gms.maps.model.MapStyleOptions.loadRawResourceStyle(requireContext(), ec.edu.mapsalud.R.raw.map_style_dark))
             }
@@ -162,7 +157,7 @@ class NuevaCitaFragment : Fragment(R.layout.user_nueva_cita) {
     }
 
     private fun configurarRecyclerView() {
-        adapter = CentroMedicoAdapter(emptyList()) { seleccion ->
+        adapter = CentroMedicoAdapter { seleccion ->
             if (seleccion.distanceMeters > 1000) {
                 val distanciaTexto = if (seleccion.distanceMeters >= 1000) {
                     String.format(Locale.getDefault(), "%.1f km", seleccion.distanceMeters / 1000)
@@ -186,13 +181,13 @@ class NuevaCitaFragment : Fragment(R.layout.user_nueva_cita) {
 
     private fun initObservers() {
         centroMedicoVM.filteredCenters.observe(viewLifecycleOwner) { list ->
-            val itemsAdapter = list.map { CenterWithDistance(it.first, it.second) }
+            val itemsAdapter = list.map { CentroMedicoDistancia(it.first, it.second) }
             adapter.actualizarLista(itemsAdapter)
             binding.txtCountCentros.text = "${list.size} encontrados"
         }
     }
 
-    private fun navegarAEspecialistas(seleccion: CenterWithDistance) {
+    private fun navegarAEspecialistas(seleccion: CentroMedicoDistancia) {
         val intent = Intent(requireContext(), Especialistas::class.java)
         intent.putExtra("ID_CENTRO", seleccion.center.id)
         val espSeleccionada = binding.autoCompleteEspecialidad.text.toString()
@@ -223,31 +218,89 @@ class NuevaCitaFragment : Fragment(R.layout.user_nueva_cita) {
     }
 
     inner class CentroMedicoAdapter(
-        private var listaCentros: List<CenterWithDistance>,
-        private val onClick: (CenterWithDistance) -> Unit
+        private val onClick: (CentroMedicoDistancia) -> Unit
     ) : RecyclerView.Adapter<CentroMedicoAdapter.CentroViewHolder>() {
 
-        fun actualizarLista(nuevaLista: List<CenterWithDistance>) {
-            this.listaCentros = nuevaLista
-            notifyDataSetChanged()
+        private var lastPosition = -1
+        private val diffCallback = object : DiffUtil.ItemCallback<CentroMedicoDistancia>() {
+            override fun areItemsTheSame(oldItem: CentroMedicoDistancia, newItem: CentroMedicoDistancia): Boolean {
+                return oldItem.center.id == newItem.center.id
+            }
+
+            override fun areContentsTheSame(oldItem: CentroMedicoDistancia, newItem: CentroMedicoDistancia): Boolean {
+                return oldItem == newItem
+            }
+        }
+
+        private val differ = AsyncListDiffer(this, diffCallback)
+
+        fun actualizarLista(nuevaLista: List<CentroMedicoDistancia>) {
+            lastPosition = -1 // Reseteamos animaciones para nuevos filtros
+            differ.submitList(nuevaLista)
         }
 
         inner class CentroViewHolder(val itemBinding: CuadroCentroMedicoBinding) : RecyclerView.ViewHolder(itemBinding.root) {
-            fun bind(item: CenterWithDistance) {
+            fun bind(item: CentroMedicoDistancia) {
                 val centro = item.center
                 itemBinding.txtNombreCentro.text = centro.name
-                val especialidadesAmigables = centro.specialties.map { try { Specialty.valueOf(it).nombreMostrar } catch (e: Exception) { it } }
+
+                val especialidadesAmigables = centro.specialties.map {
+                    try { Specialty.valueOf(it).nombreMostrar } catch (e: Exception) { it }
+                }
                 itemBinding.txtEspecialidad.text = especialidadesAmigables.joinToString(", ")
+
                 val tipoAmigable = try { CenterType.valueOf(centro.type).nombreMostrar } catch (e: Exception) { centro.type }
                 itemBinding.txtTipoCentro.text = tipoAmigable
-                val distanciaTexto = if (item.distanceMeters >= 1000) String.format(Locale.getDefault(), "A %.1f km de distancia", item.distanceMeters / 1000) else "A ${item.distanceMeters.roundToInt()} m de distancia"
+
+                val distanciaTexto = if (item.distanceMeters >= 1000) {
+                    String.format(Locale.getDefault(), "A %.1f km de distancia", item.distanceMeters / 1000)
+                } else {
+                    "A ${item.distanceMeters.roundToInt()} m de distancia"
+                }
                 itemBinding.txtDistancia.text = distanciaTexto
                 itemBinding.root.setOnClickListener { onClick(item) }
             }
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = CentroViewHolder(CuadroCentroMedicoBinding.inflate(LayoutInflater.from(parent.context), parent, false))
-        override fun onBindViewHolder(holder: CentroViewHolder, position: Int) = holder.bind(listaCentros[position])
-        override fun getItemCount() = listaCentros.size
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): CentroViewHolder {
+            val layoutInflater = LayoutInflater.from(parent.context)
+            return CentroViewHolder(CuadroCentroMedicoBinding.inflate(layoutInflater, parent, false))
+        }
+
+        override fun onBindViewHolder(holder: CentroViewHolder, position: Int) {
+            val currentPosition = holder.bindingAdapterPosition
+            if (currentPosition == RecyclerView.NO_POSITION) return
+
+            val item = differ.currentList[currentPosition]
+            holder.bind(item)
+
+            holder.itemBinding.root.animate().setListener(null).cancel()
+            holder.itemBinding.root.translationY = 0f
+            holder.itemBinding.root.alpha = 1f
+
+            if (currentPosition > lastPosition) {
+                val view = holder.itemBinding.root
+                view.translationY = 120f
+                view.alpha = 0f
+
+                view.animate()
+                    .translationY(0f)
+                    .alpha(1f)
+                    .setStartDelay(currentPosition * 35L)
+                    .setDuration(300L)
+                    .setInterpolator(android.view.animation.DecelerateInterpolator())
+                    .setListener(null)
+                    .start()
+
+                lastPosition = currentPosition
+            }
+        }
+
+        override fun getItemCount() = differ.currentList.size
+
+        override fun onViewDetachedFromWindow(holder: CentroViewHolder) {
+            holder.itemBinding.root.clearAnimation()
+            super.onViewDetachedFromWindow(holder)
+        }
     }
 }

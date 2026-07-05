@@ -11,7 +11,7 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:paddingBottom="24dp">
+        android:paddingBottom="32dp">
 
         <TextView
             android:id="@+id/txtTituloNuevaCita"
@@ -34,7 +34,9 @@
             android:layout_marginTop="16dp"
             app:cardCornerRadius="16dp"
             app:cardElevation="4dp"
-            app:layout_constraintTop_toBottomOf="@id/txtTituloNuevaCita">
+            app:layout_constraintTop_toBottomOf="@id/txtTituloNuevaCita"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <FrameLayout
                 android:layout_width="match_parent"
@@ -70,7 +72,9 @@
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            app:layout_constraintTop_toBottomOf="@id/cardMapPreview">
+            app:layout_constraintTop_toBottomOf="@id/cardMapPreview"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">>
 
             <AutoCompleteTextView
                 android:id="@+id/autoCompleteTipoCentro"
@@ -92,7 +96,9 @@
             app:boxCornerRadiusTopEnd="12dp"
             app:boxCornerRadiusBottomStart="12dp"
             app:boxCornerRadiusBottomEnd="12dp"
-            app:layout_constraintTop_toBottomOf="@id/layoutTipoCentro">
+            app:layout_constraintTop_toBottomOf="@id/layoutTipoCentro"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent">
 
             <AutoCompleteTextView
                 android:id="@+id/autoCompleteEspecialidad"
@@ -130,9 +136,12 @@
             android:id="@+id/recyclerViewCentros"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginTop="8dp"
+            android:layout_marginTop="12dp"
             android:nestedScrollingEnabled="false"
+            android:overScrollMode="never"
             app:layout_constraintTop_toBottomOf="@id/lblAvailableCenters"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
             tools:listitem="@layout/cuadro_centro_medico" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>

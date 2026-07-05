@@ -80,4 +80,9 @@ dependencies {
 
     //implementation(platform("com.google.firebase:firebase-bom:34.14.1"))
     //implementation("com.google.firebase:firebase-analytics")
+
+    implementation("com.cloudinary:cloudinary-android:3.1.2")
+
+    implementation("com.github.bumptech.glide:glide:4.16.0")
+    annotationProcessor("com.github.bumptech.glide:compiler:4.16.0")
 }

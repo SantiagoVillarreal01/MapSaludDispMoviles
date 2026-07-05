@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
 
     <application
+        android:name=".MapSaludApp"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -39,17 +40,17 @@
             android:name=".medicPages.PrincipalMedic"
             android:exported="false" />
         <activity
-            android:name=".userPages.PrincipalUser"
+            android:name=".patientPages.PrincipalPatient"
             android:exported="false" />
         <activity
-            android:name=".userPages.DetalleDiagnosticoUser"
+            android:name=".patientPages.DetalleDiagnosticoUser"
             android:exported="false" />
 
         <activity
-            android:name=".userPages.ReservarCita"
+            android:name=".patientPages.ReservarCita"
             android:exported="false" />
         <activity
-            android:name=".userPages.Especialistas"
+            android:name=".patientPages.Especialistas"
             android:exported="false" />
         <activity
             android:name=".ConfiguracionApp"
@@ -58,7 +59,7 @@
             android:name=".EditarPerfil"
             android:exported="false" />
         <activity
-            android:name=".userPages.DatosHospital"
+            android:name=".patientPages.DatosHospital"
             android:exported="false" />
 
         <meta-data

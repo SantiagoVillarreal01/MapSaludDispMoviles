@@ -1,4 +1,4 @@
-package ec.edu.mapsalud.datos
+package ec.edu.mapsalud.config
 
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore

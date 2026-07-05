@@ -5,10 +5,10 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import androidx.appcompat.app.AppCompatActivity
-import ec.edu.mapsalud.datos.FirebaseManager
+import ec.edu.mapsalud.config.FirebaseManager
 import ec.edu.mapsalud.enum.Type
 import ec.edu.mapsalud.medicPages.PrincipalMedic
-import ec.edu.mapsalud.userPages.PrincipalUser
+import ec.edu.mapsalud.patientPages.PrincipalPatient
 import ec.edu.mapsalud.utils.ThemeUtils
 
 
@@ -54,7 +54,7 @@ class SplashScreen : AppCompatActivity() {
                     val intent = if (tipoUsuarioStr == Type.DOCTOR.name) {
                         Intent(this, PrincipalMedic::class.java)
                     } else {
-                        Intent(this, PrincipalUser::class.java)
+                        Intent(this, PrincipalPatient::class.java)
                     }
 
                     intent.putExtra("xx1", "Bienvenido de nuevo")

@@ -64,7 +64,7 @@
                 android:textColor="?attr/colorOnSurfaceVariant"
                 android:layout_marginBottom="24dp"/>
 
-            <!-- 1. Diagnóstico Clínico -->
+            <!-- 1. Diagnóstico Clínico con Micrófono -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -74,11 +74,15 @@
                 android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilDiagnostico"
                 style="@style/Widget.MapSalud.TextInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxBackgroundColor="?attr/colorSurfaceVariant">
+                app:boxBackgroundColor="?attr/colorSurfaceVariant"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_mic"
+                app:endIconContentDescription="Dictar diagnóstico">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputDiagnostico"
@@ -92,7 +96,7 @@
                     android:textColorHint="?attr/colorOnSurfaceVariant"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- 2. Tratamiento -->
+            <!-- 2. Tratamiento con Micrófono -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -102,11 +106,15 @@
                 android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilTratamiento"
                 style="@style/Widget.MapSalud.TextInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxBackgroundColor="?attr/colorSurfaceVariant">
+                app:boxBackgroundColor="?attr/colorSurfaceVariant"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_mic"
+                app:endIconContentDescription="Dictar tratamiento">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputTratamiento"
@@ -120,7 +128,7 @@
                     android:textColorHint="?attr/colorOnSurfaceVariant"/>
             </com.google.android.material.textfield.TextInputLayout>
 
-            <!-- 3. Sugerencias -->
+            <!-- 3. Sugerencias con Micrófono -->
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -130,11 +138,15 @@
                 android:layout_marginBottom="8dp"/>
 
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilSugerencias"
                 style="@style/Widget.MapSalud.TextInputLayout"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginBottom="16dp"
-                app:boxBackgroundColor="?attr/colorSurfaceVariant">
+                app:boxBackgroundColor="?attr/colorSurfaceVariant"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_mic"
+                app:endIconContentDescription="Dictar sugerencias">
 
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/inputSugerencias"

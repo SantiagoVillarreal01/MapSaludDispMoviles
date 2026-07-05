@@ -20,8 +20,7 @@
             android:id="@+id/imgDoctor"
             android:layout_width="60dp"
             android:layout_height="60dp"
-            android:background="?attr/colorSurfaceVariant"
-            android:src="@android:drawable/ic_menu_gallery"
+            android:src="@drawable/user"
             app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Medium"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />

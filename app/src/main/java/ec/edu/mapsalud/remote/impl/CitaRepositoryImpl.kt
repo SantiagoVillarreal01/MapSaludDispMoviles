@@ -1,17 +1,9 @@
 package ec.edu.mapsalud.remote.impl
 
 import com.google.firebase.firestore.FirebaseFirestore
-import ec.edu.mapsalud.dto.AppointmentDetail
-import ec.edu.mapsalud.dto.AppointmentDtoRemote
-import ec.edu.mapsalud.dto.DiagnosisEmbedded
-import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
-import ec.edu.mapsalud.dto.Medico
-import ec.edu.mapsalud.dto.OfficeDtoRemote
-import ec.edu.mapsalud.dto.Paciente
+import ec.edu.mapsalud.dto.CitaDtoRemote
+import ec.edu.mapsalud.dto.Diagnostico
 import ec.edu.mapsalud.remote.inter.CitaRepository
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
-import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 
 
@@ -33,7 +25,7 @@ class CitaRepositoryImpl : CitaRepository {
         !snapshot.isEmpty
     }
 
-    override suspend fun saveAppointment(appointment: AppointmentDtoRemote): Result<Unit> =
+    override suspend fun saveAppointment(appointment: CitaDtoRemote): Result<Unit> =
         runCatching {
             val docRef = db.collection("citas").document()
             val appointmentToSave = appointment.copy(id = docRef.id)
@@ -56,7 +48,7 @@ class CitaRepositoryImpl : CitaRepository {
             .await()
     }
 
-    override suspend fun getPendingAppointmentsByOffices(officeIds: List<String>): Result<List<AppointmentDtoRemote>> = runCatching {
+    override suspend fun getPendingAppointmentsByOffices(officeIds: List<String>): Result<List<CitaDtoRemote>> = runCatching {
         if (officeIds.isEmpty()) return@runCatching emptyList()
 
         val snapshot = db.collection("citas")
@@ -64,13 +56,13 @@ class CitaRepositoryImpl : CitaRepository {
             .whereEqualTo("status", "Pendiente")
             .get()
             .await()
-        snapshot.toObjects(AppointmentDtoRemote::class.java)
+        snapshot.toObjects(CitaDtoRemote::class.java)
     }
 
-    override suspend fun getAppointmentById(appointmentId: String): Result<AppointmentDtoRemote?> = runCatching {
+    override suspend fun getAppointmentById(appointmentId: String): Result<CitaDtoRemote?> = runCatching {
         val snap = db.collection("citas").document(appointmentId).get().await()
         if (snap.exists()) {
-            snap.toObject(AppointmentDtoRemote::class.java)?.copy(id = snap.id)
+            snap.toObject(CitaDtoRemote::class.java)?.copy(id = snap.id)
         } else null
     }
 
@@ -81,18 +73,18 @@ class CitaRepositoryImpl : CitaRepository {
         Unit
     }
 
-    override suspend fun getCompletedAppointmentsByDoctor(idDoctor: String): Result<List<AppointmentDtoRemote>> = runCatching {
+    override suspend fun getCompletedAppointmentsByDoctor(idDoctor: String): Result<List<CitaDtoRemote>> = runCatching {
         val snapshot = db.collection("citas")
             .whereEqualTo("idDoctor", idDoctor)
             .whereEqualTo("status", "Completada")
             .get()
             .await()
         snapshot.documents.mapNotNull { doc ->
-            doc.toObject(AppointmentDtoRemote::class.java)?.copy(id = doc.id)
+            doc.toObject(CitaDtoRemote::class.java)?.copy(id = doc.id)
         }
     }
 
-    override suspend fun getCompletedAppointmentsByDoctorAndPatient(idDoctor: String, idUser: String): Result<List<AppointmentDtoRemote>> = runCatching {
+    override suspend fun getCompletedAppointmentsByDoctorAndPatient(idDoctor: String, idUser: String): Result<List<CitaDtoRemote>> = runCatching {
         val snapshot = db.collection("citas")
             .whereEqualTo("idUser", idUser)
             .whereEqualTo("idDoctor", idDoctor)
@@ -100,11 +92,11 @@ class CitaRepositoryImpl : CitaRepository {
             .get()
             .await()
         snapshot.documents.mapNotNull { doc ->
-            doc.toObject(AppointmentDtoRemote::class.java)?.copy(id = doc.id)
+            doc.toObject(CitaDtoRemote::class.java)?.copy(id = doc.id)
         }
     }
 
-    override suspend fun updateAppointmentDiagnosis(appointmentId: String, diagnosis: DiagnosisEmbedded): Result<Unit> = runCatching {
+    override suspend fun updateAppointmentDiagnosis(appointmentId: String, diagnosis: Diagnostico): Result<Unit> = runCatching {
         db.collection("citas").document(appointmentId)
             .update(
                 mapOf(
@@ -115,7 +107,7 @@ class CitaRepositoryImpl : CitaRepository {
         Unit
     }
 
-    override suspend fun fetchAppointmentsRaw(userId: String, status: String): Result<List<AppointmentDtoRemote>> = runCatching {
+    override suspend fun fetchAppointmentsRaw(userId: String, status: String): Result<List<CitaDtoRemote>> = runCatching {
         val appointmentsSnapshot = db.collection("citas")
             .whereEqualTo("idUser", userId)
             .whereEqualTo("status", status)
@@ -123,7 +115,7 @@ class CitaRepositoryImpl : CitaRepository {
             .await()
 
         appointmentsSnapshot.documents.mapNotNull { doc ->
-            doc.toObject(AppointmentDtoRemote::class.java)?.copy(id = doc.id)
+            doc.toObject(CitaDtoRemote::class.java)?.copy(id = doc.id)
         }
     }
 }

@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
+import ec.edu.mapsalud.dto.CentroMedicoDtoRemote
 import ec.edu.mapsalud.usercases.centrosUC.AddSpecialtyToCenterUC
 import ec.edu.mapsalud.usercases.centrosUC.GetAllCentersUC
 import ec.edu.mapsalud.usercases.centrosUC.GetCenterByIdUC
@@ -13,14 +13,14 @@ import kotlinx.coroutines.launch
 
 class CentroMedicoViewModel : ViewModel() {
 
-    private var _centersList = MutableLiveData<List<MedicalCenterDtoRemote>>()
-    val centersList: LiveData<List<MedicalCenterDtoRemote>> get() = _centersList
+    private var _centersList = MutableLiveData<List<CentroMedicoDtoRemote>>()
+    val centersList: LiveData<List<CentroMedicoDtoRemote>> get() = _centersList
 
-    private var _filteredCenters = MutableLiveData<List<Pair<MedicalCenterDtoRemote, Float>>>()
-    val filteredCenters: LiveData<List<Pair<MedicalCenterDtoRemote, Float>>> get() = _filteredCenters
+    private var _filteredCenters = MutableLiveData<List<Pair<CentroMedicoDtoRemote, Float>>>()
+    val filteredCenters: LiveData<List<Pair<CentroMedicoDtoRemote, Float>>> get() = _filteredCenters
 
-    private var _selectedCenter = MutableLiveData<MedicalCenterDtoRemote?>()
-    val selectedCenter: LiveData<MedicalCenterDtoRemote?> get() = _selectedCenter
+    private var _selectedCenter = MutableLiveData<CentroMedicoDtoRemote?>()
+    val selectedCenter: LiveData<CentroMedicoDtoRemote?> get() = _selectedCenter
 
     fun cargarTodosLosCentros(getAllCentersUC: GetAllCentersUC) {
         viewModelScope.launch {

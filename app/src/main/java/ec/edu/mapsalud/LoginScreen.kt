@@ -4,19 +4,17 @@ import android.content.Intent
 import android.os.Bundle
 import android.text.InputFilter
 import android.text.InputType
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
-import ec.edu.mapsalud.datos.FirebaseManager
+import ec.edu.mapsalud.config.FirebaseManager
 import ec.edu.mapsalud.enum.Type
 import ec.edu.mapsalud.medicPages.PrincipalMedic
-import ec.edu.mapsalud.userPages.PrincipalUser
+import ec.edu.mapsalud.patientPages.PrincipalPatient
 import ec.edu.mapsalud.utils.EmailJSRequest
 import ec.edu.mapsalud.utils.RetrofitClient
 import com.google.android.gms.auth.api.signin.GoogleSignIn
 import com.google.android.gms.auth.api.signin.GoogleSignInClient
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions
-import com.google.android.gms.common.api.ApiException
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputEditText
@@ -291,7 +289,7 @@ class LoginScreen : AppCompatActivity() {
     private fun navegarAlHome(isPatient: Boolean) {
         showMessage("Bienvenido")
         val intent = if (isPatient) {
-            Intent(this, PrincipalUser::class.java)
+            Intent(this, PrincipalPatient::class.java)
         } else {
             Intent(this, PrincipalMedic::class.java)
         }

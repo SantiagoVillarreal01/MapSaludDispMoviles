@@ -1,4 +1,4 @@
-package ec.edu.mapsalud.userPages
+package ec.edu.mapsalud.patientPages
 
 import android.content.Intent
 import android.os.Bundle
@@ -13,16 +13,12 @@ import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.UserPrincipalBinding
 import android.graphics.Color
 import androidx.activity.viewModels
-import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
-import ec.edu.mapsalud.remote.inter.UsuariosRepository
 import ec.edu.mapsalud.usercases.usuariosUC.GetPacienteByIdUC
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ec.edu.mapsalud.utils.ThemeUtils
 import ec.edu.mapsalud.viewmodel.UsuarioViewModel
-class PrincipalUser : AppCompatActivity() {
+class PrincipalPatient : AppCompatActivity() {
 
     private lateinit var binding: UserPrincipalBinding
     private val auth = FirebaseAuth.getInstance()
@@ -44,6 +40,29 @@ class PrincipalUser : AppCompatActivity() {
         }
 
         initListeners()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        cargarFotoPerfilDesdeCache()
+    }
+
+    private fun cargarFotoPerfilDesdeCache() {
+        val sharedPref = getSharedPreferences("MapSaludCache", MODE_PRIVATE)
+        val fotoUrl = sharedPref.getString("USER_FOTO_URL", "") ?: ""
+
+        Glide.with(this).clear(binding.imgProfile)
+
+        if (fotoUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(fotoUrl)
+                .centerCrop()
+                .placeholder(R.drawable.user)
+                .error(R.drawable.user)
+                .into(binding.imgProfile)
+        } else {
+            binding.imgProfile.setImageResource(R.drawable.user)
+        }
     }
 
     private fun cargarDatosUsuario() {
@@ -117,13 +136,32 @@ class PrincipalUser : AppCompatActivity() {
     private fun initObservers() {
         userVM.paciente.observe(this) { paciente ->
             if (paciente != null) {
+
                 val nombres = paciente.info.nombres.trim()
                 val apellidos = paciente.info.apellidos.trim()
                 val primerNombre = nombres.split(" ").firstOrNull() ?: ""
                 val primerApellido = apellidos.split(" ").firstOrNull() ?: ""
                 binding.txtUserName.text = "$primerNombre $primerApellido"
+
+                val fotoUrlActual = paciente.info.imageUrl ?: ""
+                val sharedPref = getSharedPreferences("MapSaludCache", MODE_PRIVATE)
+                sharedPref.edit().putString("USER_FOTO_URL", fotoUrlActual).apply()
+
+                Glide.with(this).clear(binding.imgProfile)
+                if (fotoUrlActual.isNotEmpty()) {
+                    Glide.with(this)
+                        .load(fotoUrlActual)
+                        .centerCrop()
+                        .placeholder(R.drawable.user)
+                        .error(R.drawable.user)
+                        .into(binding.imgProfile)
+                } else {
+                    binding.imgProfile.setImageResource(R.drawable.user)
+                }
+
             } else {
                 binding.txtUserName.text = "Paciente"
+                binding.imgProfile.setImageResource(R.drawable.user)
             }
         }
     }

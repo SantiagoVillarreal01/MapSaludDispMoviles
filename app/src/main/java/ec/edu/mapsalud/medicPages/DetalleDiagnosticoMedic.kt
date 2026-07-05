@@ -1,22 +1,19 @@
 package ec.edu.mapsalud.medicPages
 
+import android.app.Activity
+import android.content.Intent
 import android.os.Bundle
+import android.speech.RecognizerIntent
 import androidx.appcompat.app.AppCompatActivity
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.viewModels
-import androidx.lifecycle.lifecycleScope
 import ec.edu.mapsalud.databinding.MedicDetalleDiagnosticoBinding
-import ec.edu.mapsalud.dto.DiagnosisEmbedded
+import ec.edu.mapsalud.dto.Diagnostico
 import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
-import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
-import ec.edu.mapsalud.remote.inter.CitaRepository
 import ec.edu.mapsalud.usercases.citasUC.UpdateAppointmentDiagnosisUC
 import ec.edu.mapsalud.utils.ThemeUtils
 import ec.edu.mapsalud.viewmodel.CitaViewModel
-import ec.edu.mapsalud.viewmodel.UsuarioViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -27,6 +24,32 @@ class DetalleDiagnosticoMedic : AppCompatActivity() {
     private var appointmentId: String = ""
     private val citaRepository = CitaRepositoryImpl()
     private val citaVM: CitaViewModel by viewModels()
+
+    private var idCampoObjetivo: Int = 0
+
+    private val speechLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { resultado ->
+        if (resultado.resultCode == Activity.RESULT_OK && resultado.data != null) {
+            val palabrasReconocidas = resultado.data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
+            if (!palabrasReconocidas.isNullOrEmpty()) {
+                val textoDictado = palabrasReconocidas[0]
+
+                when (idCampoObjetivo) {
+                    binding.inputDiagnostico.id -> {
+                        binding.inputDiagnostico.setText(textoDictado)
+                        binding.inputDiagnostico.setSelection(textoDictado.length)
+                    }
+                    binding.inputTratamiento.id -> {
+                        binding.inputTratamiento.setText(textoDictado)
+                        binding.inputTratamiento.setSelection(textoDictado.length)
+                    }
+                    binding.inputSugerencias.id -> {
+                        binding.inputSugerencias.setText(textoDictado)
+                        binding.inputSugerencias.setSelection(textoDictado.length)
+                    }
+                }
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtils.applyTheme(this)
@@ -41,6 +64,7 @@ class DetalleDiagnosticoMedic : AppCompatActivity() {
         binding.txtPacienteDetalle.text = "Paciente: $nombrePaciente"
         binding.txtMotivoDetalle.text = "Motivo: $motivoCita"
 
+        configurarBotonesDeDictado()
         initObservers()
 
         binding.btnRegresarDiag.setOnClickListener {
@@ -73,6 +97,36 @@ class DetalleDiagnosticoMedic : AppCompatActivity() {
         }
     }
 
+    private fun configurarBotonesDeDictado() {
+        binding.tilDiagnostico.setEndIconOnClickListener {
+            iniciarDictadoPorVoz(binding.inputDiagnostico.id)
+        }
+
+        binding.tilTratamiento.setEndIconOnClickListener {
+            iniciarDictadoPorVoz(binding.inputTratamiento.id)
+        }
+
+        binding.tilSugerencias.setEndIconOnClickListener {
+            iniciarDictadoPorVoz(binding.inputSugerencias.id)
+        }
+    }
+
+    private fun iniciarDictadoPorVoz(targetEditTextId: Int) {
+        idCampoObjetivo = targetEditTextId
+
+        val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+            putExtra(RecognizerIntent.EXTRA_LANGUAGE, Locale.getDefault())
+            putExtra(RecognizerIntent.EXTRA_PROMPT, "Dictando datos médicos...")
+        }
+
+        try {
+            speechLauncher.launch(intent)
+        } catch (e: Exception) {
+            Toast.makeText(this, "El reconocimiento de voz no está disponible en este dispositivo", Toast.LENGTH_SHORT).show()
+        }
+    }
+
     private fun guardarDiagnosticoEnRepositorio() {
         val diagnosticoTxt = binding.inputDiagnostico.text.toString().trim()
         val tratamientoTxt = binding.inputTratamiento.text.toString().trim()
@@ -95,7 +149,7 @@ class DetalleDiagnosticoMedic : AppCompatActivity() {
         val formatoFecha = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
         val fechaActual = formatoFecha.format(Date())
 
-        val nuevoDiagnostico = DiagnosisEmbedded(
+        val nuevoDiagnostico = Diagnostico(
             clinicalDiagnosis = diagnosticoTxt,
             treatment = tratamientoTxt,
             suggestions = sugerenciasTxt,

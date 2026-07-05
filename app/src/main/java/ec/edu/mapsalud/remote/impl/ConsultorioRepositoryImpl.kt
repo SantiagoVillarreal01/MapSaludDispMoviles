@@ -1,8 +1,7 @@
 package ec.edu.mapsalud.remote.impl
 
 import com.google.firebase.firestore.FirebaseFirestore
-import ec.edu.mapsalud.dto.Medico
-import ec.edu.mapsalud.dto.OfficeDtoRemote
+import ec.edu.mapsalud.dto.ConsultorioDtoRemote
 import ec.edu.mapsalud.remote.inter.ConsultorioRepository
 import kotlinx.coroutines.tasks.await
 
@@ -14,18 +13,18 @@ class ConsultorioRepositoryImpl : ConsultorioRepository {
         return db.collection("consultorios").document().id
     }
 
-    override suspend fun getOfficeById(idOffice: String): Result<OfficeDtoRemote?> = runCatching {
+    override suspend fun getOfficeById(idOffice: String): Result<ConsultorioDtoRemote?> = runCatching {
         val snap = db.collection("consultorios").document(idOffice).get().await()
-        snap.toObject(OfficeDtoRemote::class.java)?.copy(id = snap.id)
+        snap.toObject(ConsultorioDtoRemote::class.java)?.copy(id = snap.id)
     }
 
 
-    override suspend fun saveOffice(office: OfficeDtoRemote): Result<Unit> = runCatching {
+    override suspend fun saveOffice(office: ConsultorioDtoRemote): Result<Unit> = runCatching {
         db.collection("consultorios").document(office.id).set(office).await()
         Unit
     }
 
-    override suspend fun getOfficesByCenterAndSpecialty(idCenter: String, specialty: String): Result<List<OfficeDtoRemote>> {
+    override suspend fun getOfficesByCenterAndSpecialty(idCenter: String, specialty: String): Result<List<ConsultorioDtoRemote>> {
         return runCatching {
             val snapshot = db.collection("consultorios")
                 .whereEqualTo("idCenter", idCenter)
@@ -34,18 +33,18 @@ class ConsultorioRepositoryImpl : ConsultorioRepository {
                 .await()
 
             snapshot.documents.mapNotNull { doc ->
-                doc.toObject(OfficeDtoRemote::class.java)?.copy(id = doc.id)
+                doc.toObject(ConsultorioDtoRemote::class.java)?.copy(id = doc.id)
             }
         }
     }
 
-    override suspend fun getOfficesByDoctor(idDoctor: String): Result<List<OfficeDtoRemote>> = runCatching {
+    override suspend fun getOfficesByDoctor(idDoctor: String): Result<List<ConsultorioDtoRemote>> = runCatching {
         val snapshot = db.collection("consultorios")
             .whereEqualTo("idDoctor", idDoctor)
             .get()
             .await()
         snapshot.documents.mapNotNull { doc ->
-            doc.toObject(OfficeDtoRemote::class.java)?.copy(id = doc.id)
+            doc.toObject(ConsultorioDtoRemote::class.java)?.copy(id = doc.id)
         }
     }
 

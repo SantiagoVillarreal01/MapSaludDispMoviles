@@ -1,4 +1,4 @@
-package ec.edu.mapsalud.userPages
+package ec.edu.mapsalud.patientPages
 
 import android.content.Intent
 import android.os.Bundle
@@ -12,27 +12,23 @@ import com.google.android.material.card.MaterialCardView
 import com.google.firebase.auth.FirebaseAuth
 import ec.edu.mapsalud.databinding.CuadroComentarioBinding
 import ec.edu.mapsalud.databinding.UserDatosHospitalBinding
-import ec.edu.mapsalud.dto.CommentDtoRemote
+import ec.edu.mapsalud.dto.ComentarioDtoRemote
 import ec.edu.mapsalud.enum.CenterType
 import ec.edu.mapsalud.remote.impl.ComentarioRepositoryImpl
 import ec.edu.mapsalud.remote.impl.CentroMedicoRepositoryImpl
-import ec.edu.mapsalud.remote.inter.ComentarioRepository
-import ec.edu.mapsalud.remote.inter.CentroMedicoRepository
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import ec.edu.mapsalud.utils.ThemeUtils
 import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
-import ec.edu.mapsalud.remote.inter.UsuariosRepository
 import ec.edu.mapsalud.usercases.centrosUC.GetCenterByIdUC
 import ec.edu.mapsalud.usercases.comentriosUC.GetCommentsByCenterUC
 import ec.edu.mapsalud.usercases.comentriosUC.SaveCommentUC
 import ec.edu.mapsalud.viewmodel.CentroMedicoViewModel
 import ec.edu.mapsalud.viewmodel.ComentarioViewModel
-import ec.edu.mapsalud.viewmodel.UsuarioViewModel
+import com.bumptech.glide.Glide
+import ec.edu.mapsalud.R
 
 class DatosHospital : AppCompatActivity() {
 
@@ -83,7 +79,7 @@ class DatosHospital : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            val nuevoComentario = CommentDtoRemote(
+            val nuevoComentario = ComentarioDtoRemote(
                 idCenter = idCentroActual,
                 idUser = uidPaciente,
                 rating = estrellas,
@@ -128,17 +124,24 @@ class DatosHospital : AppCompatActivity() {
         centroMedicoVM.selectedCenter.observe(this) { centro ->
             centro?.let {
                 binding.txtNombreHospital.text = it.name
+                binding.txtDireccionHospital.text = "📍 ${it.address}"
+                binding.txtDescripcionHospital.text = it.description.ifEmpty {
+                    "No hay descripción disponible para este centro médico."
+                }
+
+                if (!it.imageUrl.isNullOrEmpty()) {
+                    Glide.with(this)
+                        .load(it.imageUrl)
+                        .centerCrop()
+                        .into(binding.imgHospital)
+                } else {
+                    binding.imgHospital.setImageResource(android.R.drawable.ic_menu_gallery)
+                }
 
                 val tipoCentro = try {
                     CenterType.valueOf(it.type).nombreMostrar
                 } catch (e: Exception) {
                     "Centro Médico"
-                }
-
-                binding.txtDireccionHospital.text = "📍 ${it.address}"
-
-                binding.txtDescripcionHospital.text = it.description.ifEmpty {
-                    "No hay descripción disponible para este centro médico."
                 }
 
                 dibujarEspecialidades(it.specialties)
@@ -149,18 +152,18 @@ class DatosHospital : AppCompatActivity() {
             binding.layoutComentarios.removeAllViews()
 
             lifecycleScope.launch {
-                val comentariosConNombres = coroutineScope {
+                val comentariosProcesados = coroutineScope {
                     listaComentarios.map { comentario ->
                         async {
-                            val nombre = obtenerNombreUsuario(comentario.idUser)
-                            Pair(comentario, nombre)
+                            val datosUsuario = obtenerDatosUsuario(comentario.idUser)
+                            Triple(comentario, datosUsuario.first, datosUsuario.second)
                         }
                     }.awaitAll()
                 }
 
-                for ((comentario, nombreUsuario) in comentariosConNombres) {
+                for ((comentario, nombreUsuario, fotoUrl) in comentariosProcesados) {
                     val estrellasStr = "⭐".repeat(comentario.rating.toInt())
-                    agregarComentarioVista(nombreUsuario, estrellasStr, comentario.review)
+                    agregarComentarioVista(nombreUsuario, estrellasStr, comentario.review, fotoUrl)
                 }
             }
         }
@@ -168,7 +171,10 @@ class DatosHospital : AppCompatActivity() {
         comentarioVM.commentSaved.observe(this) { comentarioGuardado ->
             if (comentarioGuardado != null) {
                 val estrellas = comentarioGuardado.rating.toInt()
-                agregarComentarioVista("Tú", "⭐".repeat(estrellas), comentarioGuardado.review)
+                val sharedPref = getSharedPreferences("MapSaludCache", MODE_PRIVATE)
+                val miFotoUrl = sharedPref.getString("USER_FOTO_URL", "") ?: ""
+
+                agregarComentarioVista("Tú", "⭐".repeat(estrellas), comentarioGuardado.review, miFotoUrl)
 
                 binding.editComentario.text.clear()
                 binding.ratingBar.rating = 0f
@@ -179,7 +185,7 @@ class DatosHospital : AppCompatActivity() {
         }
     }
 
-    private suspend fun obtenerNombreUsuario(uid: String): String {
+    private suspend fun obtenerDatosUsuario(uid: String): Pair<String, String> {
         return try {
             val result = usuariosRepository.getPacienteById(uid)
             val paciente = result.getOrNull()
@@ -187,12 +193,15 @@ class DatosHospital : AppCompatActivity() {
             if (paciente != null) {
                 val primerNombre = paciente.info.nombres.split(" ").firstOrNull() ?: ""
                 val primerApellido = paciente.info.apellidos.split(" ").firstOrNull() ?: ""
-                "$primerNombre $primerApellido".trim()
+                val nombreCompleto = "$primerNombre $primerApellido".trim()
+                val fotoUrl = paciente.info.imageUrl ?: "" // Ajusta según el campo exacto de tu DTO/Modelo
+
+                Pair(nombreCompleto, fotoUrl)
             } else {
-                "Usuario Anónimo"
+                Pair("Usuario Anónimo", "")
             }
         } catch (e: Exception) {
-            "Usuario Anónimo"
+            Pair("Usuario Anónimo", "")
         }
     }
 
@@ -221,7 +230,7 @@ class DatosHospital : AppCompatActivity() {
                 gravity = android.view.Gravity.CENTER
                 textSize = 14f
                 setTypeface(null, android.graphics.Typeface.BOLD)
-                setTextColor(0xFF424242.toInt()) // Color de texto por defecto
+                setTextColor(0xFF424242.toInt())
             }
 
             card.addView(textView)
@@ -245,10 +254,23 @@ class DatosHospital : AppCompatActivity() {
         }
     }
 
-    private fun agregarComentarioVista(usuario: String, estrellas: String, texto: String) {
+    private fun agregarComentarioVista(usuario: String, estrellas: String, texto: String, fotoUrl: String) {
         val itemBinding = CuadroComentarioBinding.inflate(layoutInflater, binding.layoutComentarios, false)
+
         itemBinding.txtUsuarioEstrellas.text = "$usuario - $estrellas"
         itemBinding.txtTextoComentario.text = texto
+
+        if (fotoUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(fotoUrl)
+                .centerCrop()
+                .placeholder(R.drawable.user)
+                .error(R.drawable.user)
+                .into(itemBinding.imgProfileComentario)
+        } else {
+            itemBinding.imgProfileComentario.setImageResource(R.drawable.user)
+        }
+
         binding.layoutComentarios.addView(itemBinding.root, 0)
     }
 }

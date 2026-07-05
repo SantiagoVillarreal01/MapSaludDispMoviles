@@ -58,6 +58,7 @@
                 android:layout_height="220dp">
 
                 <ImageView
+                    android:id="@+id/imgHospital"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:src="@android:drawable/ic_menu_gallery"
@@ -203,7 +204,9 @@
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
                     android:orientation="vertical"
-                    android:paddingBottom="24dp"/>
+                    android:paddingBottom="24dp"
+                    android:showDividers="middle"
+                    android:divider="?android:attr/listDivider" />
 
             </LinearLayout>
         </LinearLayout>

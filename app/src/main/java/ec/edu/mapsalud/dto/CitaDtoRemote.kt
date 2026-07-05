@@ -1,6 +1,6 @@
 package ec.edu.mapsalud.dto
 
-data class AppointmentDtoRemote(
+data class CitaDtoRemote(
 
     val id: String = "",
     val idUser: String = "",
@@ -16,6 +16,6 @@ data class AppointmentDtoRemote(
     val date: String = "", //dd/MM/yyyy
     val time: String = "",
     val status: String = "Pendiente", // "Pendiente", "Completada", "Cancelada", "Inasistencia"
-    val diagnosis: DiagnosisEmbedded? = null // Empieza en null hasta que el médico lo llena
+    val diagnosis: Diagnostico? = null // Empieza en null hasta que el médico lo llena
 
 )

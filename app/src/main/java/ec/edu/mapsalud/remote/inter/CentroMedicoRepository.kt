@@ -1,10 +1,10 @@
 package ec.edu.mapsalud.remote.inter
 
-import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
+import ec.edu.mapsalud.dto.CentroMedicoDtoRemote
 
 interface CentroMedicoRepository {
-    suspend fun getAllCenters(): Result<List<MedicalCenterDtoRemote>>
-    suspend fun getCenterById(id: String): Result<MedicalCenterDtoRemote?>
+    suspend fun getAllCenters(): Result<List<CentroMedicoDtoRemote>>
+    suspend fun getCenterById(id: String): Result<CentroMedicoDtoRemote?>
 
     suspend fun getCentersFiltered(
         userLat: Double,
@@ -12,7 +12,7 @@ interface CentroMedicoRepository {
         type: String?, // "Público", "Privado" o null para todos
         specialty: String?, // Especialidad o null para todas
         radiusInMeters: Double = 1000.0
-    ): Result<List<Pair<MedicalCenterDtoRemote, Float>>>
+    ): Result<List<Pair<CentroMedicoDtoRemote, Float>>>
 
     suspend fun addSpecialtyToCenter(idCenter: String, specialty: String): Result<Unit>
 }

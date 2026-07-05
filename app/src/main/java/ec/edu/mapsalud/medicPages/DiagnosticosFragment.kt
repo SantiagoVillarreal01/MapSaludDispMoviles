@@ -14,17 +14,16 @@ import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.CuadroCitaCompletaBinding
 import ec.edu.mapsalud.databinding.MedicFragmentDiagnosticosBinding
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.recyclerview.widget.AsyncListDiffer
+import androidx.recyclerview.widget.DiffUtil
 import com.google.firebase.auth.FirebaseAuth
-import ec.edu.mapsalud.dto.AppointmentDtoRemote
-import ec.edu.mapsalud.dto.AppointmentPaciente
+import ec.edu.mapsalud.dto.CitaDtoRemote
+import ec.edu.mapsalud.dto.CitaPaciente
 import ec.edu.mapsalud.dto.Paciente
 import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
 import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
-import ec.edu.mapsalud.remote.inter.CitaRepository
-import ec.edu.mapsalud.remote.inter.UsuariosRepository
 import ec.edu.mapsalud.usercases.citasUC.GetCompletedAppointmentsByDoctorAndPatientUC
 import ec.edu.mapsalud.usercases.citasUC.GetCompletedAppointmentsByDoctorUC
 import ec.edu.mapsalud.usercases.usuariosUC.GetPacienteByCedulaUC
@@ -43,8 +42,9 @@ import kotlin.getValue
 
 class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
 
-    private lateinit var binding: MedicFragmentDiagnosticosBinding
-    private lateinit var adapter: DiagnosticosAdapter
+    private var _binding: MedicFragmentDiagnosticosBinding? = null
+    private val binding get() = _binding!!
+    private lateinit var diagnosticosAdapter: DiagnosticosAdapter
     private val auth = FirebaseAuth.getInstance()
     private val citaVM by viewModels<CitaViewModel>()
     private val usuarioVM by viewModels<UsuarioViewModel>()
@@ -53,7 +53,7 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        binding = MedicFragmentDiagnosticosBinding.bind(view)
+        _binding = MedicFragmentDiagnosticosBinding.bind(view)
 
         configurarRecycler()
         configurarBuscador()
@@ -62,7 +62,7 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
     }
 
     private fun configurarRecycler() {
-        adapter = DiagnosticosAdapter(emptyList()) { citaSeleccionada ->
+        diagnosticosAdapter = DiagnosticosAdapter { citaSeleccionada ->
             val intent = Intent(requireContext(), DetalleDiagnosticoMedic::class.java).apply {
                 putExtra("APPOINTMENT_ID", citaSeleccionada.appointment.id)
                 val nombreCompleto = "${citaSeleccionada.paciente.info.nombres} ${citaSeleccionada.paciente.info.apellidos}"
@@ -72,7 +72,7 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
             startActivity(intent)
         }
         binding.recyclerCitasDiagnostico.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerCitasDiagnostico.adapter = adapter
+        binding.recyclerCitasDiagnostico.adapter = diagnosticosAdapter
     }
 
     private fun configurarBuscador() {
@@ -85,7 +85,6 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
             }
         }
     }
-
     private fun cargarTodasLasCitas() {
         val uidMedico = auth.currentUser?.uid ?: return
 
@@ -121,7 +120,7 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
 
             if (paciente == null) {
                 Toast.makeText(requireContext(), "No se encontró paciente con esa cédula", Toast.LENGTH_SHORT).show()
-                adapter.actualizarDatos(emptyList())
+                diagnosticosAdapter.submitList(emptyList())
                 return@observe
             }
             citaVM.cargarHistorialCompartido(
@@ -134,7 +133,7 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
         }
     }
 
-    private suspend fun cruzarCitasConPacientes(citasRemote: List<AppointmentDtoRemote>): List<AppointmentPaciente> {
+    private suspend fun cruzarCitasConPacientes(citasRemote: List<CitaDtoRemote>): List<CitaPaciente> {
         return coroutineScope {
             citasRemote.map { appointment ->
                 async {
@@ -143,7 +142,7 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
                             nombres = appointment.patientName,
                             apellidos = ""
                         ))
-                        AppointmentPaciente(
+                        CitaPaciente(
                             appointment = appointment,
                             paciente = dummyPaciente,
                             horaFormateada = appointment.time,
@@ -153,7 +152,7 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
                         val patientResult = usuarioRepository.getPacienteById(appointment.idUser)
                         val paciente = patientResult.getOrNull() ?: Paciente()
 
-                        AppointmentPaciente(
+                        CitaPaciente(
                             appointment = appointment,
                             paciente = paciente,
                             horaFormateada = appointment.time,
@@ -164,7 +163,7 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
             }.awaitAll()
         }
     }
-    private fun actualizarListaOrdenada(lista: List<AppointmentPaciente>) {
+    private fun actualizarListaOrdenada(lista: List<CitaPaciente>) {
         val formato = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
 
         val listaOrdenada = lista.sortedWith(Comparator { c1, c2 ->
@@ -173,25 +172,33 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
             fecha2.compareTo(fecha1)
         })
 
-        adapter.actualizarDatos(listaOrdenada)
-    }
-
-    private fun obtenerFechaActualString(): String {
-        val sdf = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
-        return sdf.format(Date())
+        diagnosticosAdapter.submitList(listaOrdenada)
     }
 
     inner class DiagnosticosAdapter(
-        private var listaCitas: List<AppointmentPaciente>,
-        private val onCitaClick: (AppointmentPaciente) -> Unit
+        private val onCitaClick: (CitaPaciente) -> Unit
     ) : RecyclerView.Adapter<DiagnosticosAdapter.ViewHolder>() {
 
-        inner class ViewHolder(val binding: CuadroCitaCompletaBinding) : RecyclerView.ViewHolder(binding.root)
+        private var lastPosition = -1
 
-        fun actualizarDatos(nuevaLista: List<AppointmentPaciente>) {
-            this.listaCitas = nuevaLista
-            notifyDataSetChanged()
+        private val diffCallback = object : DiffUtil.ItemCallback<CitaPaciente>() {
+            override fun areItemsTheSame(oldItem: CitaPaciente, newItem: CitaPaciente): Boolean {
+                return oldItem.appointment.id == newItem.appointment.id
+            }
+
+            override fun areContentsTheSame(oldItem: CitaPaciente, newItem: CitaPaciente): Boolean {
+                return oldItem == newItem
+            }
         }
+
+        private val differ = AsyncListDiffer(this, diffCallback)
+
+        fun submitList(nuevaLista: List<CitaPaciente>) {
+            lastPosition = -1
+            differ.submitList(nuevaLista)
+        }
+
+        inner class ViewHolder(val itemBinding: CuadroCitaCompletaBinding) : RecyclerView.ViewHolder(itemBinding.root)
 
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
             val binding = CuadroCitaCompletaBinding.inflate(LayoutInflater.from(parent.context), parent, false)
@@ -199,18 +206,49 @@ class DiagnosticosFragment : Fragment(R.layout.medic_fragment_diagnosticos) {
         }
 
         override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-            val citaPaciente = listaCitas[position]
+            val currentPosition = holder.bindingAdapterPosition
+            if (currentPosition == RecyclerView.NO_POSITION) return
+
+            val citaPaciente = differ.currentList[currentPosition]
             val appointment = citaPaciente.appointment
             val infoUsuario = citaPaciente.paciente.info
 
-            holder.binding.txtFechaCita.text = "${appointment.date} - ${appointment.time}"
-            holder.binding.txtNombrePaciente.text = "${infoUsuario.nombres} ${infoUsuario.apellidos}"
-            holder.binding.txtMotivo.text = appointment.reason
+            holder.itemBinding.txtFechaCita.text = "${appointment.date} - ${appointment.time}"
+            holder.itemBinding.txtNombrePaciente.text = "${infoUsuario.nombres} ${infoUsuario.apellidos}"
+            holder.itemBinding.txtMotivo.text = appointment.reason
 
-            holder.binding.colorBordeLateral.setBackgroundColor(Color.parseColor("#00838F"))
-            holder.binding.root.setOnClickListener { onCitaClick(citaPaciente) }
+            holder.itemBinding.colorBordeLateral.setBackgroundColor(Color.parseColor("#00838F"))
+            holder.itemBinding.root.setOnClickListener { onCitaClick(citaPaciente) }
+
+            holder.itemBinding.root.animate().setListener(null).cancel()
+            holder.itemBinding.root.translationY = 0f
+            holder.itemBinding.root.alpha = 1f
+            holder.itemBinding.root.scaleX = 1f
+            holder.itemBinding.root.scaleY = 1f
+
+            if (currentPosition > lastPosition) {
+                val view = holder.itemBinding.root
+                view.translationY = 100f
+                view.alpha = 0f
+
+                view.animate()
+                    .translationY(0f)
+                    .alpha(1f)
+                    .setStartDelay(currentPosition * 35L)
+                    .setDuration(300L)
+                    .setInterpolator(android.view.animation.DecelerateInterpolator())
+                    .setListener(null)
+                    .start()
+
+                lastPosition = currentPosition
+            }
         }
 
-        override fun getItemCount() = listaCitas.size
+        override fun getItemCount() = differ.currentList.size
+
+        override fun onViewDetachedFromWindow(holder: ViewHolder) {
+            holder.itemBinding.root.clearAnimation()
+            super.onViewDetachedFromWindow(holder)
+        }
     }
 }

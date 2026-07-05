@@ -61,12 +61,12 @@
                     android:gravity="center_vertical">
 
                     <com.google.android.material.imageview.ShapeableImageView
+                        android:id="@+id/imgDoctorReserva"
                         android:layout_width="60dp"
                         android:layout_height="60dp"
-                        android:src="@drawable/ic_person"
+                        android:src="@drawable/user"
                         android:background="?attr/colorSurfaceVariant"
-                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full"
-                        app:tint="?attr/colorOnSurfaceVariant"/>
+                        app:shapeAppearanceOverlay="@style/ShapeAppearance.Material3.Corner.Full" />
 
                     <LinearLayout
                         android:layout_width="wrap_content"
@@ -100,12 +100,17 @@
                 android:textColor="?attr/colorOnSurface"
                 android:layout_marginBottom="8dp"/>
 
+            <!-- Se añade el End Icon de Micrófono para el Motivo -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilMotivo"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.MapSalud.TextInputLayout"
                 android:layout_marginBottom="16dp"
-                app:boxBackgroundColor="?attr/colorSurfaceVariant">
+                app:boxBackgroundColor="?attr/colorSurfaceVariant"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_mic"
+                app:endIconContentDescription="Dictar motivo">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edtMotivo"
                     android:layout_width="match_parent"
@@ -124,12 +129,17 @@
                 android:textColor="?attr/colorOnSurface"
                 android:layout_marginBottom="8dp"/>
 
+            <!-- Se añade el End Icon de Micrófono para la Descripción -->
             <com.google.android.material.textfield.TextInputLayout
+                android:id="@+id/tilDescripcion"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 style="@style/Widget.MapSalud.TextInputLayout"
                 android:layout_marginBottom="24dp"
-                app:boxBackgroundColor="?attr/colorSurfaceVariant">
+                app:boxBackgroundColor="?attr/colorSurfaceVariant"
+                app:endIconMode="custom"
+                app:endIconDrawable="@drawable/ic_mic"
+                app:endIconContentDescription="Dictar descripción">
                 <com.google.android.material.textfield.TextInputEditText
                     android:id="@+id/edtDescripcion"
                     android:layout_width="match_parent"

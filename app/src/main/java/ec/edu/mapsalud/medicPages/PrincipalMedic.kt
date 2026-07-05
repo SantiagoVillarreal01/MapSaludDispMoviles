@@ -14,6 +14,7 @@ import ec.edu.mapsalud.databinding.MedicPrincipalBinding
 import android.graphics.Color
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.bumptech.glide.Glide
 import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
 import ec.edu.mapsalud.remote.inter.UsuariosRepository
 import ec.edu.mapsalud.usercases.usuariosUC.GetDoctorByIdUC
@@ -48,6 +49,29 @@ class PrincipalMedic : AppCompatActivity() {
         initListeners()
     }
 
+    override fun onResume() {
+        super.onResume()
+        cargarFotoPerfilDesdeCache()
+    }
+
+    private fun cargarFotoPerfilDesdeCache() {
+        val sharedPref = getSharedPreferences("MapSaludCache", MODE_PRIVATE)
+        val fotoUrl = sharedPref.getString("USER_FOTO_URL", "") ?: ""
+
+        Glide.with(this).clear(binding.imgProfileMedic)
+
+        if (fotoUrl.isNotEmpty()) {
+            Glide.with(this)
+                .load(fotoUrl)
+                .centerCrop()
+                .placeholder(R.drawable.user)
+                .error(R.drawable.user)
+                .into(binding.imgProfileMedic)
+        } else {
+            binding.imgProfileMedic.setImageResource(R.drawable.user)
+        }
+    }
+
     private fun cargarDatosDoctor() {
         val uid = auth.currentUser?.uid ?: return
         usuarioVM.cargarMedico(
@@ -60,8 +84,26 @@ class PrincipalMedic : AppCompatActivity() {
         usuarioVM.medico.observe(this) { medico ->
             if (medico != null) {
                 binding.txtBienvenidaMedic.text = "Buen día, Dr. ${medico.info.apellidos}"
+
+                val fotoUrlActual = medico.info.imageUrl ?: ""
+
+                val sharedPref = getSharedPreferences("MapSaludCache", MODE_PRIVATE)
+                sharedPref.edit().putString("USER_FOTO_URL", fotoUrlActual).apply()
+
+                Glide.with(this).clear(binding.imgProfileMedic)
+                if (fotoUrlActual.isNotEmpty()) {
+                    Glide.with(this)
+                        .load(fotoUrlActual)
+                        .centerCrop()
+                        .placeholder(R.drawable.user)
+                        .error(R.drawable.user)
+                        .into(binding.imgProfileMedic)
+                } else {
+                    binding.imgProfileMedic.setImageResource(R.drawable.user)
+                }
             } else {
                 binding.txtBienvenidaMedic.text = "Buen día, Doctor"
+                binding.imgProfileMedic.setImageResource(R.drawable.user)
             }
         }
     }

@@ -4,9 +4,9 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ec.edu.mapsalud.dto.AppointmentDetail
-import ec.edu.mapsalud.dto.AppointmentDtoRemote
-import ec.edu.mapsalud.dto.DiagnosisEmbedded
+import ec.edu.mapsalud.dto.CitaDetalle
+import ec.edu.mapsalud.dto.CitaDtoRemote
+import ec.edu.mapsalud.dto.Diagnostico
 import ec.edu.mapsalud.usercases.citasUC.CancelAppointmentUC
 import ec.edu.mapsalud.usercases.citasUC.CheckIsSlotTakenUC
 import ec.edu.mapsalud.usercases.citasUC.FetchAppointmentsWithDetailsUC
@@ -25,14 +25,14 @@ class CitaViewModel : ViewModel() {
     private val _isSlotTaken = MutableLiveData<Boolean>()
     val isSlotTaken: LiveData<Boolean> get() = _isSlotTaken
 
-    private val _appointmentsDetails = MutableLiveData<List<AppointmentDetail>>()
-    val appointmentsDetails: LiveData<List<AppointmentDetail>> get() = _appointmentsDetails
+    private val _appointmentsDetails = MutableLiveData<List<CitaDetalle>>()
+    val appointmentsDetails: LiveData<List<CitaDetalle>> get() = _appointmentsDetails
 
-    private val _appointmentsRawList = MutableLiveData<List<AppointmentDtoRemote>>()
-    val appointmentsRawList: LiveData<List<AppointmentDtoRemote>> get() = _appointmentsRawList
+    private val _appointmentsRawList = MutableLiveData<List<CitaDtoRemote>>()
+    val appointmentsRawList: LiveData<List<CitaDtoRemote>> get() = _appointmentsRawList
 
-    private val _selectedAppointment = MutableLiveData<AppointmentDtoRemote?>()
-    val selectedAppointment: LiveData<AppointmentDtoRemote?> get() = _selectedAppointment
+    private val _selectedAppointment = MutableLiveData<CitaDtoRemote?>()
+    val selectedAppointment: LiveData<CitaDtoRemote?> get() = _selectedAppointment
 
     private val _operationSuccess = MutableLiveData<Boolean>()
     val operationSuccess: LiveData<Boolean> get() = _operationSuccess
@@ -44,7 +44,7 @@ class CitaViewModel : ViewModel() {
         }
     }
 
-    fun agendarCita(appointment: AppointmentDtoRemote, saveUC: SaveAppointmentUC) {
+    fun agendarCita(appointment: CitaDtoRemote, saveUC: SaveAppointmentUC) {
         viewModelScope.launch {
             val exito = saveUC.invoke(appointment).isSuccess
             _operationSuccess.value = exito
@@ -79,7 +79,7 @@ class CitaViewModel : ViewModel() {
         }
     }
 
-    fun finalizarCitaConDiagnostico(appointmentId: String, diagnosis: DiagnosisEmbedded, updateDiagnosisUC: UpdateAppointmentDiagnosisUC) {
+    fun finalizarCitaConDiagnostico(appointmentId: String, diagnosis: Diagnostico, updateDiagnosisUC: UpdateAppointmentDiagnosisUC) {
         viewModelScope.launch {
             val exito = updateDiagnosisUC.invoke(appointmentId, diagnosis).isSuccess
             _operationSuccess.value = exito

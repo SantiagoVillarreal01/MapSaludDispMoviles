@@ -1,6 +1,6 @@
 package ec.edu.mapsalud.usercases.citasUC
 
-import ec.edu.mapsalud.dto.AppointmentDetail
+import ec.edu.mapsalud.dto.CitaDetalle
 import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
 import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
 import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
@@ -13,7 +13,7 @@ class FetchAppointmentsWithDetailsUC(
     private val consultorioRepo: ConsultorioRepositoryImpl,
     private val usuarioRepo: UsuariosRepositoryImpl
 ) {
-    suspend fun invoke(userId: String, status: String): Result<List<AppointmentDetail>> = runCatching {
+    suspend fun invoke(userId: String, status: String): Result<List<CitaDetalle>> = runCatching {
         val appointments = citaRepo.fetchAppointmentsRaw(userId, status).getOrThrow()
         if (appointments.isEmpty()) return@runCatching emptyList()
 
@@ -35,7 +35,7 @@ class FetchAppointmentsWithDetailsUC(
                 val doctor = office?.let { doctorsMap[it.idDoctor] }
 
                 if (office != null && doctor != null) {
-                    AppointmentDetail(
+                    CitaDetalle(
                         appointment = appointment,
                         office = office,
                         doctor = doctor

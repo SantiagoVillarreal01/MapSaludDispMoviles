@@ -4,18 +4,18 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ec.edu.mapsalud.dto.CommentDtoRemote
+import ec.edu.mapsalud.dto.ComentarioDtoRemote
 import ec.edu.mapsalud.usercases.comentriosUC.GetCommentsByCenterUC
 import ec.edu.mapsalud.usercases.comentriosUC.SaveCommentUC
 import kotlinx.coroutines.launch
 
 class ComentarioViewModel : ViewModel() {
 
-    private var _commentsList = MutableLiveData<List<CommentDtoRemote>>()
-    val commentsList: LiveData<List<CommentDtoRemote>> get() = _commentsList
+    private var _commentsList = MutableLiveData<List<ComentarioDtoRemote>>()
+    val commentsList: LiveData<List<ComentarioDtoRemote>> get() = _commentsList
 
-    private var _commentSaved = MutableLiveData<CommentDtoRemote?>()
-    val commentSaved: LiveData<CommentDtoRemote?> get() = _commentSaved
+    private var _commentSaved = MutableLiveData<ComentarioDtoRemote?>()
+    val commentSaved: LiveData<ComentarioDtoRemote?> get() = _commentSaved
 
     fun cargarComentariosPorCentro(idCenter: String, getCommentsUC: GetCommentsByCenterUC) {
         viewModelScope.launch {
@@ -24,7 +24,7 @@ class ComentarioViewModel : ViewModel() {
         }
     }
 
-    fun guardarComentario(comment: CommentDtoRemote, saveCommentUC: SaveCommentUC) {
+    fun guardarComentario(comment: ComentarioDtoRemote, saveCommentUC: SaveCommentUC) {
         viewModelScope.launch {
             val resultado = saveCommentUC.invoke(comment).getOrNull()
             _commentSaved.value = resultado

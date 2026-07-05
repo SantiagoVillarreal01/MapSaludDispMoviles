@@ -4,7 +4,7 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import ec.edu.mapsalud.dto.OfficeDtoRemote
+import ec.edu.mapsalud.dto.ConsultorioDtoRemote
 import ec.edu.mapsalud.usercases.consultoriosUC.GetOfficeByIdUC
 import ec.edu.mapsalud.usercases.consultoriosUC.GetOfficesByCenterAndSpecialtyUC
 import ec.edu.mapsalud.usercases.consultoriosUC.GetOfficesByDoctorUC
@@ -14,11 +14,11 @@ import kotlinx.coroutines.launch
 
 class ConsultorioViewModel : ViewModel() {
 
-    private var _selectedOffice = MutableLiveData<OfficeDtoRemote?>()
-    val selectedOffice: LiveData<OfficeDtoRemote?> get() = _selectedOffice
+    private var _selectedOffice = MutableLiveData<ConsultorioDtoRemote?>()
+    val selectedOffice: LiveData<ConsultorioDtoRemote?> get() = _selectedOffice
 
-    private var _officesList = MutableLiveData<List<OfficeDtoRemote>>()
-    val officesList: LiveData<List<OfficeDtoRemote>> get() = _officesList
+    private var _officesList = MutableLiveData<List<ConsultorioDtoRemote>>()
+    val officesList: LiveData<List<ConsultorioDtoRemote>> get() = _officesList
 
     private var _operationResult = MutableLiveData<Boolean>()
     val operationResult: LiveData<Boolean> get() = _operationResult
@@ -43,7 +43,7 @@ class ConsultorioViewModel : ViewModel() {
         }
     }
 
-    fun registrarConsultorio(office: OfficeDtoRemote, saveOfficeUC: SaveOfficeUC) {
+    fun registrarConsultorio(office: ConsultorioDtoRemote, saveOfficeUC: SaveOfficeUC) {
         viewModelScope.launch {
             val resultado = saveOfficeUC.invoke(office).isSuccess
             _operationResult.value = resultado

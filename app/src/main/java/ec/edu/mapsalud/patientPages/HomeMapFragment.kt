@@ -1,4 +1,4 @@
-package ec.edu.mapsalud.userPages
+package ec.edu.mapsalud.patientPages
 
 import android.Manifest
 import android.content.Intent
@@ -6,11 +6,9 @@ import android.content.pm.PackageManager
 import android.os.Bundle
 import android.view.View
 import android.widget.Toast
-import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
-import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.location.FusedLocationProviderClient
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.maps.CameraUpdateFactory
@@ -21,15 +19,11 @@ import com.google.android.gms.maps.model.LatLng
 import com.google.android.gms.maps.model.MarkerOptions
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.FragmentHomeMapBinding
-import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
+import ec.edu.mapsalud.dto.CentroMedicoDtoRemote
 import ec.edu.mapsalud.remote.impl.CentroMedicoRepositoryImpl
-import ec.edu.mapsalud.remote.inter.CentroMedicoRepository
 import ec.edu.mapsalud.usercases.centrosUC.GetAllCentersUC
 import ec.edu.mapsalud.utils.ThemeUtils
 import ec.edu.mapsalud.viewmodel.CentroMedicoViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import kotlin.getValue
 
 class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback {
@@ -41,7 +35,7 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
 
     private val centroMedicoRepository = CentroMedicoRepositoryImpl()
     private val centroMedicoVM by viewModels<CentroMedicoViewModel>()
-    private var centroSeleccionado: MedicalCenterDtoRemote? = null
+    private var centroSeleccionado: CentroMedicoDtoRemote? = null
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -111,7 +105,7 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
         configurarUbicacionEnTiempoReal()
 
         mMap.setOnMarkerClickListener { marker ->
-            val centro = marker.tag as? MedicalCenterDtoRemote
+            val centro = marker.tag as? CentroMedicoDtoRemote
             if (centro != null) {
                 centroSeleccionado = centro
                 binding.cardInfoHospitalMap.visibility = View.VISIBLE

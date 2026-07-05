@@ -13,21 +13,16 @@ import android.widget.Toast
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import com.google.firebase.auth.FirebaseAuth
-import ec.edu.mapsalud.dto.OfficeDtoRemote
+import ec.edu.mapsalud.dto.ConsultorioDtoRemote
 import ec.edu.mapsalud.remote.impl.CentroMedicoRepositoryImpl
 import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
-import ec.edu.mapsalud.remote.inter.CentroMedicoRepository
-import ec.edu.mapsalud.remote.inter.ConsultorioRepository
 import ec.edu.mapsalud.usercases.consultoriosUC.GetOfficesByDoctorUC
 import ec.edu.mapsalud.usercases.consultoriosUC.UpdateOfficeHorariesUC
-import ec.edu.mapsalud.viewmodel.CentroMedicoViewModel
 import ec.edu.mapsalud.viewmodel.ConsultorioViewModel
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 
 class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
@@ -40,8 +35,8 @@ class EditarHorariosFragment : Fragment(R.layout.medic_fragment_editar) {
     private val officeRepository = ConsultorioRepositoryImpl()
     private val centroMedicoRepository = CentroMedicoRepositoryImpl()
     private var diasSeleccionados = mutableSetOf<String>()
-    private var listaConsultorios = listOf<OfficeDtoRemote>()
-    private var consultorioSeleccionado: OfficeDtoRemote? = null
+    private var listaConsultorios = listOf<ConsultorioDtoRemote>()
+    private var consultorioSeleccionado: ConsultorioDtoRemote? = null
 
     private val mapaBotonesDias by lazy {
         mapOf(

@@ -1,6 +1,6 @@
 package ec.edu.mapsalud.dto
 
-data class DiagnosisEmbedded(
+data class Diagnostico(
 
     val clinicalDiagnosis: String = "",
     val treatment: String = "",

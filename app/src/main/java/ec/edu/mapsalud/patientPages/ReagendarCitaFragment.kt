@@ -1,4 +1,4 @@
-package ec.edu.mapsalud.userPages
+package ec.edu.mapsalud.patientPages
 
 import android.graphics.Color
 import android.os.Bundle
@@ -7,16 +7,11 @@ import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.UserReagendarCitaBinding
-import ec.edu.mapsalud.dto.AppointmentDetail
+import ec.edu.mapsalud.dto.CitaDetalle
 import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
-import ec.edu.mapsalud.remote.inter.CitaRepository
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Locale
@@ -41,7 +36,7 @@ class ReagendarCitaFragment : Fragment(R.layout.user_reagendar_cita) {
     private val usuarioRepository = UsuariosRepositoryImpl()
     private val auth = FirebaseAuth.getInstance()
 
-    private var selectedAppointment: AppointmentDetail? = null
+    private var selectedAppointment: CitaDetalle? = null
     private var selectedDate: String = ""
     private var selectedTime: String = ""
     private var selectedTimeButton: Button? = null
@@ -91,8 +86,13 @@ class ReagendarCitaFragment : Fragment(R.layout.user_reagendar_cita) {
         }
 
         citaVM.isSlotTaken.observe(viewLifecycleOwner) { ocupado ->
+            if (binding.btnReagendarCita.isEnabled) return@observe
+
             val appointment = selectedAppointment
-            if (appointment == null || selectedDate.isEmpty() || selectedTime.isEmpty()) return@observe
+            if (appointment == null || selectedDate.isEmpty() || selectedTime.isEmpty()) {
+                binding.btnReagendarCita.isEnabled = true
+                return@observe
+            }
 
             if (ocupado) {
                 Toast.makeText(requireContext(), "El horario seleccionado ya está ocupado", Toast.LENGTH_LONG).show()
@@ -108,7 +108,7 @@ class ReagendarCitaFragment : Fragment(R.layout.user_reagendar_cita) {
         }
     }
 
-    private fun poblarCitas(list: List<AppointmentDetail>) {
+    private fun poblarCitas(list: List<CitaDetalle>) {
         binding.containerCitas.removeAllViews()
         val inflater = LayoutInflater.from(requireContext())
         
@@ -121,7 +121,6 @@ class ReagendarCitaFragment : Fragment(R.layout.user_reagendar_cita) {
             itemBinding.root.setOnClickListener {
                 selectedAppointment = item
                 Toast.makeText(requireContext(), "Cita seleccionada", Toast.LENGTH_SHORT).show()
-                // Resetear seleccion de hora si cambia la cita
                 selectedTime = ""
                 binding.containerHorarios.removeAllViews()
             }

@@ -1,6 +1,6 @@
 package ec.edu.mapsalud.dto
 
-data class OfficeDtoRemote(
+data class ConsultorioDtoRemote(
     val id: String = "",
     val idCenter: String = "",
     val idDoctor: String = "",

@@ -16,15 +16,11 @@ import com.google.android.material.timepicker.MaterialTimePicker
 import com.google.android.material.timepicker.TimeFormat
 import ec.edu.mapsalud.databinding.MedicAgregarConsultorioBinding
 import kotlin.collections.iterator
-import androidx.lifecycle.lifecycleScope
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.Marker
 import com.google.firebase.auth.FirebaseAuth
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import ec.edu.mapsalud.dto.MedicalCenterDtoRemote
-import ec.edu.mapsalud.dto.OfficeDtoRemote
+import ec.edu.mapsalud.dto.CentroMedicoDtoRemote
+import ec.edu.mapsalud.dto.ConsultorioDtoRemote
 import ec.edu.mapsalud.enum.Specialty
 import android.Manifest
 import android.content.pm.PackageManager
@@ -36,8 +32,6 @@ import ec.edu.mapsalud.enum.CenterType
 import ec.edu.mapsalud.utils.ThemeUtils
 import ec.edu.mapsalud.remote.impl.CentroMedicoRepositoryImpl
 import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
-import ec.edu.mapsalud.remote.inter.CentroMedicoRepository
-import ec.edu.mapsalud.remote.inter.ConsultorioRepository
 import ec.edu.mapsalud.usercases.centrosUC.AddSpecialtyToCenterUC
 import ec.edu.mapsalud.usercases.centrosUC.GetAllCentersUC
 import ec.edu.mapsalud.usercases.consultoriosUC.SaveOfficeUC
@@ -60,9 +54,9 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
     private val auth = FirebaseAuth.getInstance()
 
     private val diasSeleccionados = mutableSetOf<String>()
-    private var centroSeleccionado: MedicalCenterDtoRemote? = null
+    private var centroSeleccionado: CentroMedicoDtoRemote? = null
     private var especialidadSeleccionada: Specialty? = null
-    private val marcadoresCentrosMedicos = HashMap<Marker, MedicalCenterDtoRemote>()
+    private val marcadoresCentrosMedicos = HashMap<Marker, CentroMedicoDtoRemote>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtils.applyTheme(this)
@@ -268,7 +262,7 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         binding.btnGuardarConsultorio.isEnabled = false
 
         val nuevoIdOffice = consultorioRepository.generateNewOfficeId()
-        val nuevoConsultorio = OfficeDtoRemote(
+        val nuevoConsultorio = ConsultorioDtoRemote(
             id = nuevoIdOffice,
             idCenter = centro.id,
             idDoctor = idMedicoLogueado,

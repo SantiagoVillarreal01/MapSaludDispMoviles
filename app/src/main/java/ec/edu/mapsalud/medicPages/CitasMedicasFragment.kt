@@ -9,6 +9,7 @@ import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
 import com.google.firebase.auth.FirebaseAuth
 import ec.edu.mapsalud.R
 import ec.edu.mapsalud.databinding.MedicCuadroCitaBinding
@@ -17,15 +18,12 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import android.widget.Toast
 import androidx.fragment.app.viewModels
-import ec.edu.mapsalud.dto.AppointmentDtoRemote
-import ec.edu.mapsalud.dto.AppointmentPaciente
+import androidx.recyclerview.widget.AsyncListDiffer
+import ec.edu.mapsalud.dto.CitaPaciente
 import ec.edu.mapsalud.dto.Paciente
 import ec.edu.mapsalud.remote.impl.CitaRepositoryImpl
 import ec.edu.mapsalud.remote.impl.ConsultorioRepositoryImpl
 import ec.edu.mapsalud.remote.impl.UsuariosRepositoryImpl
-import ec.edu.mapsalud.remote.inter.CitaRepository
-import ec.edu.mapsalud.remote.inter.ConsultorioRepository
-import ec.edu.mapsalud.remote.inter.UsuariosRepository
 import ec.edu.mapsalud.usercases.citasUC.GetPendingAppointmentsByOfficesUC
 import ec.edu.mapsalud.usercases.consultoriosUC.GetOfficesByDoctorUC
 import ec.edu.mapsalud.viewmodel.CitaViewModel
@@ -40,6 +38,8 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
 
     private var _binding: MedicFragmentCitasBinding? = null
     private val binding get() = _binding!!
+    private lateinit var adapterHoy: CitasMedicAdapter
+    private lateinit var adapterManana: CitasMedicAdapter
     private val currentDoctorId = FirebaseAuth.getInstance().currentUser?.uid ?: ""
     private val consultorioVM by viewModels<ConsultorioViewModel>()
     private val citaVM by viewModels<CitaViewModel>()
@@ -51,11 +51,32 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
         super.onViewCreated(view, savedInstanceState)
         _binding = MedicFragmentCitasBinding.bind(view)
 
-        binding.recyclerCitasHoy.layoutManager = LinearLayoutManager(requireContext())
-        binding.recyclerCitasManana.layoutManager = LinearLayoutManager(requireContext())
-
+        configurarRecyclerViews()
         initObservers()
+        //cargarCitas()
+    }
+
+    override fun onResume() {
+        super.onResume()
         cargarCitas()
+    }
+
+    private fun configurarRecyclerViews() {
+        adapterHoy = CitasMedicAdapter { citaSeleccionada ->
+            abrirDetalleCita(citaSeleccionada)
+        }
+        binding.recyclerCitasHoy.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerCitasHoy.adapter = adapterHoy
+
+        binding.recyclerCitasHoy.isNestedScrollingEnabled = true
+
+        adapterManana = CitasMedicAdapter { citaSeleccionada ->
+            abrirDetalleCita(citaSeleccionada)
+        }
+        binding.recyclerCitasManana.layoutManager = LinearLayoutManager(requireContext())
+        binding.recyclerCitasManana.adapter = adapterManana
+
+        binding.recyclerCitasManana.isNestedScrollingEnabled = true
     }
 
     private fun cargarCitas() {
@@ -70,7 +91,8 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
         consultorioVM.officesList.observe(viewLifecycleOwner) { offices ->
             val officeIds = offices.map { it.id }
             if (officeIds.isEmpty()) {
-                actualizarUI(emptyList(), emptyList())
+                adapterHoy.submitList(emptyList())
+                adapterManana.submitList(emptyList())
                 return@observe
             }
             citaVM.cargarCitasPendientesPorConsultorios(
@@ -78,6 +100,7 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
                 getByOfficesUC = GetPendingAppointmentsByOfficesUC(citaRepository)
             )
         }
+
         citaVM.appointmentsRawList.observe(viewLifecycleOwner) { todasLasCitas ->
             lifecycleScope.launch(Dispatchers.Main) {
                 try {
@@ -88,12 +111,11 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
                         cal.add(Calendar.DAY_OF_YEAR, 1)
                         val fechaManana = dateFormat.format(cal.time)
 
-                        val citasHoy = mutableListOf<AppointmentPaciente>()
-                        val citasManana = mutableListOf<AppointmentPaciente>()
+                        val citasHoy = mutableListOf<CitaPaciente>()
+                        val citasManana = mutableListOf<CitaPaciente>()
 
                         for (cita in todasLasCitas) {
                             if (cita.date == fechaHoy || cita.date == fechaManana) {
-
                                 val paciente = if (cita.patientName.isNotEmpty()) {
                                     Paciente(info = ec.edu.mapsalud.dto.UsuarioInfo(
                                         nombres = cita.patientName,
@@ -105,7 +127,7 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
 
                                 if (paciente != null) {
                                     val (horaFormat, amPm) = formatearHora(cita.time)
-                                    val citaUI = AppointmentPaciente(cita, paciente, horaFormat, amPm)
+                                    val citaUI = CitaPaciente(cita, paciente, horaFormat, amPm)
 
                                     if (cita.date == fechaHoy) citasHoy.add(citaUI)
                                     else citasManana.add(citaUI)
@@ -116,21 +138,15 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
                         citasManana.sortBy { it.appointment.time }
                         Pair(citasHoy, citasManana)
                     }
-                    actualizarUI(listasFiltradas.first, listasFiltradas.second)
+                    adapterHoy.submitList(listasFiltradas.first)
+                    adapterManana.submitList(listasFiltradas.second)
 
                 } catch (e: Exception) {
-                    Toast.makeText(requireContext(), "Error al procesar citas: ${e.message}", Toast.LENGTH_SHORT).show()
+                    context?.let { seguroContext ->
+                        Toast.makeText(seguroContext, "Error al cargar citas", Toast.LENGTH_SHORT).show()
+                    }
                 }
             }
-        }
-    }
-
-    private fun actualizarUI(hoy: List<AppointmentPaciente>, manana: List<AppointmentPaciente>) {
-        binding.recyclerCitasHoy.adapter = CitasMedicAdapter(hoy) { citaSeleccionada ->
-            abrirDetalleCita(citaSeleccionada)
-        }
-        binding.recyclerCitasManana.adapter = CitasMedicAdapter(manana) { citaSeleccionada ->
-            abrirDetalleCita(citaSeleccionada)
         }
     }
 
@@ -148,7 +164,7 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
         }
     }
 
-    private fun abrirDetalleCita(cita: AppointmentPaciente) {
+    private fun abrirDetalleCita(cita: CitaPaciente) {
         val intent = Intent(requireContext(), DetalleCitaMedic::class.java)
         intent.putExtra("ID_CITA", cita.appointment.id)
         startActivity(intent)
@@ -160,12 +176,30 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
     }
 
     inner class CitasMedicAdapter(
-        private val citas: List<AppointmentPaciente>,
-        private val onCitaClick: (AppointmentPaciente) -> Unit
+        private val onCitaClick: (CitaPaciente) -> Unit
     ) : RecyclerView.Adapter<CitasMedicAdapter.ViewHolder>() {
 
+        private var lastPosition = -1
+
+        private val diffCallback = object : DiffUtil.ItemCallback<CitaPaciente>() {
+            override fun areItemsTheSame(oldItem: CitaPaciente, newItem: CitaPaciente): Boolean {
+                return oldItem.appointment.id == newItem.appointment.id
+            }
+
+            override fun areContentsTheSame(oldItem: CitaPaciente, newItem: CitaPaciente): Boolean {
+                return oldItem == newItem
+            }
+        }
+
+        private val differ = AsyncListDiffer(this, diffCallback)
+
+        fun submitList(nuevaLista: List<CitaPaciente>) {
+            lastPosition = -1
+            differ.submitList(nuevaLista)
+        }
+
         inner class ViewHolder(val itemBinding: MedicCuadroCitaBinding) : RecyclerView.ViewHolder(itemBinding.root) {
-            fun bind(item: AppointmentPaciente) {
+            fun bind(item: CitaPaciente) {
                 itemBinding.txtHoraCita.text = item.horaFormateada
                 itemBinding.txtAmPmCita.text = item.amPm
                 itemBinding.txtNombrePaciente.text = "${item.paciente.info.nombres} ${item.paciente.info.apellidos}"
@@ -180,7 +214,42 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
         override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) = ViewHolder(
             MedicCuadroCitaBinding.inflate(LayoutInflater.from(parent.context), parent, false)
         )
-        override fun onBindViewHolder(holder: ViewHolder, position: Int) = holder.bind(citas[position])
-        override fun getItemCount() = citas.size
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val currentPosition = holder.bindingAdapterPosition
+            if (currentPosition == RecyclerView.NO_POSITION) return
+
+            val item = differ.currentList[currentPosition]
+            holder.bind(item)
+
+            holder.itemBinding.root.animate().cancel()
+
+            holder.itemBinding.root.translationY = 0f
+            holder.itemBinding.root.alpha = 1f
+
+            if (currentPosition > lastPosition) {
+                val view = holder.itemBinding.root
+                view.translationY = 100f
+                view.alpha = 0f
+
+                view.animate()
+                    .translationY(0f)
+                    .alpha(1f)
+                    .setStartDelay(currentPosition * 35L)
+                    .setDuration(300L)
+                    .setInterpolator(android.view.animation.DecelerateInterpolator())
+                    .setListener(null)
+                    .start()
+
+                lastPosition = currentPosition
+            }
+        }
+
+        override fun getItemCount() = differ.currentList.size
+
+        override fun onViewDetachedFromWindow(holder: ViewHolder) {
+            holder.itemBinding.root.clearAnimation()
+            super.onViewDetachedFromWindow(holder)
+        }
     }
 }

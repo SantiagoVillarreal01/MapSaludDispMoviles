@@ -10,5 +10,6 @@ data class UsuarioInfo(
     val telefono: String = "",
     val cedula: String = "",
     val genero: String = Genero.NO_ESPECIFICADO.valor,
-    val tipoUsuario: Type = Type.PATIENT
+    val tipoUsuario: Type = Type.PATIENT,
+    val imageUrl: String = ""
 )
