@@ -4,6 +4,8 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.text.Editable
+import android.text.TextWatcher
 import android.view.View
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
@@ -32,10 +34,10 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
     private val binding get() = _binding!!
     private lateinit var mMap: GoogleMap
     private lateinit var fusedLocationClient: FusedLocationProviderClient
-
     private val centroMedicoRepository = CentroMedicoRepositoryImpl()
     private val centroMedicoVM by viewModels<CentroMedicoViewModel>()
     private var centroSeleccionado: CentroMedicoDtoRemote? = null
+    private var listaCompletaCentros = emptyList<CentroMedicoDtoRemote>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -75,6 +77,29 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
                 startActivity(intent)
             }
         }
+        binding.editBuscarCentro.addTextChangedListener(object : TextWatcher {
+
+            override fun beforeTextChanged(
+                s: CharSequence?,
+                start: Int,
+                count: Int,
+                after: Int
+            ) {
+            }
+
+            override fun onTextChanged(
+                s: CharSequence?,
+                start: Int,
+                before: Int,
+                count: Int
+            ) {
+
+                filtrarCentros(s.toString())
+
+            }
+
+            override fun afterTextChanged(s: Editable?) {}
+        })
     }
 
     private fun initObservers() {
@@ -86,18 +111,41 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
                 Toast.makeText(requireContext(), "No se encontraron centros médicos disponibles", Toast.LENGTH_LONG).show()
                 return@observe
             }
-            for (centro in listaCentros) {
-                val latLng = LatLng(centro.latitude, centro.longitude)
-                val marker = mMap.addMarker(
-                    MarkerOptions()
-                        .position(latLng)
-                        .title(centro.name)
-                )
-                marker?.tag = centro
-            }
+
+            listaCompletaCentros = listaCentros
+
+            mostrarCentros(listaCentros)
         }
     }
+    private fun mostrarCentros(lista: List<CentroMedicoDtoRemote>) {
 
+        mMap.clear()
+
+        if (lista.isEmpty()) {
+            Toast.makeText(
+                requireContext(),
+                "No se encontraron centros médicos",
+                Toast.LENGTH_SHORT
+            ).show()
+            return
+        }
+
+        lista.forEach { centro ->
+
+            val marker = mMap.addMarker(
+                MarkerOptions()
+                    .position(
+                        LatLng(
+                            centro.latitude,
+                            centro.longitude
+                        )
+                    )
+                    .title(centro.name)
+            )
+
+            marker?.tag = centro
+        }
+    }
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         updateMapStyle(googleMap)
@@ -139,4 +187,38 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
         super.onDestroyView()
         _binding = null
     }
+
+    private fun filtrarCentros(texto: String) {
+
+        if (texto.isBlank()) {
+
+            mostrarCentros(listaCompletaCentros)
+            return
+        }
+
+        val resultado = listaCompletaCentros.filter {
+
+            it.name.contains(texto, true) ||
+                    it.address.contains(texto, true)
+
+        }
+
+        mostrarCentros(resultado)
+
+        if (resultado.size == 1) {
+
+            val centro = resultado.first()
+
+            mMap.animateCamera(
+                CameraUpdateFactory.newLatLngZoom(
+                    LatLng(
+                        centro.latitude,
+                        centro.longitude
+                    ),
+                    16f
+                )
+            )
+        }
+    }
+
 }
