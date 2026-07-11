@@ -28,18 +28,19 @@ import com.google.android.material.textfield.TextInputLayout
 import retrofit2.Call
 import retrofit2.Callback
 import retrofit2.Response
-
+import ec.edu.mapsalud.ui.LoadingDialog
 class SignUpScreen : AppCompatActivity() {
 
     private lateinit var binding: ActivitySignUpPageBinding
     private var selectedType: Type = Type.PATIENT
+    private lateinit var loading: LoadingDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = ActivitySignUpPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        loading = LoadingDialog(this)
         configurarDropdowns()
         initListeners()
         updateRoleSelection()
@@ -169,18 +170,21 @@ class SignUpScreen : AppCompatActivity() {
                         .addOnSuccessListener {
                             binding.btnSignUp.isEnabled = true
                             binding.btnSignUp.text = "Registrarse"
+                            loading.hide()
                             showMessage("Registro exitoso. Bienvenido a MAP SALUD.")
                             val intent = Intent(this, LoginScreen::class.java)
                             startActivity(intent)
                             finish()
                         }
                         .addOnFailureListener {
+                            loading.hide()
                             binding.btnSignUp.isEnabled = true
                             binding.btnSignUp.text = "Registrarse"
                             showMessage("Error guardando datos: ${it.message}")
                         }
                 }
                 .addOnFailureListener { exception ->
+                    loading.hide()
                     binding.btnSignUp.isEnabled = true
                     binding.btnSignUp.text = "Registrarse"
 
@@ -235,6 +239,7 @@ class SignUpScreen : AppCompatActivity() {
             val input = inputEditText.text.toString().trim()
             if (input == verificationCode) {
                 dialog.dismiss()
+                loading.show("Creando su cuenta...")
                 onVerified()
             } else {
                 textInputLayout.error = "Código incorrecto"

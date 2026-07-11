@@ -21,6 +21,7 @@ import com.google.android.material.textfield.TextInputEditText
 import com.google.android.material.textfield.TextInputLayout
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.auth.GoogleAuthProvider
+import com.google.firebase.firestore.DocumentSnapshot
 import ec.edu.mapsalud.databinding.ActivityLoginPageBinding
 import ec.edu.mapsalud.dto.Medico
 import ec.edu.mapsalud.dto.Paciente
@@ -34,7 +35,7 @@ import retrofit2.Response
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-
+import ec.edu.mapsalud.ui.LoadingDialog
 
 class LoginScreen : AppCompatActivity() {
 
@@ -42,14 +43,14 @@ class LoginScreen : AppCompatActivity() {
     var type: Type? = null
     private lateinit var binding: ActivityLoginPageBinding
     private lateinit var googleSignInClient: GoogleSignInClient
-
+    private lateinit var loading: LoadingDialog
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtils.applyTheme(this)
         super.onCreate(savedInstanceState)
         binding = ActivityLoginPageBinding.inflate(layoutInflater)
         setContentView(binding.root)
-
+        loading = LoadingDialog(this)
         initGoogleConfig()
         initListeners()
         initVariables()
@@ -100,7 +101,7 @@ class LoginScreen : AppCompatActivity() {
         }
 
         binding.btnSignin.isEnabled = false
-
+        loading.show("Iniciando sesión...")
         FirebaseManager.auth.signInWithEmailAndPassword(email, password)
             .addOnSuccessListener { authResult ->
                 val user = FirebaseManager.auth.currentUser
@@ -115,11 +116,12 @@ class LoginScreen : AppCompatActivity() {
                 if (counter >= 3) {
                     sendSecurityAlert(email)
                 }
+                loading.hide()
                 showMessage("Correo o contraseña incorrectos")
             }
     }
 
-    private fun obtenerPerfilYRedirigir(uid: String) {
+    /*private fun obtenerPerfilYRedirigir(uid: String) {
         FirebaseManager.db.collection("usuarios").document(uid).get()
             .addOnSuccessListener { document ->
                 binding.btnSignin.isEnabled = true
@@ -146,9 +148,39 @@ class LoginScreen : AppCompatActivity() {
                 binding.btnSignin.isEnabled = true
                 showMessage("Error al obtener perfil: ${it.localizedMessage}")
             }
+    }*/
+    private fun obtenerPerfilYRedirigir(uid: String) {
+        FirebaseManager.db.collection("usuarios").document(uid).get()
+            .addOnSuccessListener { document ->
+                binding.btnSignin.isEnabled = true
+
+                if (document.exists()) {
+                    val infoMap = document.get("info") as? Map<*, *>
+                    val tipoUsuarioStr = infoMap?.get("tipoUsuario")?.toString()
+
+                    val tipoUsuario = tipoUsuarioStr?.let {
+                        runCatching { Type.valueOf(it) }.getOrNull()
+                    }
+
+                    when (tipoUsuario) {
+                        Type.DOCTOR,
+                        Type.PATIENT -> guardarPerfilYContinuar(document, tipoUsuario)
+
+                        null -> {
+                            showMessage("Error: Tipo de usuario no identificado en el servidor.")
+                        }
+                    }
+                } else {
+                    showMessage("No se encontraron datos de perfil.")
+                }
+            }
+            .addOnFailureListener {
+                binding.btnSignin.isEnabled = true
+                showMessage("Error al obtener perfil: ${it.localizedMessage}")
+            }
     }
 
-    private fun guardarPerfilYContinuar(uid: String, tipo: Type) {
+    /*private fun guardarPerfilYContinuar(uid: String, tipo: Type) {
         // Obtenemos los datos restantes para el cache
         FirebaseManager.db.collection("usuarios").document(uid).get()
             .addOnSuccessListener { doc ->
@@ -176,6 +208,35 @@ class LoginScreen : AppCompatActivity() {
                 }
                 navegarAlHome(isPatient = tipo == Type.PATIENT)
             }
+    }*/
+    private fun guardarPerfilYContinuar(doc: DocumentSnapshot, tipo: Type) {
+        val info = doc.get("info") as? Map<*, *>
+
+        val nombres = info?.get("nombres")?.toString() ?: ""
+        val apellidos = info?.get("apellidos")?.toString() ?: ""
+        val cedula = info?.get("cedula")?.toString() ?: ""
+
+        val sharedPref = getSharedPreferences("MapSaludCache", MODE_PRIVATE)
+
+        sharedPref.edit().apply {
+            putString("USER_NAME", "$nombres $apellidos".trim())
+            putString("USER_NOMBRES", nombres)
+            putString("USER_APELLIDOS", apellidos)
+            putString("USER_CEDULA", cedula)
+            putString("USER_TELEFONO", info?.get("telefono")?.toString() ?: "")
+            putString("USER_GENERO", info?.get("genero")?.toString() ?: "")
+            putString("USER_CORREO", info?.get("correo")?.toString() ?: "")
+            putString("USER_TYPE", tipo.name)
+
+            if (tipo == Type.DOCTOR) {
+                putString("USER_EXTRA", doc.getString("specialty") ?: "Médico")
+            } else {
+                putString("USER_EXTRA", "Paciente Asegurado")
+            }
+
+            apply()
+        }
+        navegarAlHome(isPatient = tipo == Type.PATIENT)
     }
 
     private fun firebaseAuthWithGoogle(idToken: String) {
