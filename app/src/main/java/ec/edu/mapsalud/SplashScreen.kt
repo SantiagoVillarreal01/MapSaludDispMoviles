@@ -30,36 +30,32 @@ class SplashScreen : AppCompatActivity() {
         if (usuarioActual == null) {
             irAlLogin()
         } else {
-            usuarioActual.reload().addOnSuccessListener {
-                if (usuarioActual.isEmailVerified) {
-                    buscarRolEIniciarHome(usuarioActual.uid)
-                } else {
-                    FirebaseManager.auth.signOut()
-                    irAlLogin()
+            val sharedPref = getSharedPreferences("MapSaludCache", MODE_PRIVATE)
+            val tipoUsuarioStr = sharedPref.getString("USER_TYPE", null)
+
+            if (tipoUsuarioStr != null) {
+                val tipoUsuario = runCatching { Type.valueOf(tipoUsuarioStr) }.getOrNull()
+                if (tipoUsuario != null) {
+                    redirigirPorRol(tipoUsuario.name)
+                    return
                 }
-            }.addOnFailureListener {
-                irAlLogin()
             }
+
+            buscarRolEIniciarHome(usuarioActual.uid)
         }
     }
 
     private fun buscarRolEIniciarHome(uid: String) {
-        FirebaseManager.db.collection("users").document(uid).get()
+        FirebaseManager.db.collection("usuarios").document(uid).get()
             .addOnSuccessListener { document ->
                 if (document != null && document.exists()) {
                     val infoMap = document.get("info") as? Map<*, *>
                     val tipoUsuarioStr = infoMap?.get("tipoUsuario")?.toString() ?: ""
 
-                    // Redirección directa según el Enum unificado
-                    val intent = if (tipoUsuarioStr == Type.DOCTOR.name) {
-                        Intent(this, PrincipalMedic::class.java)
-                    } else {
-                        Intent(this, PrincipalPatient::class.java)
-                    }
+                    val sharedPref = getSharedPreferences("MapSaludCache", MODE_PRIVATE)
+                    sharedPref.edit().putString("USER_TYPE", tipoUsuarioStr).apply()
 
-                    intent.putExtra("xx1", "Bienvenido de nuevo")
-                    startActivity(intent)
-                    finish()
+                    redirigirPorRol(tipoUsuarioStr)
                 } else {
                     irAlLogin()
                 }
@@ -67,6 +63,18 @@ class SplashScreen : AppCompatActivity() {
             .addOnFailureListener {
                 irAlLogin()
             }
+    }
+
+    private fun redirigirPorRol(tipoUsuarioStr: String) {
+        val intent = if (tipoUsuarioStr == Type.DOCTOR.name) {
+            Intent(this, PrincipalMedic::class.java)
+        } else {
+            Intent(this, PrincipalPatient::class.java)
+        }
+
+        intent.putExtra("xx1", "Bienvenido de nuevo")
+        startActivity(intent)
+        finish()
     }
 
     private fun irAlLogin() {
