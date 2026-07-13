@@ -22,6 +22,9 @@ class CentroMedicoViewModel : ViewModel() {
     private var _selectedCenter = MutableLiveData<CentroMedicoDtoRemote?>()
     val selectedCenter: LiveData<CentroMedicoDtoRemote?> get() = _selectedCenter
 
+    private var _searchSuggestions = MutableLiveData<List<CentroMedicoDtoRemote>>()
+    val searchSuggestions: LiveData<List<CentroMedicoDtoRemote>> get() = _searchSuggestions
+
     fun cargarTodosLosCentros(getAllCentersUC: GetAllCentersUC) {
         viewModelScope.launch {
             val resultado = getAllCentersUC.invoke().getOrNull()
@@ -54,5 +57,27 @@ class CentroMedicoViewModel : ViewModel() {
         viewModelScope.launch {
             addSpecialtyUC.invoke(idCenter, specialty)
         }
+    }
+
+    fun filtrarSugerenciasPorNombre(query: String) {
+        val listaTotal = _centersList.value ?: emptyList()
+
+        if (query.isBlank()) {
+            _searchSuggestions.value = emptyList()
+            return
+        }
+
+        val filtrados = listaTotal.filter { centro ->
+            centro.name.contains(query, ignoreCase = true)
+        }
+        _searchSuggestions.value = filtrados
+    }
+
+    fun seleccionarCentro(centro: CentroMedicoDtoRemote) {
+        _selectedCenter.value = centro
+    }
+
+    fun deseleccionarCentro() {
+        _selectedCenter.value = null
     }
 }

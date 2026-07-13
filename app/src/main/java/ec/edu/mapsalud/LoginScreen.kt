@@ -54,10 +54,31 @@ class LoginScreen : AppCompatActivity() {
         initGoogleConfig()
         initListeners()
         initVariables()
+
+        verificarSesionExistente()
     }
 
     private fun initVariables() {
         type = Type.PATIENT
+    }
+
+    private fun verificarSesionExistente() {
+        val usuarioFirebase = FirebaseManager.auth.currentUser
+
+        if (usuarioFirebase != null) {
+            val sharedPref = getSharedPreferences("MapSaludCache", MODE_PRIVATE)
+            val tipoUsuarioStr = sharedPref.getString("USER_TYPE", null)
+
+            if (tipoUsuarioStr != null) {
+                val tipoUsuario = runCatching { Type.valueOf(tipoUsuarioStr) }.getOrNull()
+                if (tipoUsuario != null) {
+                    navegarAlHome(isPatient = tipoUsuario == Type.PATIENT)
+                    return
+                }
+            }
+            loading.show("Recuperando sesión...")
+            obtenerPerfilYRedirigir(usuarioFirebase.uid)
+        }
     }
 
     private fun initGoogleConfig() {

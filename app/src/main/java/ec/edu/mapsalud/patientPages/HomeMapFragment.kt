@@ -1,12 +1,16 @@
 package ec.edu.mapsalud.patientPages
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
+import android.view.inputmethod.EditorInfo
+import android.widget.ArrayAdapter
+import android.widget.ListPopupWindow
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.fragment.app.Fragment
@@ -27,6 +31,8 @@ import ec.edu.mapsalud.usercases.centrosUC.GetAllCentersUC
 import ec.edu.mapsalud.utils.ThemeUtils
 import ec.edu.mapsalud.viewmodel.CentroMedicoViewModel
 import kotlin.getValue
+import android.view.inputmethod.InputMethodManager
+import java.text.Normalizer
 
 class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback {
 
@@ -36,8 +42,12 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
     private lateinit var fusedLocationClient: FusedLocationProviderClient
     private val centroMedicoRepository = CentroMedicoRepositoryImpl()
     private val centroMedicoVM by viewModels<CentroMedicoViewModel>()
+
     private var centroSeleccionado: CentroMedicoDtoRemote? = null
     private var listaCompletaCentros = emptyList<CentroMedicoDtoRemote>()
+
+    private lateinit var popupWindow: ListPopupWindow
+    private var sugerenciasActuales = emptyList<CentroMedicoDtoRemote>()
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
@@ -48,6 +58,7 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
         val mapFragment = childFragmentManager.findFragmentById(R.id.mapContainerFull) as? SupportMapFragment
         mapFragment?.getMapAsync(this)
 
+        configurarBuscadorDesplegable()
         initListeners()
         initObservers()
     }
@@ -61,11 +72,48 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
                     )
                 )
             } else {
-                googleMap.setMapStyle(null) // Estilo normal
+                googleMap.setMapStyle(null)
             }
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    private fun configurarBuscadorDesplegable() {
+        popupWindow = ListPopupWindow(requireContext()).apply {
+            anchorView = binding.editBuscarCentro // Se cuelga automáticamente debajo de tu buscador
+            isModal = false
+        }
+
+        popupWindow.setOnItemClickListener { _, _, position, _ ->
+            val centro = sugerenciasActuales[position]
+            binding.editBuscarCentro.setText(centro.name)
+
+            popupWindow.dismiss()
+            ocultarTeclado()
+
+            seleccionarCentroEnMapa(centro)
+        }
+    }
+
+    private fun seleccionarCentroEnMapa(centro: CentroMedicoDtoRemote) {
+        centroSeleccionado = centro
+        binding.cardInfoHospitalMap.visibility = View.VISIBLE
+        binding.txtNombreHospitalMap.text = centro.name
+        binding.txtDireccionHospitalMap.text = centro.address
+
+        mMap.animateCamera(
+            CameraUpdateFactory.newLatLngZoom(
+                LatLng(centro.latitude, centro.longitude),
+                16f
+            )
+        )
+    }
+
+    private fun ocultarTeclado() {
+        val imm = requireContext().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        imm.hideSoftInputFromWindow(binding.editBuscarCentro.windowToken, 0)
+        binding.editBuscarCentro.clearFocus()
     }
 
     private fun initListeners() {
@@ -77,29 +125,58 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
                 startActivity(intent)
             }
         }
+
         binding.editBuscarCentro.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
 
-            override fun beforeTextChanged(
-                s: CharSequence?,
-                start: Int,
-                count: Int,
-                after: Int
-            ) {
-            }
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                val texto = s.toString().trim().quitarTildes()
 
-            override fun onTextChanged(
-                s: CharSequence?,
-                start: Int,
-                before: Int,
-                count: Int
-            ) {
+                if (texto.isBlank()) {
+                    sugerenciasActuales = emptyList()
+                    popupWindow.dismiss()
+                    mostrarCentros(listaCompletaCentros)
+                } else {
+                    sugerenciasActuales = listaCompletaCentros.filter {
+                        it.name.quitarTildes().contains(texto, true) ||
+                                it.address.quitarTildes().contains(texto, true)
+                    }
 
-                filtrarCentros(s.toString())
-
+                    if (sugerenciasActuales.isNotEmpty() && binding.editBuscarCentro.hasFocus()) {
+                        val nombres = sugerenciasActuales.map { it.name }
+                        val adapterSuggestions = ArrayAdapter(
+                            requireContext(),
+                            android.R.layout.simple_list_item_1,
+                            nombres
+                        )
+                        popupWindow.setAdapter(adapterSuggestions)
+                        popupWindow.show()
+                    } else {
+                        popupWindow.dismiss()
+                    }
+                }
             }
 
             override fun afterTextChanged(s: Editable?) {}
         })
+
+        binding.editBuscarCentro.setOnEditorActionListener { _, actionId, _ ->
+            if (actionId == EditorInfo.IME_ACTION_SEARCH || actionId == EditorInfo.IME_ACTION_DONE) {
+                if (sugerenciasActuales.isNotEmpty()) {
+
+                    val primerMatch = sugerenciasActuales.first()
+                    binding.editBuscarCentro.setText(primerMatch.name)
+                    seleccionarCentroEnMapa(primerMatch)
+                } else {
+                    Toast.makeText(requireContext(), "No se encontraron centros", Toast.LENGTH_SHORT).show()
+                }
+                popupWindow.dismiss()
+                ocultarTeclado()
+                true
+            } else {
+                false
+            }
+        }
     }
 
     private fun initObservers() {
@@ -113,39 +190,28 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
             }
 
             listaCompletaCentros = listaCentros
-
             mostrarCentros(listaCentros)
         }
     }
-    private fun mostrarCentros(lista: List<CentroMedicoDtoRemote>) {
 
+    private fun mostrarCentros(lista: List<CentroMedicoDtoRemote>) {
         mMap.clear()
 
         if (lista.isEmpty()) {
-            Toast.makeText(
-                requireContext(),
-                "No se encontraron centros médicos",
-                Toast.LENGTH_SHORT
-            ).show()
+            Toast.makeText(requireContext(), "No se encontraron centros médicos", Toast.LENGTH_SHORT).show()
             return
         }
 
         lista.forEach { centro ->
-
             val marker = mMap.addMarker(
                 MarkerOptions()
-                    .position(
-                        LatLng(
-                            centro.latitude,
-                            centro.longitude
-                        )
-                    )
+                    .position(LatLng(centro.latitude, centro.longitude))
                     .title(centro.name)
             )
-
             marker?.tag = centro
         }
     }
+
     override fun onMapReady(googleMap: GoogleMap) {
         mMap = googleMap
         updateMapStyle(googleMap)
@@ -155,10 +221,7 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
         mMap.setOnMarkerClickListener { marker ->
             val centro = marker.tag as? CentroMedicoDtoRemote
             if (centro != null) {
-                centroSeleccionado = centro
-                binding.cardInfoHospitalMap.visibility = View.VISIBLE
-                binding.txtNombreHospitalMap.text = centro.name
-                binding.txtDireccionHospitalMap.text = centro.address
+                seleccionarCentroEnMapa(centro) // Reutiliza la animación y UI unificada
             }
             true
         }
@@ -166,8 +229,12 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
         mMap.setOnMapClickListener {
             binding.cardInfoHospitalMap.visibility = View.GONE
             centroSeleccionado = null
+            binding.editBuscarCentro.setText("")
+            popupWindow.dismiss()
+            ocultarTeclado()
         }
     }
+
     private fun configurarUbicacionEnTiempoReal() {
         if (ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
             ActivityCompat.checkSelfPermission(requireContext(), Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -188,37 +255,8 @@ class HomeMapFragment : Fragment(R.layout.fragment_home_map), OnMapReadyCallback
         _binding = null
     }
 
-    private fun filtrarCentros(texto: String) {
-
-        if (texto.isBlank()) {
-
-            mostrarCentros(listaCompletaCentros)
-            return
-        }
-
-        val resultado = listaCompletaCentros.filter {
-
-            it.name.contains(texto, true) ||
-                    it.address.contains(texto, true)
-
-        }
-
-        mostrarCentros(resultado)
-
-        if (resultado.size == 1) {
-
-            val centro = resultado.first()
-
-            mMap.animateCamera(
-                CameraUpdateFactory.newLatLngZoom(
-                    LatLng(
-                        centro.latitude,
-                        centro.longitude
-                    ),
-                    16f
-                )
-            )
-        }
+    fun String.quitarTildes(): String {
+        val textoNormalizado = Normalizer.normalize(this, Normalizer.Form.NFD)
+        return textoNormalizado.replace(Regex("[\\p{InCombiningDiacriticalMarks}]"), "")
     }
-
 }

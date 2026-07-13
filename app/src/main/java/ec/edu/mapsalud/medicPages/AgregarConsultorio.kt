@@ -24,6 +24,8 @@ import ec.edu.mapsalud.dto.ConsultorioDtoRemote
 import ec.edu.mapsalud.enum.Specialty
 import android.Manifest
 import android.content.pm.PackageManager
+import android.text.Editable
+import android.widget.ListPopupWindow
 import androidx.activity.viewModels
 import androidx.core.app.ActivityCompat
 import com.google.android.gms.location.FusedLocationProviderClient
@@ -37,12 +39,19 @@ import ec.edu.mapsalud.usercases.centrosUC.GetAllCentersUC
 import ec.edu.mapsalud.usercases.consultoriosUC.SaveOfficeUC
 import ec.edu.mapsalud.viewmodel.CentroMedicoViewModel
 import ec.edu.mapsalud.viewmodel.ConsultorioViewModel
+import android.content.Context
+import android.text.TextWatcher
+import android.view.inputmethod.InputMethodManager
+import android.widget.ArrayAdapter
+import java.text.Normalizer
 
 class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
 
     private lateinit var binding: MedicAgregarConsultorioBinding
     private lateinit var mapa: GoogleMap
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
+
+    private lateinit var searchPopupWindow: ListPopupWindow
 
     private lateinit var fusedLocationClient: FusedLocationProviderClient
 
@@ -57,6 +66,7 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
     private var centroSeleccionado: CentroMedicoDtoRemote? = null
     private var especialidadSeleccionada: Specialty? = null
     private val marcadoresCentrosMedicos = HashMap<Marker, CentroMedicoDtoRemote>()
+    private var listaCentrosCompleta: List<CentroMedicoDtoRemote> = emptyList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         ThemeUtils.applyTheme(this)
@@ -69,8 +79,11 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         val mapFragment = supportFragmentManager.findFragmentById(binding.mapConsultorio.id) as SupportMapFragment
         mapFragment.getMapAsync(this)
 
+        searchPopupWindow = ListPopupWindow(this)
+
         configurarPanelDeslizable()
         configurarDropdownEspecialidades()
+        configurarBuscador()
         initListeners()
         initObservers()
         configurarBotonesDias()
@@ -78,6 +91,7 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
 
     private fun initObservers() {
         centroMedicoVM.centersList.observe(this) { listaCentros ->
+            listaCentrosCompleta = listaCentros
             mapa.clear()
             marcadoresCentrosMedicos.clear()
 
@@ -94,6 +108,7 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
                 }
             }
         }
+
         consultorioVM.operationResult.observe(this) { exito ->
             if (exito) {
                 Toast.makeText(this, "¡Consultorio vinculado correctamente!", Toast.LENGTH_LONG).show()
@@ -105,13 +120,93 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         }
     }
 
+    private fun configurarBuscador() {
+        binding.editBuscarCentro.addTextChangedListener(object : TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                filtrarCentrosMedicos(s.toString())
+            }
+            override fun afterTextChanged(s: Editable?) {}
+        })
+    }
+
+    private fun filtrarCentrosMedicos(query: String) {
+        if (query.isBlank()) {
+            searchPopupWindow.dismiss()
+            return
+        }
+
+        val queryLimpio = quitarTildes(query).lowercase()
+        val filtrados = listaCentrosCompleta.filter { centro ->
+            quitarTildes(centro.name).lowercase().contains(queryLimpio) ||
+                    quitarTildes(centro.address).lowercase().contains(queryLimpio)
+        }
+
+        if (filtrados.isEmpty()) {
+            searchPopupWindow.dismiss()
+            return
+        }
+
+        val infoFiltrada = filtrados.map { "${it.name}\n${it.address}" }
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, infoFiltrada)
+
+        searchPopupWindow.setAdapter(adapter)
+        searchPopupWindow.anchorView = binding.searchCard
+        searchPopupWindow.isModal = false
+
+        searchPopupWindow.setOnItemClickListener { _, _, position, _ ->
+            val centroElegido = filtrados[position]
+            binding.editBuscarCentro.setText(centroElegido.name)
+            searchPopupWindow.dismiss()
+            ocultarTeclado()
+
+            val marcadorAsociado = marcadoresCentrosMedicos.entries.find { it.value.id == centroElegido.id }?.key
+            val ubicacion = marcadorAsociado?.position ?: LatLng(centroElegido.latitude, centroElegido.longitude)
+
+            mostrarDetalleCentro(centroElegido, ubicacion)
+        }
+
+        if (!searchPopupWindow.isShowing) {
+            searchPopupWindow.show()
+        }
+    }
+
+    private fun mostrarDetalleCentro(centro: CentroMedicoDtoRemote, posicion: LatLng) {
+        centroSeleccionado = centro
+        binding.cardUbicacion.visibility = View.VISIBLE
+
+        val tipoCentro = try {
+            CenterType.valueOf(centro.type).nombreMostrar
+        } catch (e: Exception) {
+            "Centro Médico"
+        }
+
+        binding.txtNombreCentro.text = centro.name
+        binding.txtDireccionCentro.text = "${centro.address} • $tipoCentro"
+        bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
+        mapa.animateCamera(CameraUpdateFactory.newLatLngZoom(posicion, 16f))
+    }
+
+    private fun quitarTildes(texto: String): String {
+        val normalizado = Normalizer.normalize(texto, Normalizer.Form.NFD)
+        return normalizado.replace(Regex("\\p{InCombiningDiacriticalMarks}+"), "")
+    }
+
+    private fun ocultarTeclado() {
+        val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        currentFocus?.let { view ->
+            imm.hideSoftInputFromWindow(view.windowToken, 0)
+            view.clearFocus()
+        }
+    }
+
     private fun configurarDropdownEspecialidades() {
         val listaEspecialidades = Specialty.entries.sortedBy { it.nombreMostrar }
         val nombresMostrar = listaEspecialidades.map { it.nombreMostrar }.toTypedArray()
-        val adapter = android.widget.ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, nombresMostrar)
+        val adapter = ArrayAdapter(this, android.R.layout.simple_dropdown_item_1line, nombresMostrar)
         binding.autoCompleteEspecialidad.setAdapter(adapter)
 
-        binding.autoCompleteEspecialidad.setOnItemClickListener { _, _, position, _ ->
+        binding.autoCompleteEspecialidad.setOnItemClickListener { _, _, _, _ ->
             val nombreSeleccionado = binding.autoCompleteEspecialidad.text.toString()
             especialidadSeleccionada = Specialty.entries.find { it.nombreMostrar == nombreSeleccionado }
         }
@@ -134,19 +229,7 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
         mapa.setOnMarkerClickListener { marker ->
             val centro = marcadoresCentrosMedicos[marker]
             if (centro != null) {
-                centroSeleccionado = centro
-                binding.cardUbicacion.visibility = View.VISIBLE
-
-                val tipoCentro = try {
-                    CenterType.valueOf(centro.type).nombreMostrar
-                } catch (e: Exception) {
-                    "Centro Médico"
-                }
-
-                binding.txtNombreCentro.text = centro.name
-                binding.txtDireccionCentro.text = "${centro.address} • $tipoCentro"
-                bottomSheetBehavior.state = BottomSheetBehavior.STATE_EXPANDED
-                mapa.animateCamera(CameraUpdateFactory.newLatLng(marker.position))
+                mostrarDetalleCentro(centro, marker.position)
             }
             true
         }
@@ -155,6 +238,9 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
             centroSeleccionado = null
             binding.cardUbicacion.visibility = View.GONE
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_COLLAPSED
+            binding.editBuscarCentro.text?.clear()
+            searchPopupWindow.dismiss()
+            ocultarTeclado()
         }
     }
 
@@ -323,7 +409,7 @@ class AgregarConsultorio : AppCompatActivity(), OnMapReadyCallback {
                 } else {
                     diasSeleccionados.add(dia)
                 }
-                configurarBotonesDias() // Actualizar UI
+                configurarBotonesDias()
             }
         }
     }
