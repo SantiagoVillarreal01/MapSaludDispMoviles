@@ -114,6 +114,9 @@ class ConfiguracionApp : AppCompatActivity() {
         }
 
         binding.btnCerrarSesion.setOnClickListener {
+
+            auth.signOut()
+
             getSharedPreferences("MapSaludPrefs", MODE_PRIVATE).edit().clear().apply()
             getSharedPreferences("MapSaludCache", MODE_PRIVATE).edit().clear().apply()
 
