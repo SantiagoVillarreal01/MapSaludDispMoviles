@@ -18,6 +18,7 @@ import ec.edu.mapsalud.usercases.citasUC.SaveAppointmentUC
 import ec.edu.mapsalud.usercases.citasUC.UpdateAppointmentDiagnosisUC
 import ec.edu.mapsalud.usercases.citasUC.UpdateAppointmentStatusUC
 import ec.edu.mapsalud.usercases.citasUC.UpdateAppointmentUC
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 
 class CitaViewModel : ViewModel() {
@@ -27,9 +28,12 @@ class CitaViewModel : ViewModel() {
 
     private val _appointmentsDetails = MutableLiveData<List<CitaDetalle>>()
     val appointmentsDetails: LiveData<List<CitaDetalle>> get() = _appointmentsDetails
+    private var diagnosticsListeningJob: Job? = null
 
     private val _appointmentsRawList = MutableLiveData<List<CitaDtoRemote>>()
     val appointmentsRawList: LiveData<List<CitaDtoRemote>> get() = _appointmentsRawList
+
+    private var appointmentsListeningJob: Job? = null
 
     private val _selectedAppointment = MutableLiveData<CitaDtoRemote?>()
     val selectedAppointment: LiveData<CitaDtoRemote?> get() = _selectedAppointment
@@ -86,10 +90,17 @@ class CitaViewModel : ViewModel() {
         }
     }
 
-    fun cargarCitasPendientesPorConsultorios(officeIds: List<String>, getByOfficesUC: GetPendingAppointmentsByOfficesUC) {
-        viewModelScope.launch {
-            val resultado = getByOfficesUC.invoke(officeIds).getOrNull()
-            _appointmentsRawList.value = resultado ?: emptyList()
+    fun cargarCitasPendientesPorConsultorios(
+        officeIds: List<String>,
+        getByOfficesUC: GetPendingAppointmentsByOfficesUC
+    ) {
+        appointmentsListeningJob?.cancel()
+
+        appointmentsListeningJob = viewModelScope.launch {
+            getByOfficesUC.invoke(officeIds).collect { result ->
+                val resultado = result.getOrNull()
+                _appointmentsRawList.value = resultado ?: emptyList()
+            }
         }
     }
 
@@ -107,10 +118,24 @@ class CitaViewModel : ViewModel() {
         }
     }
 
-    fun cargarCitasConDetalles(userId: String, status: String, fetchDetailsUC: FetchAppointmentsWithDetailsUC) {
-        viewModelScope.launch {
-            val resultado = fetchDetailsUC.invoke(userId, status).getOrNull()
-            _appointmentsDetails.value = resultado ?: emptyList()
+    fun cargarCitasConDetalles(
+        userId: String,
+        status: String,
+        fetchDetailsUC: FetchAppointmentsWithDetailsUC
+    ) {
+        diagnosticsListeningJob?.cancel()
+
+        diagnosticsListeningJob = viewModelScope.launch {
+            fetchDetailsUC.invoke(userId, status).collect { result ->
+                val listaConDetalles = result.getOrNull() ?: emptyList()
+                _appointmentsDetails.value = listaConDetalles
+            }
         }
+    }
+
+    override fun onCleared() {
+        super.onCleared()
+        appointmentsListeningJob?.cancel()
+        diagnosticsListeningJob?.cancel()
     }
 }

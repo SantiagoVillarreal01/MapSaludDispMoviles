@@ -53,11 +53,6 @@ class CitasMedicasFragment : Fragment(R.layout.medic_fragment_citas) {
 
         configurarRecyclerViews()
         initObservers()
-        //cargarCitas()
-    }
-
-    override fun onResume() {
-        super.onResume()
         cargarCitas()
     }
 

@@ -5,6 +5,9 @@ import ec.edu.mapsalud.dto.CitaDtoRemote
 import ec.edu.mapsalud.dto.Diagnostico
 import ec.edu.mapsalud.remote.inter.CitaRepository
 import kotlinx.coroutines.tasks.await
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 
 
 class CitaRepositoryImpl : CitaRepository {
@@ -116,6 +119,58 @@ class CitaRepositoryImpl : CitaRepository {
 
         appointmentsSnapshot.documents.mapNotNull { doc ->
             doc.toObject(CitaDtoRemote::class.java)?.copy(id = doc.id)
+        }
+    }
+
+    override fun listenPendingAppointmentsByOffices(officeIds: List<String>): Flow<Result<List<CitaDtoRemote>>> = callbackFlow {
+        if (officeIds.isEmpty()) {
+            trySend(Result.success(emptyList()))
+            close()
+            return@callbackFlow
+        }
+
+        val query = db.collection("citas")
+            .whereIn("idOffice", officeIds)
+            .whereEqualTo("status", "Pendiente")
+
+        val listenerRegistration = query.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                trySend(Result.failure(error))
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null) {
+                val appointments = snapshot.documents.mapNotNull { doc ->
+                    doc.toObject(CitaDtoRemote::class.java)?.copy(id = doc.id)
+                }
+                trySend(Result.success(appointments))
+            }
+        }
+        awaitClose {
+            listenerRegistration.remove()
+        }
+    }
+
+    override fun listenAppointmentsByUserAndStatus(userId: String, status: String): Flow<Result<List<CitaDtoRemote>>> = callbackFlow {
+        val query = db.collection("citas")
+            .whereEqualTo("idUser", userId)
+            .whereEqualTo("status", status)
+
+        val listenerRegistration = query.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                trySend(Result.failure(error))
+                return@addSnapshotListener
+            }
+
+            if (snapshot != null) {
+                val appointments = snapshot.documents.mapNotNull { doc ->
+                    doc.toObject(CitaDtoRemote::class.java)?.copy(id = doc.id)
+                }
+                trySend(Result.success(appointments))
+            }
+        }
+        awaitClose {
+            listenerRegistration.remove()
         }
     }
 }
